@@ -1,17 +1,20 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
+import { useState } from "react";
 import './styles/custom.css';
-import Dashboard from './components/Dashboard';
+import './styles/global.css';
+import { Toaster } from "react-hot-toast";
+import Login from "./components/Auth/Login";
 
 function App() {
-  const [count, setCount] = useState(0)
+    return (
+        <div className="bg-gradient-to-br from-slate-900
+                     to-sky-500 min-h-screen">
+            <div className="container mx-auto p-8">
 
-  return (
-    <>
-    <Dashboard/>
-    </>
-  )
+            <Login/>
+            </div>
+                   
+        </div>
+    )
 }
 
-export default App
+export default App;
