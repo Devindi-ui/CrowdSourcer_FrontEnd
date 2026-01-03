@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { FaEnvelope, FaLock } from "react-icons/fa";
+import { FaEnvelope, FaLock, FaBus, FaArrowRight, FaUser, FaTrafficLight } from "react-icons/fa";
 import toast from "react-hot-toast";
 import { authAPI } from "../../services/api";
 
@@ -47,7 +47,9 @@ const Login = ({ onLoginSuccess, onShowSignup }) => {
 
         {/* Left Side */}
         <div className="hidden md:flex w-1/2 bg-sky-900 text-white flex-col justify-center items-center p-10 text-center">
-          <h1 className="text-3xl font-bold mb-4">Welcome To PublicPilot</h1>
+          <FaTrafficLight className="text-4xl"/>
+          <h1 className="mt-3 text-3xl font-bold mb-4">
+             PUBLICPILOT</h1>
           <p className="text-base opacity-90">
             Login to continue your journey with us
           </p>
