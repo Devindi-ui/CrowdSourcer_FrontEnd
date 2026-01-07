@@ -3,45 +3,81 @@ import './styles/custom.css';
 import './styles/global.css';
 import { Toaster } from "react-hot-toast";
 import Login from "./components/Auth/Login";
-import { Navbar } from "./components/Layout/Navbar";
+import Navbar from "./components/Layout/Navbar";
 import MainDashboard from "./components/MainDashboard";
+import { Route, Routes, useLocation } from "react-router-dom";
+import AdminPage from "./pages/Admin/AdminDashboard";
+import PassengerPage from "./pages/Passenger/PassengerDashboard";
+import OwnerPage from "./pages/Owner/OwnerDashboard";
+import CDPage from "./pages/Conductor/Driver/Dashboard";
 
 function App() {
     const [isLoggedIn, setIsLoggedIn] = useState(false);
+    const [role, setRole] = useState(null);
+
+    const location = useLocation();
 
     //check login when app loads
     useEffect(() => {
         const token = localStorage.getItem("token");
+        const savedRole = localStorage.getItem("role");
+
         if(token) {
             setIsLoggedIn(true);
+            setRole(savedRole); //restore role if exists
         }
     }, []);
 
+    //LOGOUT 
+    const handleLogout = () => {
+        localStorage.removeItem("token");
+        localStorage.removeItem("role");
+        setIsLoggedIn(false);
+        setRole(null);
+    };
+
+    //show navbar only after main dashboard
+    const showNavbar = isLoggedIn && location.pathname !== "/";
+
+
     return (
-        <div className="bg-gradient-to-br from-slate-900
-                     to-sky-500 min-h-screen">
-            <div className="container mx-auto p-8">
+        <>
+            <Toaster position="top-center"/>
 
-                <Toaster
-                    position="top-center"
-                    toastOptions={{
-                        duration: 3000,
-                        style: {background: "#363636", color: "white"},
-                    }}
-                />
+            {/* show login if not logged in */}
+                {!isLoggedIn ? (
+                    <Login 
+                        onLoginSuccess={(userRole) => {
+                            setIsLoggedIn(true);
+                            setRole(userRole);
+                            localStorage.setItem("role", userRole);
+                        }}
+                    />
+                ):(
+                    <>
 
-            {/* IF NOT LOGGED IN > SHOW LOGIN */}
-            {!isLoggedIn ? (
-                <Login onLoginSuccess={() => setIsLoggedIn(true)}/>
-            ) : (
-                <>
-                    {/* IF LOGGED IN > SHOW NAVBAR */}
-                    <MainDashboard/>
-                </>
-            )}
-            </div>
-                   
-        </div>
+                        {showNavbar && (
+                            <Navbar role={role} onLogout={handleLogout}/>
+                        )}                       
+
+                        <Routes>
+                            <Route 
+                                path="/"
+                                element= {
+                                    <MainDashboard
+                                        onSelectRole={setRole}
+                                    />
+                                }
+                            />
+
+                            <Route path="/user" element={<PassengerPage/>}/>
+                            <Route path="/admin" element={<AdminPage/>}/>
+                            <Route path="/owner" element={<OwnerPage/>}/>
+                            <Route path="/cd" element={<CDPage/>}/>
+                        </Routes>
+                    </>
+                )}
+        </>
     )
 }
 

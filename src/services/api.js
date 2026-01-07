@@ -12,4 +12,4 @@ const api = axios.create(
 // Auth API
 export const authAPI = {
     login: (data) => api.post("/login", data)
-};
+}
