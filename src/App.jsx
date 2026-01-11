@@ -3,6 +3,7 @@ import './styles/custom.css';
 import './styles/global.css';
 import { Toaster } from "react-hot-toast";
 import Login from "./components/Auth/Login";
+import Register from "./components/Auth/Register";
 import Navbar from "./components/Layout/Navbar";
 import MainDashboard from "./components/MainDashboard";
 import { Route, Routes, useLocation } from "react-router-dom";
@@ -61,6 +62,7 @@ function App() {
                         )}                       
 
                         <Routes>
+
                             <Route 
                                 path="/"
                                 element= {
@@ -74,6 +76,8 @@ function App() {
                             <Route path="/admin" element={<AdminPage/>}/>
                             <Route path="/owner" element={<OwnerPage/>}/>
                             <Route path="/cd" element={<CDPage/>}/>
+                            <Route path="/register" element={<Register/>} />
+
                         </Routes>
                     </>
                 )}

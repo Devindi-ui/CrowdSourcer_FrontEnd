@@ -6,7 +6,16 @@ const MainDashboard = ({ onSelectRole, onLogout }) => {
 
   const handleSelect = (role, path) => {
     onSelectRole(role);
+    localStorage.setItem("role", role); //save role
     navigate(path);
+  };
+
+  const handleLogout = () => {
+        navigate("/login");
+  };
+
+  const goToRegister = () => {
+    navigate("/register");
   };
 
 
@@ -71,13 +80,15 @@ const MainDashboard = ({ onSelectRole, onLogout }) => {
         <div className="mt-10 flex flex-col md:flex-row justify-center gap-6">
 
           <button 
+            onClick={() => navigate("/register")}
             className="px-6 py-2 rounded-xl bg-sky-900 text-white 
-                      hover:bg-sky-800 transition">
+                      hover:bg-sky-800 transition"
+          >
             Register 
           </button>
 
           <button 
-            onClick={onLogout}
+            onClick={handleLogout}
             className="px-6 py-2 rounded-xl border border-sky-900 
                             text-sky-900 hover:bg-sky-100 transition">
             Logout       
