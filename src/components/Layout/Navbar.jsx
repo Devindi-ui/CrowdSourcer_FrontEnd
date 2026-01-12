@@ -8,7 +8,7 @@ const Navbar = ({onLogout}) => {
 
     const handleLogout = () => {
         onLogout();
-        navigate("/");
+        navigate("/login");
     };
 
     return (
@@ -60,8 +60,10 @@ const Navbar = ({onLogout}) => {
                         <Link onClick={() => setIsOpen(false)} to="/owner" className="block hover:text-sky-400">Owner</Link>
                         <Link onClick={() => setIsOpen(false)} to="/admin" className="block hover:text-sky-400">Admin</Link>
 
-                        <button className="w-full mt-4 px-4 py-2 rounded-lg 
-                            bg-sky-500 text-white hover:bg-sky-400 transition"
+                        <button 
+                            onClick={handleLogout}
+                            className="w-full mt-4 px-4 py-2 rounded-lg 
+                                bg-sky-500 text-white hover:bg-sky-400 transition"
                         >
                             Logout
                         </button>

@@ -45,7 +45,7 @@ const Register = () => {
             });
 
             if (res.data.success) {
-              toast.success("Registration Successful!");  
+              toast.success("Registered Successfully!");  
               navigate("/login");         
               
             } else {

@@ -1,12 +1,15 @@
 import { useState } from "react";
-import { FaEnvelope, FaLock, FaBus, FaArrowRight, FaUser, FaTrafficLight } from "react-icons/fa";
+import { FaEnvelope, FaLock, FaTrafficLight } from "react-icons/fa";
 import toast from "react-hot-toast";
 import { authAPI } from "../../services/api";
+import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 
 const Login = ({ onLoginSuccess, onShowSignup }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const navigate = useNavigate();
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -38,6 +41,7 @@ const Login = ({ onLoginSuccess, onShowSignup }) => {
       })
       .finally(() => {
         setIsSubmitting(false);
+        navigate("/main")
       });
   };
 
@@ -111,12 +115,12 @@ const Login = ({ onLoginSuccess, onShowSignup }) => {
             {/* Switch to Register */}
             <p className="text-center text-sm mt-4 text-slate-700">
               Don't have an account?{" "}
-              <span
-                onClick={onShowSignup}
+              <Link
+                to= "/register"
                 className="text-sky-900 font-semibold cursor-pointer hover:underline"
               >
                 Sign up
-              </span>
+              </Link>
             </p>
           </form>
         </div>

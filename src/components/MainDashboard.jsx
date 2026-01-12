@@ -11,7 +11,8 @@ const MainDashboard = ({ onSelectRole, onLogout }) => {
   };
 
   const handleLogout = () => {
-        navigate("/login");
+    onLogout();
+    navigate("/login");
   };
 
   const goToRegister = () => {

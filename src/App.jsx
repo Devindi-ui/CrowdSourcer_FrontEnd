@@ -32,6 +32,7 @@ function App() {
     //LOGOUT 
     const handleLogout = () => {
         localStorage.removeItem("token");
+        localStorage.removeItem("user");
         localStorage.removeItem("role");
         setIsLoggedIn(false);
         setRole(null);
@@ -58,25 +59,28 @@ function App() {
                     <>
 
                         {showNavbar && (
-                            <Navbar role={role} onLogout={handleLogout}/>
+                            <Navbar onLogout={handleLogout}/>
                         )}                       
 
                         <Routes>
 
                             <Route 
-                                path="/"
+                                path="/main"
                                 element= {
                                     <MainDashboard
                                         onSelectRole={setRole}
+                                        onLogout={handleLogout}
                                     />
                                 }
                             />
 
+                            <Route path="/register" element={<Register/>} />
+                            <Route path="/login" element={<Login/>}/>
+                            <Route path="/main" element={<MainDashboard/>}/>
                             <Route path="/user" element={<PassengerPage/>}/>
                             <Route path="/admin" element={<AdminPage/>}/>
                             <Route path="/owner" element={<OwnerPage/>}/>
                             <Route path="/cd" element={<CDPage/>}/>
-                            <Route path="/register" element={<Register/>} />
 
                         </Routes>
                     </>
