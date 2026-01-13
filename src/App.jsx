@@ -7,10 +7,10 @@ import Register from "./components/Auth/Register";
 import Navbar from "./components/Layout/Navbar";
 import MainDashboard from "./components/MainDashboard";
 import { Route, Routes, useLocation } from "react-router-dom";
-import AdminPage from "./pages/Admin/AdminDashboard";
 import PassengerPage from "./pages/Passenger/PassengerDashboard";
 import OwnerPage from "./pages/Owner/OwnerDashboard";
 import CDPage from "./pages/Conductor/Driver/Dashboard";
+import AdminDashboard from "./pages/Admin/AdminDashboard";
 
 function App() {
     const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -78,7 +78,7 @@ function App() {
                             <Route path="/login" element={<Login/>}/>
                             <Route path="/main" element={<MainDashboard/>}/>
                             <Route path="/user" element={<PassengerPage/>}/>
-                            <Route path="/admin" element={<AdminPage/>}/>
+                            <Route path="/admin" element={<AdminDashboard/>}/>
                             <Route path="/owner" element={<OwnerPage/>}/>
                             <Route path="/cd" element={<CDPage/>}/>
 

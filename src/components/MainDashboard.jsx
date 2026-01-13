@@ -15,15 +15,11 @@ const MainDashboard = ({ onSelectRole, onLogout }) => {
     navigate("/login");
   };
 
-  const goToRegister = () => {
-    navigate("/register");
-  };
-
 
   return (
     <div className="min-h-screen flex justify-center items-center 
       bg-linear-to-br from-slate-900 to-sky-500">
-      <div className="w-[950px] max-w-[50%] bg-gray-300 rounded-2xl 
+      <div className="mt-10 w-[950px] max-w-[50%] bg-gray-300 rounded-2xl 
         shadow-2xl p-10">
 
         {/* Title */}
@@ -31,18 +27,18 @@ const MainDashboard = ({ onSelectRole, onLogout }) => {
           <h1 className="text-3xl font-bold text-sky-900 mb-2">
             Welcome to PublicPilot
           </h1>
-          <p className="text-slate-700">
+          <p className="mt-3 text-slate-700">
             CONTINUE AS
           </p>
         </div>
 
         {/* Role Cards */}
-        <div className="gris grid-cols-1 md:grid-cols lg:grid-cols-4 gap-3">
+        <div className="grid grid-cols-1 md:grid-cols lg:grid-cols-4 gap-3">
 
           {/* Passenger */}
           <div 
             onClick={() => handleSelect("Passenger", "/user")} 
-            className="cursor-pointer bg-white rounded-xl p-6 text-center 
+            className="mt-3 cursor-pointer bg-white rounded-xl p-6 text-center 
             shadow-md hover:shadow-xl hover:scale-105 transition duration-300">
             <FaUsers className="text-4xl text-sky-700 mx-auto mb-3"/>
             <h3 className="font-semibold text-lg text-sky-900">Passenger</h3>
@@ -91,7 +87,8 @@ const MainDashboard = ({ onSelectRole, onLogout }) => {
           <button 
             onClick={handleLogout}
             className="px-6 py-2 rounded-xl border border-sky-900 
-                            text-sky-900 hover:bg-sky-100 transition">
+                            text-sky-900 hover:bg-sky-100 transition"
+          >
             Logout       
           </button>
 
