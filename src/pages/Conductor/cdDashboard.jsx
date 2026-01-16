@@ -7,7 +7,7 @@ import {
 } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 
-const passengerDashboard = () => {
+const cdDashboard = () => {
   const navigate = useNavigate();
 
   const stats = [
@@ -56,7 +56,7 @@ const passengerDashboard = () => {
         {/* Header */}
         <div className="rounded-3xl bg-white/70 backdrop-blur shadow-lg p-6">
           <h1 className="text-2xl font-bold text-sky-900">
-            Passenger Dashboard
+            Conductor / Driver Dashboard
           </h1>
           <p className="text-sm text-gray-600">
             Manage your buses & monitor trips
@@ -115,4 +115,4 @@ const passengerDashboard = () => {
   );
 };
 
-export default passengerDashboard;
+export default cdDashboard;

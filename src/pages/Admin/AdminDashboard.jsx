@@ -31,7 +31,7 @@ const AdminDashboard = () => {
                     {title: "Ongoing Trips", value: trips.data.total, icon: <FaTripadvisor/>},
                     {title: "Crowd Alerts", value: alerts.data.total, icon: <FaExclamationTriangle/>}
                 ]);
-                
+
             } catch (error) {
                 console.error("Failed to load dashboard stats", error.message);
                 
@@ -45,7 +45,8 @@ const AdminDashboard = () => {
         {
             title: "Alert",
             desc: "Create & manage system alerts",
-            icon: <FaExclamationTriangle/>
+            icon: <FaExclamationTriangle/>,
+            path: "/alert"
         },
         {
             title: "Auth",
@@ -166,8 +167,8 @@ const AdminDashboard = () => {
                         </h3>
                         <div className="h-64 rounded-2xl bg-gray-200 
                             flex-items-center justify-center text-gray-500">
-                            <FaMapMarkedAlt className="text-4xl"/>
-                            <span className="ml-3">Live Map Preview</span>
+                            <FaMapMarkedAlt className="ml-3 text-4xl"/>
+                            <span className="mt-3 ml-3">Live Map Preview</span>
                         </div>
                     </div>
                     {/* Alerts */}

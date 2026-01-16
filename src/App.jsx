@@ -7,9 +7,9 @@ import Register from "./components/Auth/Register";
 import Navbar from "./components/Layout/Navbar";
 import MainDashboard from "./components/MainDashboard";
 import { Route, Routes, useLocation } from "react-router-dom";
-import PassengerPage from "./pages/Passenger/PassengerDashboard";
-import OwnerPage from "./pages/Owner/OwnerDashboard";
-import CDPage from "./pages/Conductor/Driver/Dashboard";
+import PassengerDashboard from "./pages/Passenger/passengerDashboard";
+import OwnerDashboard from "./pages/Owner/ownerDashboard";
+import CdDashboard from "./pages/Conductor/cdDashboard";
 import AdminDashboard from "./pages/Admin/AdminDashboard";
 
 function App() {
@@ -77,10 +77,10 @@ function App() {
                             <Route path="/register" element={<Register/>} />
                             <Route path="/login" element={<Login/>}/>
                             <Route path="/main" element={<MainDashboard/>}/>
-                            <Route path="/user" element={<PassengerPage/>}/>
+                            <Route path="/user" element={<PassengerDashboard/>}/>
                             <Route path="/admin" element={<AdminDashboard/>}/>
-                            <Route path="/owner" element={<OwnerPage/>}/>
-                            <Route path="/cd" element={<CDPage/>}/>
+                            <Route path="/owner" element={<OwnerDashboard/>}/>
+                            <Route path="/cd" element={<CdDashboard/>}/>
 
                         </Routes>
                     </>
