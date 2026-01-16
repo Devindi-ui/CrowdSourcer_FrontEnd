@@ -11,10 +11,18 @@ const api = axios.create(
 
 // Auth API
 export const authAPI = {
-    login: (data) => api.post("/login", data)
+    login: (data) => api.post("auth/login", data)
 }
 
 //User API
 export const userAPI = {
     register: (data) => api.post('/user', data)
+}
+
+//Dashboard API 
+export const dashboardAPI = {
+    users: () => api.get("/auth/count"),
+    buses: () => api.get("/bus/count"),
+    trips: () => api.get("/trip/count"),
+    alerts: () => api.get("/alert/count")
 }
