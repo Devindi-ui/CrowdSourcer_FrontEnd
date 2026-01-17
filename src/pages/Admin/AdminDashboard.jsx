@@ -3,11 +3,14 @@ import { FaUsers, FaBus, FaRoute, FaTripadvisor, FaExclamationTriangle, FaPlus, 
     FaMapMarkedAlt, FaClipboardList, FaBusAlt, FaMapSigns, FaHeart, 
     FaCommentDots, FaHistory, FaUserShield, FaLock, FaRoad
 } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { dashboardAPI } from "../../services/api";
 
 
 const AdminDashboard = () => {
+    const navigate = useNavigate();
+
     const [stats, setStats] = useState([
         { title: "Active Users", value: 0, icon: <FaUsers/> },
         { title: "Active Buses", value: 0, icon: <FaBus/> },
@@ -43,6 +46,12 @@ const AdminDashboard = () => {
 
     const quickActions = [
         {
+            title: "User",
+            desc: "Manage users",
+            icon: <FaUsers/>,
+            path: "/user"
+        },
+        {
             title: "Alert",
             desc: "Create & manage system alerts",
             icon: <FaExclamationTriangle/>,
@@ -51,73 +60,81 @@ const AdminDashboard = () => {
         {
             title: "Auth",
             desc: "Authentication & access control",
-            icon: <FaLock/>
+            icon: <FaLock/>,
+            path: "/auth"
         },
         {
             title: "Bus",
             desc: "Manage buses",
-            icon: <FaBus/>
+            icon: <FaBus/>,
+            path: "/bus"
         },
         {
             title: "Bus Assignment",
             desc: "Assign buses to routes",
-            icon: <FaBusAlt/>
+            icon: <FaBusAlt/>,
+            path: "/bus assignment"
         },
         {
             title: "Bus Type",
             desc: "Manage bus categories",
-            icon: <FaRoad/>
+            icon: <FaRoad/>,
+            path: "/bus type"
         },
         {
             title: "Crowd Report",
             desc: "View crowd level reports",
-            icon: <FaClipboardList/>
+            icon: <FaClipboardList/>,
+            path: "/crowd report"
         },
         {
             title: "Favourite Route",
             desc: "User saved routes",
-            icon: <FaHeart/>
+            icon: <FaHeart/>,
+            path: "/favourite route"
         },
         {
             title: "Feedback",
             desc: "Passenger feedback",
-            icon: <FaCommentDots/>
+            icon: <FaCommentDots/>,
+            path: "/feedback"
         },
         {
             title: "Notification",
             desc: "Send notifications",
-            icon: <FaBell/>
+            icon: <FaBell/>,
+            path: "/notification"
         },
         {
             title: "Report History",
             desc: "Syatem activity logs",
-            icon: <FaHistory/>
+            icon: <FaHistory/>,
+            path: "/report history"
         },
         {
             title: "Role",
             desc: "Manage user roles",
-            icon: <FaUserShield/>
+            icon: <FaUserShield/>,
+            path: "/role"
         },
         {
             title: "Route",
             desc: "Create & edit routes",
-            icon: <FaRoute/>
+            icon: <FaRoute/>,
+            path: "/route"
         },
         {
             title: "Route Stop",
             desc: "Manage route stops",
-            icon: <FaMapSigns/>
+            icon: <FaMapSigns/>,
+            path: "/route stop"
         },
         {
             title: "Trip",
             desc: "Manage trips",
-            icon: <FaRoad/>
+            icon: <FaRoad/>,
+            path: "/trip"
         },
-        {
-            title: "User",
-            desc: "Manage users",
-            icon: <FaUsers/>
-        }
     ];
 
     return (
@@ -212,6 +229,7 @@ const AdminDashboard = () => {
                             className="rounded-2xl bg-white/70 backdrop-blur shadow-md 
                             p-5 text-left hover:shadow-xl hover:scale-105 
                             transition"
+                            onClick={() => navigate(action.path)}
                         >
                             <div className="text-2xl text-sky-600 mb-2">
                                 {action.icon}
