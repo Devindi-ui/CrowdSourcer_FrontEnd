@@ -1,0 +1,49 @@
+/* Page */
+.user-page {
+    min-height: 100vh;
+    background: linear-gradient(to bottom right, #0f172a, #0284c7);
+    padding: 24px;
+    color: white;
+}
+
+/* Title */
+.user-title {
+    font-size: 28px;
+    font-weight: bold;
+    margin-bottom: 20px;
+}
+
+/* Quick action buttons */
+.quick-actions {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.action-card {
+    background: rgba(255,255,255,0.85);
+    color: #0f172a;
+    padding: 16px;
+    border-radius: 16px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.action-card:hover {
+    transform: scale(1.05);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+}
+
+/* Forms */
+.form-box {
+    background: rgba(255,255,255,0.9);
+    color: #0f172a;
+    padding: 20px;
+    border-radius: 16px;
+    max-width: 500px;
+}
+
+.form-box h3 {
+    
+}

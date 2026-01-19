@@ -25,7 +25,7 @@ const Navbar = ({onLogout}) => {
                 {/* Desktop Menu */}
                 <div className="hidden md:flex items-center space-x-8 text-slate-200">
                     <Link className="hover:text-sky-400 transition" to="/main">Home</Link>
-                    <Link className="hover:text-sky-400 transition" to="/user">Passenger</Link>
+                    <Link className="hover:text-sky-400 transition" to="/passenger">Passenger</Link>
                     <Link className="hover:text-sky-400 transition" to="/cd">Drivers</Link>
                     <Link className="hover:text-sky-400 transition" to="/owner">Owner</Link>
                     <Link className="hover:text-sky-400 transition" to="/admin">Admin</Link>
@@ -55,7 +55,7 @@ const Navbar = ({onLogout}) => {
                     space-y-4 text-slate-200">
 
                         <Link onClick={() => setIsOpen(false)} to="/main" className="block hover:text-sky-400">Home</Link>
-                        <Link onClick={() => setIsOpen(false)} to="/user" className="block hover:text-sky-400">Passenger</Link>
+                        <Link onClick={() => setIsOpen(false)} to="/passenger" className="block hover:text-sky-400">Passenger</Link>
                         <Link onClick={() => setIsOpen(false)} to="/cd" className="block hover:text-sky-400">Driver / Conductor</Link>
                         <Link onClick={() => setIsOpen(false)} to="/owner" className="block hover:text-sky-400">Owner</Link>
                         <Link onClick={() => setIsOpen(false)} to="/admin" className="block hover:text-sky-400">Admin</Link>

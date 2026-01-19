@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
-import './styles/custom.css';
-import './styles/global.css';
 import { Toaster } from "react-hot-toast";
+import { Navigate } from "react-router-dom";
 import Login from "./components/Auth/Login";
 import Register from "./components/Auth/Register";
 import Navbar from "./components/Layout/Navbar";
@@ -12,6 +11,7 @@ import OwnerDashboard from "./pages/Owner/ownerDashboard";
 import CdDashboard from "./pages/Conductor/cdDashboard";
 import AdminDashboard from "./pages/Admin/AdminDashboard";
 import AlertPage from "./pages/Admin/alert";
+import User from "./pages/Admin/user";
 
 function App() {
     const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -66,7 +66,7 @@ function App() {
                         <Routes>
 
                             <Route 
-                                path="/main"
+                                path="/"
                                 element= {
                                     <MainDashboard
                                         onSelectRole={setRole}
@@ -77,12 +77,12 @@ function App() {
 
                             <Route path="/register" element={<Register/>} />
                             <Route path="/login" element={<Login/>}/>
-                            <Route path="/main" element={<MainDashboard/>}/>
-                            <Route path="/user" element={<PassengerDashboard/>}/>
+                            <Route path="/passenger" element={<PassengerDashboard/>}/>
                             <Route path="/admin" element={<AdminDashboard/>}/>
                             <Route path="/owner" element={<OwnerDashboard/>}/>
                             <Route path="/cd" element={<CdDashboard/>}/>
                             <Route path="/alert" element={<AlertPage/>}/>
+                            <Route path="/user" element={<User/>}/>
 
                         </Routes>
                     </>

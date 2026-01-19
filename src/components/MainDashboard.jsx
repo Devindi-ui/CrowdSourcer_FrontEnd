@@ -37,7 +37,7 @@ const MainDashboard = ({ onSelectRole, onLogout }) => {
 
           {/* Passenger */}
           <div 
-            onClick={() => handleSelect("Passenger", "/user")} 
+            onClick={() => handleSelect("Passenger", "/passenger")} 
             className="mt-3 cursor-pointer bg-white rounded-xl p-6 text-center 
             shadow-md hover:shadow-xl hover:scale-105 transition duration-300">
             <FaUsers className="text-4xl text-sky-700 mx-auto mb-3"/>
