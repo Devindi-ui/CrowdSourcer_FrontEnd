@@ -6,27 +6,119 @@ import {
     FaUserEdit,
     FaUserTimes
  } from "react-icons/fa";
+ import { userAPI } from "../../services/api";
 
 const User = () => {
+    const [loading, setLoading] = useState(false);
     const [mode, setMode] = useState(null);
     const [form, setForm] = useState({
         id: "",
         name: "",
-        email: ""
+        email: "",
+        password: "",
+        phone: "",
+        role_name: ""
     });
 
+    const roles = ["Admin", "Owner", "Driver", "Passenger"];
+
     const handleChange = (e) => {
-        setForm({ ...form, [e.target.name]: e.target.value });
+        setForm({ ...form, 
+            [e.target.name]: e.target.value 
+        });
     };
 
     const resetForm = () => {
-        setForm({ id: "", name: "", email: "" });
+        setForm({ 
+            id: "", 
+            name: "", 
+            email: "",
+            password: "",
+            phone: "",
+            role_name: ""
+        });
+        setMode(null);
     };
 
+    //API FUNCTIONS
+
+    //Add user
+    const addUser = async () => {
+        try {
+            setLoading(true);
+            await userAPI.register({
+                name: form.name,
+                email: form.email,
+                password: form.password,
+                phone: form.phone,
+                role_name: form.role_name
+            });
+            alert("✅User added successfully");
+            resetForm();
+        } catch (error) {
+            alert("❌Failed to add user");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    //find user
+    const findUser = async () => {
+        try {
+            setLoading(true);
+            const res = await userAPI.getUserById(form.id);
+            setForm({
+                id: res.data.id,
+                name: res.data.name,
+                email: res.data.email,
+                phone: res.data.phone,
+                role_name: res.data.role_name,
+                password: ""
+            });
+        } catch (error) {
+            alert("❌User not found");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    //Update user
+    const updateUser = async () => {
+        try {
+            setLoading(true);
+            await userAPI.updateUser(form.id, {
+                name: form.name,
+                email: form.email ,
+                phone: form.phone,
+                role_name: form.role_name 
+            });
+        } catch (error) {
+            alert("❌Failed to update user");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    //Delete user
+    const deleteUser = async () => {
+        try {
+            setLoading(true);
+            await userAPI.deleteUser(form.id);
+            alert("✅User deleted successfully");
+            resetForm();
+        } catch (error) {
+            alert("❌ Failed to delete user");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    //Decide which function to call
     const handleSubmit = () => {
-        alert(`${mode.toUpperCase()} USER\n` + JSON.stringify(form, null, 2));
-        resetForm();
-        setMode(null);
+        if (mode === "add") addUser();
+        if (mode === "find") findUser();
+        if (mode === "edit") updateUser();
+        if (mode === "delete") deleteUser();
     };
 
     return(
@@ -58,7 +150,7 @@ const User = () => {
                         bg-white/80 backdrop-blur shadow-md hover:scale-105
                         hover:shadow-xl transition" 
                 >
-                    <FaUserPlus className="text-2xl text-sky-600"/> 
+                    <FaUserCheck className="text-2xl text-sky-600"/> 
                     <span className="font-semibold text-slate-800">
                         Find User
                     </span> 
@@ -70,7 +162,7 @@ const User = () => {
                         bg-white/80 backdrop-blur shadow-md hover:scale-105
                         hover:shadow-xl transition" 
                 >
-                    <FaUserPlus className="text-2xl text-sky-600"/> 
+                    <FaUserEdit className="text-2xl text-sky-600"/> 
                     <span className="font-semibold text-slate-800">
                         Update User
                     </span> 
@@ -82,7 +174,7 @@ const User = () => {
                         bg-white/80 backdrop-blur shadow-md hover:scale-105
                         hover:shadow-xl transition" 
                 >
-                    <FaUserPlus className="text-2xl text-sky-600"/> 
+                    <FaUserTimes className="text-2xl text-sky-600"/> 
                     <span className="font-semibold text-slate-800">
                         Delete User
                     </span> 
@@ -131,6 +223,47 @@ const User = () => {
                                     border border-gray-300 focus:outline-none
                                     focus:ring-2 focus:ring-sky-400"    
                             />
+
+                            {/* Password for ADD */}
+                            {mode === "add" && (
+                                <input 
+                                    name="password" 
+                                    type="password"
+                                    value={form.password}
+                                    onChange={handleChange}
+                                    placeholder="Password"
+                                    className="w-full p-3 mb-3 rounded-xl
+                                        border border-gray-300 focus:outline-none
+                                        focus:ring-2 focus:ring-sky-400"    
+                                />
+                            )}
+
+                            <input 
+                                name="phone" 
+                                value={form.phone}
+                                onChange={handleChange}
+                                placeholder="Phone"
+                                className="w-full p-3 mb-3 rounded-xl
+                                    border border-gray-300 focus:outline-none
+                                    focus:ring-2 focus:ring-sky-400"    
+                            />
+
+                            {/* Role Selector */}
+                            <select 
+                                name="role_name"
+                                value={form.role_name}
+                                onChange={handleChange}
+                                className="w-full p-3 mb-3 rounded-xl
+                                    border border-gray-300 focus:outline-none
+                                    focus:ring-2 focus:ring-sky-400" 
+                            >
+                                <option value="">Select Role</option>
+                                <option value="admin">Admin</option>
+                                <option value="passenger">Passenger</option>
+                                <option value="owner">Owner</option>
+                                <option value="driver">Driver</option>
+                                <option value="conductor">Conductor</option>
+                            </select>
                         </>
                     )}
 

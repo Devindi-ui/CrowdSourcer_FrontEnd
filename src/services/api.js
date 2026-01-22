@@ -11,12 +11,15 @@ const api = axios.create(
 
 // Auth API
 export const authAPI = {
-    login: (data) => api.post("auth/login", data)
+    login: (user) => api.post("auth/login", user)
 }
 
 //User API
 export const userAPI = {
-    register: (data) => api.post('/user', data)
+    register: (user) => api.post('/user', user),  //add user
+    getUserById: (id) => api.get(`/user/${id}`),  // FIND
+    updateUser: (id, user) => api.put(`/user/update/${id}`, user), // UPDATE
+    deleteUser: (userId) => api.delete(`/user/delete/${userId}`),  // DELETE
 }
 
 //Dashboard API 

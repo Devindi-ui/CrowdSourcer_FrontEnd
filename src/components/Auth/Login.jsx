@@ -41,7 +41,7 @@ const Login = ({ onLoginSuccess, onShowSignup }) => {
       })
       .finally(() => {
         setIsSubmitting(false);
-        navigate("/main")
+        navigate("/")
       });
   };
 

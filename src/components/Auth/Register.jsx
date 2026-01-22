@@ -12,7 +12,7 @@ const Register = () => {
         email: "",
         password: "",
         phone: "",
-        role: ""
+        role_name: ""
     });
 
     //handle input changes
@@ -30,7 +30,7 @@ const Register = () => {
         e.preventDefault();
 
         //Role validation
-        if(!form.role) {
+        if(!form.role_name) {
             toast.error("Please select a role");
             return;
         }
@@ -41,7 +41,7 @@ const Register = () => {
                 email: form.email,
                 password: form.password,
                 phone: form.phone,
-                role_name: form.role
+                role_name: form.role_name
             });
 
             if (res.data.success) {
@@ -109,8 +109,8 @@ const Register = () => {
         />
 
         <select 
-            name="role"
-            value={form.role}
+            name="role_name"
+            value={form.role_name}
             onChange={handleChange}
             className="w-full mb-4 px-4 py-2 border rounded-lg"    
             required    
