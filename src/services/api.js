@@ -17,7 +17,9 @@ export const authAPI = {
 //User API
 export const userAPI = {
     register: (user) => api.post('/user', user),  //add user
-    getUserById: (id) => api.get(`/user/${id}`),  // FIND
+    getAllUsers: () => api.get(`/user/all`),  // FIND
+    getUserById: (id) => api.get(`/user/find/${id}`),  // FIND
+    getUserByText: (text) => api.get(`/user/search/${text}`),  // FIND
     updateUser: (id, user) => api.put(`/user/update/${id}`, user), // UPDATE
     deleteUser: (userId) => api.delete(`/user/delete/${userId}`),  // DELETE
 }
