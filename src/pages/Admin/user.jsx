@@ -8,7 +8,7 @@ import {
 import { userAPI, roleAPI } from "../../services/api";
 
 const User = () => {
-  /* ===================== STATE ===================== */
+  /*  STATE  */
   const [mode, setMode] = useState(null); // add | find | edit | delete
   const [loading, setLoading] = useState(false);
 
@@ -29,7 +29,7 @@ const User = () => {
 
   const [showResults, setShowResults] = useState(false);
 
-  /* ===================== LOAD ROLES ===================== */
+  /*  LOAD ROLES  */
   useEffect(() => {
     const loadRoles = async () => {
         try {
@@ -42,7 +42,7 @@ const User = () => {
     loadRoles();
   }, []);
 
-  /* ===================== HELPERS ===================== */
+  /*  HELPERS  */
   const resetAll = () => {
     setMode(null);
     setUsers([]);
@@ -63,9 +63,9 @@ const User = () => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  /* ===================== API ACTIONS ===================== */
+  /*  API ACTIONS  */
 
-  // ➕ ADD
+  //  ADD
   const addUser = async () => {
     try {
       setLoading(true);
@@ -85,7 +85,7 @@ const User = () => {
     }
   };
 
-  // 🔍 FIND
+  // FIND
   const findUser = async () => {
     try {
       setLoading(true);
@@ -127,7 +127,7 @@ const User = () => {
     }
   };
 
-  // ✏️ UPDATE
+  //  UPDATE
   const updateUser = async () => {
     try {
       if (!form.id) {
@@ -146,7 +146,7 @@ const User = () => {
       if (form.role_name) payload.role_name = form.role_name;
 
       await userAPI.updateUser(Number(form.id), payload);
-      
+
       alert("✅ User updated");
       resetAll();
     } catch (err) {
@@ -156,7 +156,7 @@ const User = () => {
     }
   };
 
-  // ❌ DELETE
+  // DELETE
   const deleteUser = async () => {
     try {
       setLoading(true);
@@ -170,7 +170,7 @@ const User = () => {
     }
   };
 
-  /* ===================== SUBMIT ===================== */
+  /*  SUBMIT  */
   const handleSubmit = () => {
     if (mode === "add") addUser();
     if (mode === "find") findUser();
@@ -178,14 +178,14 @@ const User = () => {
     if (mode === "delete") deleteUser();
   };
 
-  /* ===================== UI ===================== */
+  /*  UI  */
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 to-sky-600 p-6">
       <h1 className="text-3xl font-bold text-white mb-8">
         User Management
       </h1>
 
-      {/* ===================== ACTION BUTTONS ===================== */}
+      {/*  ACTION BUTTONS  */}
       {!mode && (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-10">
           <ActionBtn icon={<FaUserPlus />} text="Add User" onClick={() => setMode("add")} />
@@ -195,7 +195,7 @@ const User = () => {
         </div>
       )}
 
-      {/* ===================== FORMS ===================== */}
+      {/*  FORMS  */}
       {mode && (
         <div className="max-w-xl bg-white rounded-3xl shadow-xl p-6 mb-10">
           <h2 className="text-xl font-bold mb-4 capitalize">{mode} User</h2>
