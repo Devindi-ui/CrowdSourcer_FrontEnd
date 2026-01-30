@@ -1,342 +1,338 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
-    FaUserPlus,
-    FaUserCheck,
-    FaUserEdit,
-    FaUserTimes
+  FaUserPlus,
+  FaUserCheck,
+  FaUserEdit,
+  FaUserTimes,
 } from "react-icons/fa";
-import { userAPI } from "../../services/api";
+import { userAPI, roleAPI } from "../../services/api";
 
 const User = () => {
-    const [showActions, setShowActions] = useState(true);
+  /* ===================== STATE ===================== */
+  const [mode, setMode] = useState(null); // add | find | edit | delete
+  const [loading, setLoading] = useState(false);
 
-    /* ===================== STATE ===================== */
-    const [mode, setMode] = useState(null);
-    const [loading, setLoading] = useState(false);
+  const [form, setForm] = useState({
+    id: "",
+    name: "",
+    email: "",
+    password: "",
+    phone: "",
+    role_name: "",
+  });
 
-    const [form, setForm] = useState({
-        id: "",
-        name: "",
-        email: "",
-        password: "",
-        phone: "",
-        role_name: ""
+  const [searchType, setSearchType] = useState("id"); // id | all | text
+  const [searchText, setSearchText] = useState("");
+  const [users, setUsers] = useState([]);
+
+  const [roles, setRoles] = useState([]);
+
+  const [showResults, setShowResults] = useState(false);
+
+  /* ===================== LOAD ROLES ===================== */
+  useEffect(() => {
+    const loadRoles = async () => {
+        try {
+            const res = await roleAPI.getAllRoles();
+            setRoles(res.data.data);
+        } catch (error) {
+            console.error("Failed to load roles");
+        }
+    };
+    loadRoles();
+  }, []);
+
+  /* ===================== HELPERS ===================== */
+  const resetAll = () => {
+    setMode(null);
+    setUsers([]);
+    setSearchText("");
+    setSearchType("id");
+    setShowResults(false);
+    setForm({
+      id: "",
+      name: "",
+      email: "",
+      password: "",
+      phone: "",
+      role_name: "",
     });
+  };
 
-    // 🔶 FIND MODE STATES
-    const [searchType, setSearchType] = useState("id"); // id | all | text
-    const [searchText, setSearchText] = useState("");
-    const [users, setUsers] = useState([]);
+  const handleChange = (e) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
+  };
 
-    /* ===================== HANDLERS ===================== */
-    const handleChange = (e) => {
-        setForm({
-            ...form,
-            [e.target.name]: e.target.value
-        });
-    };
+  /* ===================== API ACTIONS ===================== */
 
-    const resetForm = () => {
-        setForm({
-            id: "",
-            name: "",
-            email: "",
-            password: "",
-            phone: "",
-            role_name: ""
-        });
-        setSearchText("");
-        setUsers([]);
-        setSearchType("id");
-        setMode(null);
-    };
+  // ➕ ADD
+  const addUser = async () => {
+    try {
+      setLoading(true);
+      await userAPI.register({
+        name: form.name,
+        email: form.email,
+        password: form.password,
+        phone: form.phone,
+        role_name: form.role_name,
+      });
+      alert("✅ User added successfully");
+      resetAll();
+    } catch (err) {
+      alert("❌ Failed to add user");
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    /* ===================== API FUNCTIONS ===================== */
+  // 🔍 FIND
+  const findUser = async () => {
+    try {
+      setLoading(true);
+      setUsers([]);
+      setShowResults(false);
+      setMode("find");
 
-    // ➕ ADD USER
-    const addUser = async () => {
-        try {
-            setLoading(true);
-            await userAPI.register({
-                name: form.name,
-                email: form.email,
-                password: form.password,
-                phone: form.phone,
-                role_name: form.role_name
-            });
-            alert("✅ User added successfully");
-            resetForm();
-        } catch (error) {
-            alert("❌ Failed to add user");
-        } finally {
-            setLoading(false);
+      if (searchType === "id") {
+        if (!form.id)return alert("Enter user ID");
+
+        const res = await userAPI.getUserById(form.id);
+        setUsers([res.data.data]); //data arrives
+        setShowResults(true);
+      }
+
+      if (searchType === "all") {
+        const res = await userAPI.getAllUsers();
+        setUsers(res.data.data);
+        setShowResults(true);
+      }
+
+      if (searchType === "text") {
+        if (!searchText.trim()) {
+          alert("Enter text to search");
+          return;
         }
-    };
 
-    // 🔍 FIND USER (ID / ALL / TEXT)
-    const findUser = async () => {
-        try {
-            setLoading(true);
+        const res = await userAPI.getUserByText(searchText);
+        setUsers(res.data.data || []);
+        setShowResults(true);
+      }
+      
+    } catch (err) {
+      alert("❌ User not found");
+      setUsers([]);
+      setShowResults(false);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-            if (searchType === "id") {
-                const res = await userAPI.getUserById(form.id);
-                setUsers([res.data.data]);
-            }
+  // ✏️ UPDATE
+  const updateUser = async () => {
+    try {
+      setLoading(true);
+      await userAPI.updateUser(form.id, {
+        name: form.name,
+        email: form.email,
+        phone: form.phone,
+        role_name: form.role_name,
+      });
+      alert("✅ User updated");
+      resetAll();
+    } catch (err) {
+      alert("❌ Update failed");
+    } finally {
+      setLoading(false);
+    }
+  };
 
-            if (searchType === "all") {
-                const res = await userAPI.getAllUsers();
-                setUsers(res.data.data);
-            }
+  // ❌ DELETE
+  const deleteUser = async () => {
+    try {
+      setLoading(true);
+      await userAPI.deleteUser(form.id);
+      alert("✅ User deleted");
+      resetAll();
+    } catch (err) {
+      alert("❌ Delete failed");
+    } finally {
+      setLoading(false);
+    }
+  };
 
-            if (searchType === "text") {
-                const res = await userAPI.getUserByText(searchText);
-                setUsers(res.data.data);
-            }
+  /* ===================== SUBMIT ===================== */
+  const handleSubmit = () => {
+    if (mode === "add") addUser();
+    if (mode === "find") findUser();
+    if (mode === "edit") updateUser();
+    if (mode === "delete") deleteUser();
+  };
 
-            setShowActions(false);
+  /* ===================== UI ===================== */
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 to-sky-600 p-6">
+      <h1 className="text-3xl font-bold text-white mb-8">
+        User Management
+      </h1>
 
-        } catch (error) {
-            alert("❌ User not found");
-            setUsers([]);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    // ✏️ UPDATE USER
-    const updateUser = async () => {
-        try {
-            setLoading(true);
-            await userAPI.updateUser(form.id, {
-                name: form.name,
-                email: form.email,
-                phone: form.phone,
-                role_name: form.role_name
-            });
-            alert("✅ User updated successfully");
-            resetForm();
-        } catch (error) {
-            alert("❌ Failed to update user");
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    // ❌ DELETE USER
-    const deleteUser = async () => {
-        try {
-            setLoading(true);
-            await userAPI.deleteUser(form.id);
-            alert("✅ User deleted successfully");
-            resetForm();
-        } catch (error) {
-            alert("❌ Failed to delete user");
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    // 🔁 SUBMIT HANDLER
-    const handleSubmit = () => {
-        if (mode === "add") addUser();
-        if (mode === "find") findUser();
-        if (mode === "edit") updateUser();
-        if (mode === "delete") deleteUser();
-    };
-
-    /* ===================== UI ===================== */
-    return (
-        <div className="min-h-screen bg-gradient-to-br from-slate-900 to-sky-500 p-6">
-
-            <h2 className="text-3xl font-bold text-white mb-6">
-                User Management
-            </h2>
-
-            {/* ===================== ACTION BUTTONS ===================== */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-
-                <button onClick={() => setMode("add")}
-                    className="flex items-center gap-3 p-5 rounded-2xl bg-white/80 shadow hover:scale-105 transition">
-                    <FaUserPlus className="text-2xl text-sky-600" />
-                    Add User
-                </button>
-
-                <button onClick={() => setMode("find")}
-                    className="flex items-center gap-3 p-5 rounded-2xl bg-white/80 shadow hover:scale-105 transition">
-                    <FaUserCheck className="text-2xl text-sky-600" />
-                    Find User
-                </button>
-
-                <button onClick={() => setMode("edit")}
-                    className="flex items-center gap-3 p-5 rounded-2xl bg-white/80 shadow hover:scale-105 transition">
-                    <FaUserEdit className="text-2xl text-sky-600" />
-                    Update User
-                </button>
-
-                <button onClick={() => setMode("delete")}
-                    className="flex items-center gap-3 p-5 rounded-2xl bg-white/80 shadow hover:scale-105 transition">
-                    <FaUserTimes className="text-2xl text-sky-600" />
-                    Delete User
-                </button>
-
-            </div>
-
-            {/* ===================== ADD / EDIT / DELETE FORM ===================== */}
-            {(mode === "add" || mode === "edit" || mode === "delete") && (
-                <div className="max-w-xl bg-white/90 rounded-3xl shadow-lg p-6">
-
-                    <h3 className="text-xl font-bold mb-4">
-                        {mode.toUpperCase()} USER
-                    </h3>
-
-                    {(mode !== "add") && (
-                        <input
-                            name="id"
-                            placeholder="User ID"
-                            value={form.id}
-                            onChange={handleChange}
-                            className="w-full p-3 mb-3 border rounded-xl"
-                        />
-                    )}
-
-                    {(mode !== "delete") && (
-                        <>
-                            <input name="name" placeholder="Name"
-                                value={form.name} onChange={handleChange}
-                                className="w-full p-3 mb-3 border rounded-xl" />
-
-                            <input name="email" placeholder="Email"
-                                value={form.email} onChange={handleChange}
-                                className="w-full p-3 mb-3 border rounded-xl" />
-
-                            {mode === "add" && (
-                                <input name="password" type="password"
-                                    placeholder="Password"
-                                    value={form.password} onChange={handleChange}
-                                    className="w-full p-3 mb-3 border rounded-xl" />
-                            )}
-
-                            <input name="phone" placeholder="Phone"
-                                value={form.phone} onChange={handleChange}
-                                className="w-full p-3 mb-3 border rounded-xl" />
-
-                            <select name="role_name"
-                                value={form.role_name} onChange={handleChange}
-                                className="w-full p-3 mb-3 border rounded-xl">
-                                <option value="">Select Role</option>
-                                <option value="admin">Admin</option>
-                                <option value="passenger">Passenger</option>
-                                <option value="owner">Owner</option>
-                                <option value="driver">Driver</option>
-                                <option value="conductor">Conductor</option>
-                            </select>
-                        </>
-                    )}
-
-                    <button onClick={handleSubmit}
-                        className="bg-sky-600 text-white px-6 py-2 rounded-xl">
-                        Submit
-                    </button>
-
-                </div>
-            )}
-
-            {/* ===================== FIND FORM ===================== */}
-
-            {showActions && mode && (
-                <div className="bg-white p-6 rounded-xl">
-                    <h3 className="font-bold-mb-4">{mode.toUpperCase()}</h3>
-
-                        {mode === "find" && (
-                            <>
-                                <select 
-                                    value={searchType}
-                                    onChange={(e) => setSearchType(e.target.value)}
-                                    className="w-full p-3 mb-3 border rounded"
-                                >
-                                    <option value="id">Find by ID</option>
-                                    <option value="all">Get All Users</option>
-                                    <option value="text">Search by Text</option>
-                                </select>
-            
-                                {searchType === "id" && (
-                                    <input 
-                                        name="id" 
-                                        value={form.id} 
-                                        onChange={handleChange}
-                                        placeholder="User ID"
-                                        className="w-full p-3 mb-3 border rounded-xl" />
-                                )}
-            
-                                {searchType === "text" && (
-                                    <input placeholder="Search text"
-                                        value={searchText}
-                                        onChange={(e) => setSearchText(e.target.value)}
-                                        className="w-full p-3 mb-3 border rounded-xl" />
-                                )}
-            
-                                <button onClick={handleSubmit}
-                                    className="bg-sky-600 text-white px-6 py-2 rounded-xl">
-                                    Search
-                                </button>
-                            </>
-                        )}
-                </div>
-            )}
-
-
-            {/* ===================== RESULTS TABLE ===================== */}
-            {users.length > 0 && (
-                <div className="mt-8 bg-white/80 backdrop-blur rounded-3xl shadow-xl p-6">
-
-                    {/* ✨ NEW UI HEADER */}
-                    <div className="flex justify-between items-center mb-4">
-                        <h3 className="text-xl font-bold text-sky-900">
-                            Search Results ({users.length})
-                        </h3>
-                    </div>
-
-                    {/* ✨ NEW UI GRID */}
-                    <div className="grid gap-4">
-                        {users.map((u) => (
-                            <div
-                                key={u.user_id}
-                                className="flex items-center justify-between
-                                bg-white rounded-2xl p-4 shadow hover:shadow-lg
-                                transition hover:scale-[1.01]">
-
-                                {/* Avatar */}
-                                <div className="flex items-center gap-4">
-                                    <div className="w-12 h-12 rounded-full
-                                        bg-sky-600 text-white flex items-center
-                                        justify-center text-xl font-bold">
-                                        {u.name.charAt(0).toUpperCase()}
-                                    </div>
-
-                                    <div>
-                                        <p className="font-semibold">{u.name}</p>
-                                        <p className="text-sm text-gray-500">
-                                            {u.email}
-                                        </p>
-                                        <p className="text-sm text-gray-500">
-                                            {u.phone}
-                                        </p>
-                                    </div>
-                                </div>
-
-                                {/* Role Badge */}
-                                <span className="px-4 py-1 rounded-full text-sm
-                                    bg-sky-100 text-sky-700 font-semibold">
-                                    {u.role_id}
-                                </span>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            )}
-
+      {/* ===================== ACTION BUTTONS ===================== */}
+      {!mode && (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-10">
+          <ActionBtn icon={<FaUserPlus />} text="Add User" onClick={() => setMode("add")} />
+          <ActionBtn icon={<FaUserCheck />} text="Find User" onClick={() => setMode("find")} />
+          <ActionBtn icon={<FaUserEdit />} text="Update User" onClick={() => setMode("edit")} />
+          <ActionBtn icon={<FaUserTimes />} text="Delete User" onClick={() => setMode("delete")} />
         </div>
-    );
+      )}
+
+      {/* ===================== FORMS ===================== */}
+      {mode && (
+        <div className="max-w-xl bg-white rounded-3xl shadow-xl p-6 mb-10">
+          <h2 className="text-xl font-bold mb-4 capitalize">{mode} User</h2>
+
+          {/* FIND MODE */}
+          {mode === "find" && (
+            <>
+              <select
+                value={searchType}
+                onChange={(e) => setSearchType(e.target.value)}
+                className="w-full p-3 mb-3 border rounded-xl"
+              >
+                <option value="id">Find by ID</option>
+                <option value="all">Get All Users</option>
+                <option value="text">Search by Text</option>
+              </select>
+
+              {searchType === "id" && (
+                <input
+                  name="id"
+                  value={form.id}
+                  onChange={handleChange}
+                  placeholder="User ID"
+                  className="w-full p-3 mb-3 border rounded-xl"
+                />
+              )}
+
+              {searchType === "text" && (
+                <input
+                  value={searchText}
+                  onChange={(e) => setSearchText(e.target.value)}
+                  placeholder="Search name / email / phone"
+                  className="w-full p-3 mb-3 border rounded-xl"
+                />
+              )}
+            </>
+          )}
+
+          {/* ADD / EDIT / DELETE */}
+          {mode !== "find" && (
+            <>
+              {mode !== "add" && (
+                <input
+                  name="id"
+                  value={form.id}
+                  onChange={handleChange}
+                  placeholder="User ID"
+                  className="w-full p-3 mb-3 border rounded-xl"
+                />
+              )}
+
+              {mode !== "delete" && (
+                <>
+                  <input name="name" placeholder="Name" value={form.name} onChange={handleChange} className="w-full p-3 mb-3 border rounded-xl" />
+                  <input name="email" placeholder="Email" value={form.email} onChange={handleChange} className="w-full p-3 mb-3 border rounded-xl" />
+                  {mode === "add" && (
+                    <input name="password" type="password" placeholder="Password" value={form.password} onChange={handleChange} className="w-full p-3 mb-3 border rounded-xl" />
+                  )}
+                  <input name="phone" placeholder="Phone" value={form.phone} onChange={handleChange} className="w-full p-3 mb-3 border rounded-xl" />
+
+                  {/* Role Dropdown */}
+                  <select 
+                    name="role_name" 
+                    value={form.role_name} 
+                    onChange={handleChange} 
+                    className="w-full p-3 mb-3 border rounded-xl"
+                  >
+                    <option value="">Select Role</option>
+                    {roles.map((r) => (
+                        <option key={r.role_id} value={r.role_name}>
+                            {r.role_name}
+                        </option>
+                    ))}
+                  </select>
+                </>
+              )}
+            </>
+          )}
+
+          <div className="flex gap-3">
+            <button 
+              onClick={handleSubmit} 
+              disabled={loading} 
+              className="bg-sky-600 text-white px-6 py-2 rounded-xl"
+            >
+              {loading ? "Please wait..." : "Submit"}
+            </button>
+            <button 
+              onClick={resetAll} 
+              className="bg-gray-500 text-white px-6 py-2 rounded-xl"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* ===================== RESULTS ===================== */}
+      {showResults && users.length > 0 && (
+        <div className="bg-white rounded-2xl shadow-xl p-6">
+          <h2 className="text-lg font-semibold mb-4">Search Results</h2>
+
+          <div className="overflow-x-auto">
+            <table className="w-full border-collapse">
+              <thead className="bg-gray-100 text-gray-600">
+                <tr>
+                  <th className="p-3 text-left">ID</th>
+                  <th className="p-3 text-left">Name</th>
+                  <th className="p-3 text-left">Email</th>
+                  <th className="p-3 text-left">Phone</th>
+                  <th className="p-3 text-left">Role</th>
+                </tr>
+              </thead>
+              <tbody>
+                {users.map((u, i) => (
+                  <tr key={u.user_id} className={i % 2 ? "bg-gray-50" : ""}>
+                    <td className="p-3 font-semibold">#{u.user_id}</td>
+                    <td className="p-3">{u.name}</td>
+                    <td className="p-3">{u.email}</td>
+                    <td className="p-3">{u.phone}</td>
+                    <td className="p-3">
+                      <span className="px-3 py-1 rounded-full bg-indigo-100 
+                        text-indigo-700 text-sm"
+                      >
+                        {u.role_name}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+    </div>
+  );
 };
+
+/* ===================== SMALL COMPONENT ===================== */
+const ActionBtn = ({ icon, text, onClick }) => (
+  <button
+    onClick={onClick}
+    className="flex items-center gap-3 p-5 bg-white rounded-2xl shadow hover:scale-105 transition"
+  >
+    <span className="text-sky-600 text-2xl">{icon}</span>
+    <span className="font-semibold">{text}</span>
+  </button>
+);
 
 export default User;
