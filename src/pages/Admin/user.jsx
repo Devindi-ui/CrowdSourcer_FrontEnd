@@ -130,13 +130,23 @@ const User = () => {
   // ✏️ UPDATE
   const updateUser = async () => {
     try {
+      if (!form.id) {
+        alert("User ID is required");
+        return;
+      }
+
       setLoading(true);
-      await userAPI.updateUser(form.id, {
-        name: form.name,
-        email: form.email,
-        phone: form.phone,
-        role_name: form.role_name,
-      });
+
+      //build payload
+      const payload = {};
+      
+      if (form.name) payload.name = form.name;
+      if (form.email) payload.email = form.email;
+      if (form.phone) payload.phone = form.phone;
+      if (form.role_name) payload.role_name = form.role_name;
+
+      await userAPI.updateUser(Number(form.id), payload);
+      
       alert("✅ User updated");
       resetAll();
     } catch (err) {
