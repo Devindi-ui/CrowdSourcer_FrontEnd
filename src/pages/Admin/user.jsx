@@ -215,213 +215,232 @@ const User = () => {
     if (mode === "delete") deleteUser();
   };
 
-  /*  UI  */
-  /* ================= UI ================= */
-return (
-  <div className="min-h-screen bg-gradient-to-br from-slate-900 to-sky-600 p-6">
 
-    {/* Back Button */}
-    {mode && (
-      <button 
-        onClick={resetAll}
-        className="flex items-center gap-2 mb-4 text-white hover:underline"
-      >
-        <FaArrowLeft /> Back
-      </button>
-    )}
+  // UI
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 to-sky-600 p-6">
 
-    <h1 className="text-3xl font-bold text-white mb-8">
-      User Management
-    </h1>
+      <h1 className="text-3xl font-bold text-white mb-8">
+        User Management
+      </h1>
 
-    {/* ACTION BUTTONS */}
-    {!mode && (
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-10">
-        <ActionBtn icon={<FaUserPlus />} text="Add User" onClick={() => setMode("add")} />
-        <ActionBtn icon={<FaUserCheck />} text="Find User" onClick={() => setMode("find")} />
-        <ActionBtn icon={<FaUserEdit />} text="Update User" onClick={() => setMode("edit")} />
-        <ActionBtn icon={<FaUserTimes />} text="Delete User" onClick={() => setMode("delete")} />
-      </div>
-    )}
-
-    {/* ================= FORM ================= */}
-    {mode && (
-      <div className="max-w-xl bg-white rounded-3xl shadow-xl p-6 mb-10">
-        <h2 className="text-xl font-bold mb-4 capitalize">{mode} User</h2>
-
-        {/* 🔴 FIX: UPDATE STEP 1 – ID ONLY */}
-        {mode === "edit" && !editLoaded && (
-          <input
-            name="id"
-            value={form.id}
-            onChange={handleChange}
-            placeholder="Enter User ID"
-            className="w-full p-3 mb-3 border rounded-xl"
-          />
-        )}
-
-        {/* 🔴 FIX: FULL FORM (ADD or EDIT after ID) */}
-        {(mode === "add" || (mode === "edit" && editLoaded)) && (
-          <>
-            <input
-              name="name"
-              value={form.name}
-              onChange={handleChange}
-              placeholder="Name"
-              className="w-full p-3 mb-3 border rounded-xl"
-            />
-
-            <input
-              name="email"
-              value={form.email}
-              onChange={handleChange}
-              placeholder="Email"
-              className="w-full p-3 mb-3 border rounded-xl"
-            />
-
-            {mode === "add" && (
-              <input
-                name="password"
-                type="password"
-                value={form.password}
-                onChange={handleChange}
-                placeholder="Password"
-                className="w-full p-3 mb-3 border rounded-xl"
-              />
-            )}
-
-            <input
-              name="phone"
-              value={form.phone}
-              onChange={handleChange}
-              placeholder="Phone"
-              className="w-full p-3 mb-3 border rounded-xl"
-            />
-
-            <select
-              name="role_name"
-              value={form.role_name}
-              onChange={handleChange}
-              className="w-full p-3 mb-3 border rounded-xl"
-            >
-              <option value="">Select Role</option>
-              {roles.map(r => (
-                <option key={r.role_id} value={r.role_name}>
-                  {r.role_name}
-                </option>
-              ))}
-            </select>
-          </>
-        )}
-
-        {/* 🔴 FIX: FIND MODE ONLY */}
-        {mode === "find" && (
-          <>
-            <select
-              value={searchType}
-              onChange={(e) => setSearchType(e.target.value)}
-              className="w-full p-3 mb-3 border rounded-xl"
-            >
-              <option value="id">Find by ID</option>
-              <option value="all">Get All Users</option>
-              <option value="text">Search by Text</option>
-            </select>
-
-            {searchType === "id" && (
-              <input
-                name="id"
-                value={form.id}
-                onChange={handleChange}
-                placeholder="User ID"
-                className="w-full p-3 mb-3 border rounded-xl"
-              />
-            )}
-
-            {searchType === "text" && (
-              <input
-                value={searchText}
-                onChange={(e) => setSearchText(e.target.value)}
-                placeholder="Search name / email / phone"
-                className="w-full p-3 mb-3 border rounded-xl"
-              />
-            )}
-          </>
-        )}
-
-        {/* 🔴 FIX: DELETE MODE */}
-        {mode === "delete" && (
-          <input
-            name="id"
-            value={form.id}
-            onChange={handleChange}
-            placeholder="User ID"
-            className="w-full p-3 mb-3 border rounded-xl"
-          />
-        )}
-
-        {/* ACTION BUTTONS */}
-        <div className="flex gap-3">
-          <button
-            onClick={handleSubmit}
-            disabled={loading}
-            className="bg-sky-600 text-white px-6 py-2 rounded-xl"
-          >
-            {loading ? "Please wait..." : "Submit"}
-          </button>
-
-          <button
-            onClick={resetAll}
-            className="bg-gray-500 text-white px-6 py-2 rounded-xl"
-          >
-            Cancel
-          </button>
+      {/* ACTION BUTTONS */}
+      {!mode && (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-10">
+          <ActionBtn icon={<FaUserPlus />} text="Add User" onClick={() => setMode("add")} />
+          <ActionBtn icon={<FaUserCheck />} text="Find User" onClick={() => setMode("find")} />
+          <ActionBtn icon={<FaUserEdit />} text="Update User" onClick={() => setMode("edit")} />
+          <ActionBtn icon={<FaUserTimes />} text="Delete User" onClick={() => setMode("delete")} />
         </div>
-      </div>
-    )}
+      )}
 
-    {/*  RESULTS  */}
-    {showResults && users.length > 0 && (
-      <div className="bg-white rounded-2xl shadow-xl p-6">
-        <h2 className="text-lg font-semibold mb-4">Search Results</h2>
+      {/*  FORM  */}
+      {mode && (
+        <div className="flex justify-center items-center h-100vh mt-30 overflow-hidden">
 
-        <table className="w-full border-collapse">
-          <thead className="bg-gray-100">
-            <tr>
-              <th>ID</th>
-              <th>Name</th>
-              <th>Email</th>
-              <th>Phone</th>
-              <th>Role</th>
-            </tr>
-          </thead>
-          <tbody>
-            {users.map(u => (
-              <tr key={u.user_id}>
-                <td>{u.user_id}</td>
-                <td>{u.name}</td>
-                <td>{u.email}</td>
-                <td>{u.phone}</td>
-                <td>{u.role_name}</td>
-              </tr>
+        <div className="max-w-xl w-full bg-white rounded-2xl shadow-xl p-6">
+          <h2 className="text-xl font-bold mb-4 capitalize">{mode} User</h2>
+
+          {/* UPDATE STEP 1 – ID ONLY */}
+          {mode === "edit" && !editLoaded && (
+            <input
+              name="id"
+              value={form.id}
+              onChange={handleChange}
+              placeholder="Enter User ID"
+              className="w-full p-3 mb-3 border rounded-xl"
+            />
+          )}
+
+          {/* FULL FORM (ADD or EDIT after ID) */}
+          {(mode === "add" || (mode === "edit" && editLoaded)) && (
+            <>
+              <input
+                name="name"
+                value={form.name}
+                onChange={handleChange}
+                placeholder="Name"
+                className="w-full p-3 mb-3 border rounded-xl"
+              />
+
+              <input
+                name="email"
+                value={form.email}
+                onChange={handleChange}
+                placeholder="Email"
+                className="w-full p-3 mb-3 border rounded-xl"
+              />
+
+              {mode === "add" && (
+                <input
+                  name="password"
+                  type="password"
+                  value={form.password}
+                  onChange={handleChange}
+                  placeholder="Password"
+                  className="w-full p-3 mb-3 border rounded-xl"
+                />
+              )}
+
+              <input
+                name="phone"
+                value={form.phone}
+                onChange={handleChange}
+                placeholder="Phone"
+                className="w-full p-3 mb-3 border rounded-xl"
+              />
+
+              <select
+                name="role_name"
+                value={form.role_name}
+                onChange={handleChange}
+                className="w-full p-3 mb-3 border rounded-xl"
+              >
+                <option value="">Select Role</option>
+                {roles.map(r => (
+                  <option key={r.role_id} value={r.role_name}>
+                    {r.role_name}
+                  </option>
+                ))}
+              </select>
+            </>
+          )}
+
+          {/* FIND MODE ONLY */}
+          {mode === "find" && (
+            <>
+              <select
+                value={searchType}
+                onChange={(e) => setSearchType(e.target.value)}
+                className="w-full p-3 mb-3 border rounded-xl"
+              >
+                <option value="id">Find by ID</option>
+                <option value="all">Get All Users</option>
+                <option value="text">Search by Text</option>
+              </select>
+
+              {searchType === "id" && (
+                <input
+                  name="id"
+                  value={form.id}
+                  onChange={handleChange}
+                  placeholder="User ID"
+                  className="w-full p-3 mb-3 border rounded-xl"
+                />
+              )}
+
+              {searchType === "text" && (
+                <input
+                  value={searchText}
+                  onChange={(e) => setSearchText(e.target.value)}
+                  placeholder="Search name / email / phone"
+                  className="w-full p-3 mb-3 border rounded-xl"
+                />
+              )}
+            </>
+          )}
+
+          {/* DELETE MODE */}
+          {mode === "delete" && (
+            <input
+              name="id"
+              value={form.id}
+              onChange={handleChange}
+              placeholder="User ID"
+              className="w-full p-3 mb-3 border rounded-xl"
+            />
+          )}
+
+          {/* ACTION BUTTONS */}
+          <div className="flex gap-3">
+            <button
+              onClick={handleSubmit}
+              disabled={loading}
+              className="bg-sky-600 text-white px-6 py-2 rounded-xl"
+            >
+              {loading ? "Please wait..." : "Submit"}
+            </button>
+
+            <button
+              onClick={resetAll}
+              className="bg-gray-500 text-white px-6 py-2 rounded-xl"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+        </div>
+      )}
+
+      {/* RESULTS */}
+      {showResults && users.length > 0 && (
+        <div className="bg-white rounded-2xl shadow-xl p-6 mt-10">
+          <h2 className="text-xl font-bold mb-6 text-gray-800">
+            🔍 Search Results
+          </h2>
+
+          <div className="space-y-4">
+            {users.map((u) => (
+              <div
+                key={u.user_id}
+                className="flex items-center justify-between gap-4 p-4 rounded-xl border border-gray-200 hover:shadow-lg hover:scale-[1.01] transition-all duration-200"
+              >
+                {/* LEFT */}
+                <div className="flex items-center gap-4">
+                  {/* Avatar */}
+                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-indigo-500 to-purple-500 text-white flex items-center justify-center font-bold text-lg">
+                    {u.name?.charAt(0).toUpperCase()}
+                  </div>
+
+                  {/* User Info */}
+                  <div>
+                    <p className="text-lg font-semibold text-gray-900">
+                      {u.name}
+                    </p>
+                    <p className="text-sm text-gray-500">{u.email}</p>
+                    <p className="text-sm text-gray-500">{u.phone}</p>
+                  </div>
+                </div>
+
+                {/* RIGHT */}
+                <div className="text-right">
+                  <span className="text-xs text-gray-400 block mb-1">
+                    ID #{u.user_id}
+                  </span>
+
+                  <span
+                    className={`px-3 py-1 rounded-full text-sm font-medium
+                      ${
+                        u.role_name === "Admin"
+                          ? "bg-red-100 text-red-700"
+                          : u.role_name === "Owner"
+                          ? "bg-indigo-100 text-indigo-700"
+                          : "bg-green-100 text-green-700"
+                      }
+                    `}
+                  >
+                    {u.role_name}
+                  </span>
+                </div>
+              </div>
             ))}
-          </tbody>
-        </table>
-      </div>
-    )}
-  </div>
-);
+          </div>
+        </div>
+      )}
+    </div>
+  );
 
-};
+  };
 
-/*  SMALL COMPONENT  */
-const ActionBtn = ({ icon, text, onClick }) => (
-  <button
-    onClick={onClick}
-    className="flex items-center gap-3 p-5 bg-white rounded-2xl shadow hover:scale-105 transition"
-  >
-    <span className="text-sky-600 text-2xl">{icon}</span>
-    <span className="font-semibold">{text}</span>
-  </button>
-);
+  /*  SMALL COMPONENT  */
+  const ActionBtn = ({ icon, text, onClick }) => (
+    <button
+      onClick={onClick}
+      className="flex items-center gap-3 p-5 bg-white rounded-2xl shadow hover:scale-105 transition"
+    >
+      <span className="text-sky-600 text-2xl">{icon}</span>
+      <span className="font-semibold">{text}</span>
+    </button>
+  );
 
 export default User;
