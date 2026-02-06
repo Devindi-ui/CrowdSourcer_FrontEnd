@@ -14,6 +14,14 @@ export const authAPI = {
     login: (user) => api.post("auth/login", user)
 }
 
+//Dashboard API 
+export const dashboardAPI = {
+    users: () => api.get("/auth/count"),
+    buses: () => api.get("/bus/count"),
+    trips: () => api.get("/trip/count"),
+    alerts: () => api.get("/alert/count")
+}
+
 //User API
 export const userAPI = {
     register: (user) => api.post('/user', user),  // Add user
@@ -22,14 +30,6 @@ export const userAPI = {
     getUserByText: (text) => api.get(`/user/search/${encodeURIComponent(text)}`),  // FIND
     updateUser: (id, user) => api.put(`/user/update/${id}`, user), // UPDATE
     deleteUser: (userId) => api.delete(`/user/delete/${userId}`),  // DELETE
-}
-
-//Dashboard API 
-export const dashboardAPI = {
-    users: () => api.get("/auth/count"),
-    buses: () => api.get("/bus/count"),
-    trips: () => api.get("/trip/count"),
-    alerts: () => api.get("/alert/count")
 }
 
 //Role API

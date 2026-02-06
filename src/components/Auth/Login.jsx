@@ -17,7 +17,7 @@ const Login = ({ onLoginSuccess, onShowSignup }) => {
 
     const credentials = {
       email,
-      password,
+      password
     };
 
     const loginPromise = authAPI.login(credentials);
@@ -29,19 +29,28 @@ const Login = ({ onLoginSuccess, onShowSignup }) => {
         error: <b>Invalid email or password</b>,
       })
       .then((res) => {
-        // Optional: save token/user data
+        if (res.data?.user?.status_d === 0) {
+          toast.error(
+            <b className="text-red-500">
+              Your account has been deactivated. Please contact admin.
+            </b>
+          );
+          return;
+        }
+
+        //allow login Only if status_d = 1
         localStorage.setItem("token", res.data.token);
 
         if (onLoginSuccess) {
           onLoginSuccess(res.data);
         }
+        navigate("/");
       })
       .catch((err) => {
         console.error(err);
       })
       .finally(() => {
         setIsSubmitting(false);
-        navigate("/")
       });
   };
 
@@ -53,7 +62,8 @@ const Login = ({ onLoginSuccess, onShowSignup }) => {
         <div className="hidden md:flex w-1/2 bg-sky-900 text-white flex-col justify-center items-center p-10 text-center">
           <FaTrafficLight className="text-4xl"/>
           <h1 className="mt-3 text-3xl font-bold mb-4">
-             PUBLICPILOT</h1>
+             PUBLICPILOT
+          </h1>
           <p className="text-base opacity-90">
             Login to continue your journey with us
           </p>

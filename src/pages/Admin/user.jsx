@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   FaUserPlus,
   FaUserCheck,
@@ -9,7 +10,8 @@ import {
 import { userAPI, roleAPI } from "../../services/api";
 
 const User = () => {
-  /*  STATE  */
+  // State
+  const navigate = useNavigate();
   const [mode, setMode] = useState(null); // add | find | edit | delete
   const [loading, setLoading] = useState(false);
 
@@ -27,7 +29,6 @@ const User = () => {
   const [users, setUsers] = useState([]);
   const [roles, setRoles] = useState([]);
   const [showResults, setShowResults] = useState(false);
-
   const [editLoaded, setEditLoaded] = useState(false);
 
   /*  LOAD ROLES  */
@@ -220,17 +221,56 @@ const User = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 to-sky-600 p-6">
 
+      {/* Back Button */}
+        <button 
+          type="button"
+          onClick={() => {
+            if (mode) {
+              setMode(null); //go back to action btns
+            } else {
+              navigate("/admin"); //go back to admin dashboard
+            }
+          }}
+          className="fixed top-6 left-6 z-50 flex items-center gap-2 mt-15
+            bg-white/90 backdrop-blur-md text-slate-800 px-4 py-2 rounded-full 
+            shadow-lg hover:bg-white hover:scale-105 transition"
+        >
+          <FaArrowLeft className="text-sky-600"/>
+          <span className="font-semibold text-sm">Back</span>
+        </button>     
+
       <h1 className="text-3xl font-bold text-white mb-8">
         User Management
       </h1>
 
       {/* ACTION BUTTONS */}
       {!mode && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-10">
-          <ActionBtn icon={<FaUserPlus />} text="Add User" onClick={() => setMode("add")} />
-          <ActionBtn icon={<FaUserCheck />} text="Find User" onClick={() => setMode("find")} />
-          <ActionBtn icon={<FaUserEdit />} text="Update User" onClick={() => setMode("edit")} />
-          <ActionBtn icon={<FaUserTimes />} text="Delete User" onClick={() => setMode("delete")} />
+        <div className="mt-25 flex flex-col items-center gap-5 mb-10 
+          [&>button]:w-72"
+        >
+          <ActionBtn 
+            icon={<FaUserPlus />} 
+            text="Add User" 
+            onClick={() => setMode("add")} 
+          />
+
+          <ActionBtn 
+            icon={<FaUserCheck />} 
+            text="Find User" 
+            onClick={() => setMode("find")} 
+          />
+
+          <ActionBtn 
+            icon={<FaUserEdit />} 
+            text="Update User" 
+            onClick={() => setMode("edit")} 
+          />
+
+          <ActionBtn 
+            icon={<FaUserTimes />} 
+            text="Delete User" 
+            onClick={() => setMode("delete")} 
+          />
         </div>
       )}
 
@@ -372,7 +412,7 @@ const User = () => {
         </div>
       )}
 
-      {/* RESULTS */}
+       {/* RESULTS */}
       {showResults && users.length > 0 && (
         <div className="bg-white rounded-2xl shadow-xl p-6 mt-10">
           <h2 className="text-xl font-bold mb-6 text-gray-800">
@@ -430,16 +470,18 @@ const User = () => {
     </div>
   );
 
-  };
+};
 
   /*  SMALL COMPONENT  */
   const ActionBtn = ({ icon, text, onClick }) => (
     <button
+      type="button"
       onClick={onClick}
-      className="flex items-center gap-3 p-5 bg-white rounded-2xl shadow hover:scale-105 transition"
+      className="mt-2 flex items-center gap-3 p-5 bg-white rounded-3xl 
+        shadow hover:scale-105 transition"
     >
       <span className="text-sky-600 text-2xl">{icon}</span>
-      <span className="font-semibold">{text}</span>
+      <span className="font-semibold text-lg">{text}</span>
     </button>
   );
 
