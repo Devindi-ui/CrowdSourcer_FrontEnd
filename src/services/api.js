@@ -32,6 +32,16 @@ export const userAPI = {
     deleteUser: (userId) => api.delete(`/user/delete/${userId}`),  // DELETE
 }
 
+//Alert API
+export const alertAPI = {
+    create: (alert) => api.post('/alert/create', alert),  // Add alert 
+    getAllAlerts: () => api.get(`/alert/all`),  // FIND
+    getAlertById: (id) => api.get(`/alert/find/${id}`),  // FIND
+    getAlertByText: (text) => api.get(`/alert/search/${encodeURIComponent(text)}`),  // FIND
+    updateAlert: (id, alert) => api.put(`/alert/update/${id}`, alert), // UPDATE
+    deleteAlert: (alertId) => api.delete(`/alert/delete/${alertId}`),  // DELETE
+}
+
 //Role API
 export const roleAPI = {
     getAllRoles: () => api.get("/role/all")

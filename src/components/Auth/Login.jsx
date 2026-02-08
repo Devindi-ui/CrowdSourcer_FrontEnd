@@ -55,8 +55,10 @@ const Login = ({ onLoginSuccess, onShowSignup }) => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 to-sky-500">
-      <div className="flex w-[900px] max-w-[95%] h-[550px] rounded-xl shadow-2xl overflow-hidden bg-gray-300">
+    <div className="min-h-screen flex items-center justify-center 
+      bg-gradient-to-br from-slate-900 to-sky-500">
+      <div className="flex w-[900px] max-w-[95%] h-[550px] rounded-xl 
+        shadow-2xl overflow-hidden bg-gray-300">
 
         {/* Left Side */}
         <div className="hidden md:flex w-1/2 bg-sky-900 text-white flex-col justify-center items-center p-10 text-center">

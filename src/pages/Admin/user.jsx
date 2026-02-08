@@ -97,8 +97,6 @@ const User = () => {
       alert("✅ User added successfully");
       resetAll();
     } catch (err) {
-      console.error("User adding failed", err.message);
-      
       alert("❌ Failed to add user");
     } finally {
       setLoading(false);
@@ -115,7 +113,6 @@ const User = () => {
 
       if (searchType === "id") {
         if (!form.id)return alert("Enter user ID");
-
         const res = await userAPI.getUserById(form.id); 
         setUsers([res.data.data]); //data arrives
         setShowResults(true);
