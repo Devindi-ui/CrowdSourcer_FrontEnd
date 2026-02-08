@@ -442,7 +442,7 @@ const User = () => {
                 {/* RIGHT */}
                 <div className="text-right">
                   <span className="text-xs text-gray-400 block mb-1">
-                    ID #{u.user_id}
+                    UID-{u.user_id}
                   </span>
 
                   <span

@@ -224,7 +224,7 @@ const Alert = () => {
       </button>
 
       <h1 className="text-3xl font-bold text-white mb-8">
-        User Management 
+        Alert Management 
       </h1>
 
       {/* Action Buttons */}
@@ -258,7 +258,7 @@ const Alert = () => {
       {mode && (
         <div className="flex justify-center items-center h-100vh mt-30 overflow-hidden">
           <div className="max-w-xl w-full bg-white rounded-2xl shadow-xl p-6">
-            <h2 className="text-xl font-bold mb-4 capitalize">{mode} User</h2>
+            <h2 className="text-xl font-bold mb-4 capitalize">{mode} Alert</h2>
 
             {/* Update - ID only */}
             {mode === "edit" && !editLoaded && (
@@ -339,7 +339,7 @@ const Alert = () => {
                   <input
                     value={searchText}
                     onChange={(e) => setSearchText(e.target.value)}
-                    placeholder="Search name / email / phone"
+                    placeholder="Search by type / desc / bus_no / user_id"
                     className="w-full p-3 mb-3 border rounded-xl"
                   />
                 )}
