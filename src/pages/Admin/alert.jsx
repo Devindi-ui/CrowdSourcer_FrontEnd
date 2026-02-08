@@ -420,12 +420,8 @@ const Alert = () => {
                     </td>
 
                     {/* Alert type badge */}
-                    <td className="px-5 py-4">
-                      <span className="inline-flex items-center px-3 py-1 
-                        rounded-full text-xs font-semibold bg-sky-100 text-sky-700"
-                      >
+                    <td className="px-5 py-4 text-sky-600 max-w-sm">
                         {a.alert_type}
-                      </span>
                     </td>
 
                     {/* Description */}
