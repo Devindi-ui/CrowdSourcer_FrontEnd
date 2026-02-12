@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from "react";
-import { data, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import {
   FaPlus,
   FaSearch,
@@ -25,7 +25,7 @@ const Alert = () => {
   });
 
   const [searchType, setSearchType] = useState("id");
-  const [searchText, setSearchText] = useState();
+  const [searchText, setSearchText] = useState("");
   const [alerts, setAlerts] = useState([]);
   const [showResults, setShowResults] = useState(false);
   const [editLoaded, setEditLoaded] = useState(false);
@@ -51,18 +51,22 @@ const Alert = () => {
   };
 
   const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value});
+    setForm({ ...form, [e.target.name]: e.target.value });
   };
 
   //fill form after ID fetch
   const populateFormFromAlert = (a) => {
+    if (!a) return;
+
     setForm({
-      alert_type: a.alert_type,
-      description: a.description,
+      id: a.alert_id || "",
+      alert_type: a.alert_type || "",
+      description: a.description || "",
       bus_number: a.bus_number,
-      user_id: a.user_id,
-      avg_passengers: a.avg_passengers
+      user_id: a.user_id || "",
+      avg_passengers: a.avg_passengers || ""
     });
+
     setEditLoaded(true);
   };
 
@@ -93,24 +97,23 @@ const Alert = () => {
       setLoading(true);
       setAlerts([]);
       setShowResults(false);
-      setMode("find");
 
+      let result = [];
+      
       if (searchType === "id") {
-        if (!form.id)return alert("Enter Alert ID");
+        if (!form.id) return alert("Enter Alert ID");
+
         const res = await alertAPI.getAlertById(form.id);
+        result = res.data?.data;
 
-        const data = Array.isArray(res.data.data)
-        ? res.data.data
-        : [res.data.data];
+        if (!result) throw new Error();
 
-        setAlerts(data); //data arrives
-        setShowResults(true);
+        result = Array.isArray(result) ? result : [result];
       }
 
       if (searchType === "all") {
         const res = await alertAPI.getAllAlerts();
-        setAlerts(res.data.data);
-        setShowResults(true);
+        result = res.data?.data || [];
       }
 
       if (searchType === "text") {
@@ -120,9 +123,11 @@ const Alert = () => {
         }
 
         const res = await alertAPI.getAlertByText(searchText);
-        setAlerts(res.data.data || []);
-        setShowResults(true);
+        result = res.data?.data || [];
       }
+
+      setAlerts(result);
+      setShowResults(true);
 
     } catch (error) {
       alert("❌ Alert not found");
@@ -133,15 +138,20 @@ const Alert = () => {
     }
   };
 
-  //Load alert by ID
+  //Load alert by ID //Auto-fill
   const loadAlertForEdit = async () => {
-    if (!form.id) return alert ("Enter alert ID");
+    if (!form.id) return alert ("Enter Alert ID");
     try {
       setLoading(true);
       const res = await alertAPI.getAlertById(form.id);
-      populateFormFromAlert(res.data.data);
-      setAlerts([res.data.data]);
+      const data = res.data?.data;
+
+      if(!data) throw new Error();
+
+      populateFormFromAlert(data);
+      setAlerts([data]);
       setShowResults(true);
+
     } catch (error) {
       alert("❌ Alert not found")
     } finally {
@@ -157,13 +167,15 @@ const Alert = () => {
         alert_type: form.alert_type,
         description: form.description,
         bus_number: form.bus_number,
-        user_id: form.user_id,
-        avg_passengers: form.avg_passengers
+        user_id: Number (form.user_id),
+        avg_passengers: Number (form.avg_passengers)
       });
       alert("✅ Alert updated");
 
       const res = await alertAPI.getAlertById(form.id);
-      setAlerts([res.data.data]);
+      const data = res.data?.data;
+
+      setAlerts([data]);
       setShowResults(true);
 
     } catch (error) {
@@ -194,16 +206,25 @@ const Alert = () => {
 
   //Submit
   const handleSubmit = () => {
-    if (mode === "add") addAlert();
-    if (mode === "find") findAlert();
-    if (mode === "edit" && !editLoaded) loadAlertForEdit();
-    else if (mode === "edit") updateAlert();
-    if (mode === "delete") deleteAlert(); 
+    if (mode === "add") return addAlert();
+    if (mode === "find") return findAlert();
+
+    //edit flow
+    if (mode === "edit") {
+      if (!editLoaded) {
+        return loadAlertForEdit();
+      } else {
+        return updateAlert();
+      }
+    }
+
+    if (mode === "delete") return deleteAlert(); 
   };
 
   //UI
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 to-sky-600 p-6">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 
+      to-sky-600 p-6">
 
       {/* Back Button */}
       <button  
@@ -281,6 +302,7 @@ const Alert = () => {
                   placeholder="Alert Type"
                   className="w-full p-3 mb-3 border rounded-xl" 
                 />
+
                 <input 
                   name="description" 
                   value={form.description}
@@ -288,6 +310,7 @@ const Alert = () => {
                   placeholder="Description"
                   className="w-full p-3 mb-3 border rounded-xl" 
                 />
+
                 <input 
                   name="bus_number" 
                   value={form.bus_number}
@@ -295,6 +318,7 @@ const Alert = () => {
                   placeholder="Bus Number"
                   className="w-full p-3 mb-3 border rounded-xl" 
                 />
+
                 <input 
                   name="user_id" 
                   value={form.user_id}
@@ -302,6 +326,7 @@ const Alert = () => {
                   placeholder="User ID"
                   className="w-full p-3 mb-3 border rounded-xl" 
                 />
+
                 <input 
                   name="avg_passengers" 
                   value={form.avg_passengers}
@@ -380,76 +405,50 @@ const Alert = () => {
 
       {/* Results */}
       {showResults && alerts.length > 0 && (
-        <div className="bg-white/95 backdrop-blur rounded-2xl shadow-2xl 
-          overflow-hidden mt-10">
+        <div className="bg-white rounded-2xl shadow-xl p-6 mt-10">
+          <h2 className="text-xl font-bold mb- text-gray-800">
+            🚨 Alert Results
+          </h2>
 
-          {/* Header */}
-          <div className="px-6 py-4 border-b flex items-center justify-between">
-            <h2 className="text-lg font-bold text-slate-800">
-              🔍 Search Results
-            </h2>
-            <span className="text-sm text-slate-500">
-              Total: {alerts.length}
-            </span>
-          </div>
+          <div className="space-y-4">
+            {alerts.map((a) => (
+              <div 
+                key={a.alert_id}
+                onClick={() => {
+                  if (mode === "edit") populateFormFromAlert(a);
+                }}
+                className="flex items-start justify-between gap-4 p-5 
+                  rounded-xl border border-gray-200 hover:shadow-lg 
+                  hover:scale-[1.01] transition-all duration-200 cursor-pointer"
+              >
 
-          {/* Table */}
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm text-left">
-              <thead className="bg-slate-100 text-slate-600 uppercase text-xs">
-                <tr>
-                  <th className="px-5 py-3">ID</th>
-                  <th className="px-5 py-3">Type</th>
-                  <th className="px-5 py-3">Description</th>
-                  <th className="px-5 py-3">Bus</th>
-                  <th className="px-5 py-3">User</th>
-                  <th className="px-5 py-3 text-right">Avg Pas</th>
-                </tr>
-              </thead>
-
-              <tbody className="divide-y">
-                {alerts.map((a, index) => (
-                  <tr 
-                    key={a.alert_id ?? index} 
-                    className="hover:bg-slate-50 transition"
-                  >
-
-                    {/* Alert ID */}
-                    <td className="px-5 py-4 font-semibold text-slate-700">
-                      #{a.alert_id}
-                    </td>
-
-                    {/* Alert type badge */}
-                    <td className="px-5 py-4 text-sky-600 max-w-sm">
+                {/* LEFT SIDE */}
+                <div className="flex items-center gap-4">
+                  <div className="flex items-center gap-4">
+                    <div>
+                      <p className="text-lg font-semibold text-gray-500">
                         {a.alert_type}
-                    </td>
+                      </p>
+                      <p className="text-sm text-gray-500">{a.description}</p>
+                      <p className="text-sm text-gray-500">{a.avg_passengers}</p>
+                    </div>
+                  </div>
 
-                    {/* Description */}
-                    <td className="px-5 py-4 text-slate-600 max-w-sm">
-                      {a.description}
-                    </td>
-
-                    {/* Bus Number */}
-                    <td className="px-5 py-4">
-                      <span className="px-3 py-1 items-center rounded-lg bg-slate-200 text-slate-700 font-medium">
-                        {a.bus_number}
-                      </span>
-                    </td>
-
-                    {/* User ID */}
-                    <td className="px-5 py-4 text-slate-700 font-mono">
+                  {/* Right */}
+                  <div className="text-right">
+                    <span className="text-xs text-gray-400 block mb-1">
                       UID-{a.user_id}
-                    </td>
+                    </span>
 
-                    {/* Avg Passengers */}
-                    <td className="px-5 py-4 text-right font-bold text-sky-700">
-                      {a.avg_passengers}
-                    </td>
+                    <span className="px-3 py-1 rounded-full text-sm font-medium
+                      bg-indigo-100 text-indigo-700">
+                        {a.bus_number}
+                    </span>
+                  </div>
+                </div>
 
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+              </div>
+            ))}
           </div>
         </div>
       )}
