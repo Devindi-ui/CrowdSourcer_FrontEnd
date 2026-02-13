@@ -73,7 +73,7 @@ const AdminDashboard = () => {
             title: "Bus Assignment",
             desc: "Assign buses to routes",
             icon: <FaBusAlt/>,
-            path: "/bus assignment"
+            path: "/busAssignment"
         },
         {
             title: "Bus Type",

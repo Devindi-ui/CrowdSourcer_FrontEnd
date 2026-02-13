@@ -202,7 +202,7 @@ const Bus = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 to-emerald-600 p-6">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 to-sky-600 p-6">
 
       {/* Back */}
       <button
@@ -210,7 +210,7 @@ const Bus = () => {
         className="mt-15 fixed top-6 left-6 z-50 flex items-center gap-2
         bg-white/90 px-4 py-2 rounded-full shadow-lg"
       >
-        <FaArrowLeft className="text-emerald-600" />
+        <FaArrowLeft className="text-sky-600" />
         Back
       </button>
 
@@ -356,7 +356,7 @@ const Bus = () => {
               <button
                 onClick={handleSubmit}
                 disabled={loading}
-                className="bg-emerald-600 text-white px-6 py-2 rounded-xl"
+                className="bg-sky-600 text-white px-6 py-2 rounded-xl"
               >
                 {loading ? "Please wait..." : "Submit"}
               </button>
@@ -429,7 +429,7 @@ const ActionBtn = ({ icon, text, onClick }) => (
     onClick={onClick}
     className="flex items-center gap-3 p-5 bg-white rounded-3xl shadow hover:scale-105 transition"
   >
-    <span className="text-emerald-600 text-2xl">{icon}</span>
+    <span className="text-sky-600 text-2xl">{icon}</span>
     <span className="font-semibold text-lg">{text}</span>
   </button>
 );

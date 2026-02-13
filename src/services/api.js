@@ -32,6 +32,16 @@ export const userAPI = {
     deleteUser: (userId) => api.delete(`/user/delete/${userId}`),  // DELETE
 }
 
+//BusAssignment API
+export const busAssignmentAPI = {
+    createAssignment: (assignment) => api.post('/busAssignment/create', assignment),  // Add assignment
+    getAllAssignments: () => api.get(`/busAssignment/all`),  // FIND
+    getAssignmentById: (id) => api.get(`/busAssignment/find/${id}`),  // FIND
+    getAssignmentByText: (text) => api.get(`/busAssignment/search/${encodeURIComponent(text)}`),  // FIND
+    updateAssignment: (id, assignment) => api.put(`/busAssignment/update/${id}`, assignment), // UPDATE
+    deleteAssignment: (assignmentID) => api.delete(`/busAssignment/delete/${assignmentID}`),  // DELETE
+}
+
 //Bus API
 export const busAPI = {
     createBus: (bus) => api.post('/bus/create', bus),  // Add bus
