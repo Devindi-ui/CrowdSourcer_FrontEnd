@@ -13,6 +13,7 @@ import AdminDashboard from "./pages/Admin/AdminDashboard";
 import AlertPage from "./pages/Admin/alert";
 import User from "./pages/Admin/user";
 import Alert from "./pages/Admin/alert";
+import Bus from "./pages/Admin/bus";
 
 function App() {
     const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -84,6 +85,7 @@ function App() {
                             <Route path="/cd" element={<CdDashboard/>}/>
                             <Route path="/alert" element={<Alert/>}/>
                             <Route path="/user" element={<User/>}/>
+                            <Route path="/bus" element={<Bus/>}/>
 
                         </Routes>
                     </>

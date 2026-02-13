@@ -32,6 +32,16 @@ export const userAPI = {
     deleteUser: (userId) => api.delete(`/user/delete/${userId}`),  // DELETE
 }
 
+//Bus API
+export const busAPI = {
+    createBus: (bus) => api.post('/bus/create', bus),  // Add bus
+    getAllBuses: () => api.get(`/bus/all`),  // FIND
+    getBusById: (id) => api.get(`/bus/find/${id}`),  // FIND
+    getBusByText: (text) => api.get(`/bus/search/${encodeURIComponent(text)}`),  // FIND
+    updateBus: (id, bus) => api.put(`/bus/update/${id}`, bus), // UPDATE
+    deleteBus: (busId) => api.delete(`/bus/delete/${busId}`),  // DELETE
+}
+
 //Alert API
 export const alertAPI = {
     create: (alert) => api.post('/alert/create', alert),  // Add alert 
@@ -45,4 +55,9 @@ export const alertAPI = {
 //Role API
 export const roleAPI = {
     getAllRoles: () => api.get("/role/all")
+}
+
+//Route API
+export const routeAPI = {
+    getAllRoutes: () => api.get("/route/all")
 }

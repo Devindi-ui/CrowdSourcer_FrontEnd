@@ -10,10 +10,12 @@ import {
 import { alertAPI } from "../../services/api";
 
 const Alert = () => {
-  // State
   const navigate = useNavigate();
+
   const [mode, setMode] = useState(null);
   const [loading, setLoading] = useState(false);
+
+  const [editLoaded, setEditLoaded] = useState(false);
 
   const [form, setForm] = useState({
     id: "",
@@ -28,7 +30,6 @@ const Alert = () => {
   const [searchText, setSearchText] = useState("");
   const [alerts, setAlerts] = useState([]);
   const [showResults, setShowResults] = useState(false);
-  const [editLoaded, setEditLoaded] = useState(false);
 
   //Helpers
   const resetAll = () => {
@@ -37,7 +38,9 @@ const Alert = () => {
     setSearchText("");
     setSearchType("id");
     setShowResults(false);
+
     setEditLoaded(false);
+
     setForm({
       id: "",
       alert_type: "",
@@ -47,7 +50,6 @@ const Alert = () => {
       avg_passengers: ""
     });
 
-    setTimeout(() => setMode(null), 0);
   };
 
   const handleChange = (e) => {
@@ -59,12 +61,11 @@ const Alert = () => {
     if (!a) return;
 
     setForm({
-      id: a.alert_id || "",
       alert_type: a.alert_type || "",
       description: a.description || "",
-      bus_number: a.bus_number,
+      bus_number: a.bus_number || "",
       user_id: a.user_id || "",
-      avg_passengers: a.avg_passengers || ""
+      avg_passengers: a.avg_passengers || "" 
     });
 
     setEditLoaded(true);
@@ -95,20 +96,14 @@ const Alert = () => {
   const findAlert = async () => {
     try {
       setLoading(true);
-      setAlerts([]);
-      setShowResults(false);
-
       let result = [];
       
       if (searchType === "id") {
         if (!form.id) return alert("Enter Alert ID");
 
         const res = await alertAPI.getAlertById(form.id);
-        result = res.data?.data;
-
-        if (!result) throw new Error();
-
-        result = Array.isArray(result) ? result : [result];
+        const data = res.data?.data;
+        result = data ? [data] : [];
       }
 
       if (searchType === "all") {
@@ -209,7 +204,6 @@ const Alert = () => {
     if (mode === "add") return addAlert();
     if (mode === "find") return findAlert();
 
-    //edit flow
     if (mode === "edit") {
       if (!editLoaded) {
         return loadAlertForEdit();
@@ -218,7 +212,7 @@ const Alert = () => {
       }
     }
 
-    if (mode === "delete") return deleteAlert(); 
+    if (mode === "delete") return deleteAlert();
   };
 
   //UI
@@ -281,7 +275,7 @@ const Alert = () => {
           <div className="max-w-xl w-full bg-white rounded-2xl shadow-xl p-6">
             <h2 className="text-xl font-bold mb-4 capitalize">{mode} Alert</h2>
 
-            {/* Update - ID only */}
+            {/* Update */}
             {mode === "edit" && !editLoaded && (
               <input 
                 name="id" 
@@ -413,10 +407,8 @@ const Alert = () => {
           <div className="space-y-4">
             {alerts.map((a) => (
               <div 
-                key={a.alert_id}
-                onClick={() => {
-                  if (mode === "edit") populateFormFromAlert(a);
-                }}
+                key={a.alert_id ?? a.id}
+                onClick={() => populateFormFromAlert(a)}
                 className="flex items-start justify-between gap-4 p-5 
                   rounded-xl border border-gray-200 hover:shadow-lg 
                   hover:scale-[1.01] transition-all duration-200 cursor-pointer"
@@ -427,20 +419,22 @@ const Alert = () => {
                   <div className="flex items-center gap-4">
                     <div>
                       <p className="text-lg font-semibold text-gray-500">
-                        {a.alert_type}
+                        {a.alert_id} - {a.alert_type}
                       </p>
-                      <p className="text-sm text-gray-500">{a.description}</p>
-                      <p className="text-sm text-gray-500">{a.avg_passengers}</p>
+                      <p 
+                        key={a.description}
+                        className="text-sm text-gray-500">{a.description}</p>
+                      <p key={a.avg_passengers} className="text-sm text-gray-500">Passengers: {a.avg_passengers}</p>
                     </div>
                   </div>
 
                   {/* Right */}
                   <div className="text-right">
-                    <span className="text-xs text-gray-400 block mb-1">
+                    <span key={a.user_id} className="text-xs text-gray-400 block mb-1">
                       UID-{a.user_id}
                     </span>
 
-                    <span className="px-3 py-1 rounded-full text-sm font-medium
+                    <span key={a.bus_number} className="px-3 py-1 rounded-full text-sm font-medium
                       bg-indigo-100 text-indigo-700">
                         {a.bus_number}
                     </span>
