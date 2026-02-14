@@ -52,6 +52,16 @@ export const busAPI = {
     deleteBus: (busId) => api.delete(`/bus/delete/${busId}`),  // DELETE
 }
 
+//BusType API
+export const busTypeAPI = {
+    createBusType: (busType) => api.post('/busType/create', busType),  // Add busType
+    getAllBusTypes: () => api.get(`/busType/all`),  // FIND
+    getBusTypeById: (id) => api.get(`/busType/find/${id}`),  // FIND
+    getBusTypeByText: (text) => api.get(`/busType/search/${encodeURIComponent(text)}`),  // FIND
+    updateBusType: (id, busType) => api.put(`/busType/update/${id}`, busType), // UPDATE
+    deleteBusType: (busTypeId) => api.delete(`/busType/delete/${busTypeId}`),  // DELETE
+}
+
 //Alert API
 export const alertAPI = {
     create: (alert) => api.post('/alert/create', alert),  // Add alert 

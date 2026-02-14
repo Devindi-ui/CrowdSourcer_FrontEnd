@@ -120,7 +120,9 @@ const Bus = () => {
       }
 
       if (searchType === "text") {
-        if (!searchText.trim()) return alert("Enter text to search");
+        if (!searchText.trim()) 
+          return alert("Enter text to search");
+        
         const res = await busAPI.getBusByText(searchText);
         setBuses(res.data.data || []);
       }

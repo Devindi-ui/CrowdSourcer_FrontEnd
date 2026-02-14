@@ -79,19 +79,19 @@ const AdminDashboard = () => {
             title: "Bus Type",
             desc: "Manage bus categories",
             icon: <FaRoad/>,
-            path: "/bus type"
+            path: "/busType"
         },
         {
             title: "Crowd Report",
             desc: "View crowd level reports",
             icon: <FaClipboardList/>,
-            path: "/crowd report"
+            path: "/crowdReport"
         },
         {
             title: "Favourite Route",
             desc: "User saved routes",
             icon: <FaHeart/>,
-            path: "/favourite route"
+            path: "/favouriteRoute"
         },
         {
             title: "Feedback",
@@ -109,7 +109,7 @@ const AdminDashboard = () => {
             title: "Report History",
             desc: "Syatem activity logs",
             icon: <FaHistory/>,
-            path: "/report history"
+            path: "/reportHistory"
         },
         {
             title: "Role",
@@ -127,7 +127,7 @@ const AdminDashboard = () => {
             title: "Route Stop",
             desc: "Manage route stops",
             icon: <FaMapSigns/>,
-            path: "/route stop"
+            path: "/routeStop"
         },
         {
             title: "Trip",

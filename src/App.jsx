@@ -14,6 +14,7 @@ import User from "./pages/Admin/user";
 import Alert from "./pages/Admin/alert";
 import Bus from "./pages/Admin/bus";
 import BusAssignment from "./pages/Admin/busAssignment";
+import BusType from "./pages/Admin/busType";
 
 function App() {
     const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -87,6 +88,7 @@ function App() {
                             <Route path="/user" element={<User/>}/>
                             <Route path="/bus" element={<Bus/>}/>
                             <Route path="/busAssignment" element={<BusAssignment/>}/>
+                            <Route path="/busType" element={<BusType/>}/>
 
                         </Routes>
                     </>
