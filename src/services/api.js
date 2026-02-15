@@ -62,6 +62,16 @@ export const busTypeAPI = {
     deleteBusType: (busTypeId) => api.delete(`/busType/delete/${busTypeId}`),  // DELETE
 }
 
+//CrowdReport API
+export const crowdReportAPI = {
+    createCrowdReport: (crowdReport) => api.post('/crowdReport/create', crowdReport),  // Add crowdReport
+    getAllCrowdReports: () => api.get(`/crowdReport/all`),  // FIND
+    getCrowdReportById: (id) => api.get(`/crowdReport/find/${id}`),  // FIND
+    getCrowdReportByText: (text) => api.get(`/crowdReport/search/${encodeURIComponent(text)}`),  // FIND
+    updateCrowdReport: (id, crowdReport) => api.put(`/crowdReport/update/${id}`, crowdReport), // UPDATE
+    deleteCrowdReport: (crowdReportId) => api.delete(`/crowdReport/delete/${crowdReportId}`),  // DELETE
+}
+
 //Alert API
 export const alertAPI = {
     create: (alert) => api.post('/alert/create', alert),  // Add alert 
@@ -70,6 +80,11 @@ export const alertAPI = {
     getAlertByText: (text) => api.get(`/alert/search/${encodeURIComponent(text)}`),  // FIND
     updateAlert: (id, alert) => api.put(`/alert/update/${id}`, alert), // UPDATE
     deleteAlert: (alertId) => api.delete(`/alert/delete/${alertId}`),  // DELETE
+}
+
+//Trip API
+export const tripAPI = {
+    getAllTrips: () => api.get("/trip/all")
 }
 
 //Role API

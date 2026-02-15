@@ -15,6 +15,7 @@ import Alert from "./pages/Admin/alert";
 import Bus from "./pages/Admin/bus";
 import BusAssignment from "./pages/Admin/busAssignment";
 import BusType from "./pages/Admin/busType";
+import CrowdReport from "./pages/Admin/crowdReport";
 
 function App() {
     const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -89,6 +90,7 @@ function App() {
                             <Route path="/bus" element={<Bus/>}/>
                             <Route path="/busAssignment" element={<BusAssignment/>}/>
                             <Route path="/busType" element={<BusType/>}/>
+                            <Route path="/crowdReport" element={<CrowdReport/>}/>
 
                         </Routes>
                     </>
