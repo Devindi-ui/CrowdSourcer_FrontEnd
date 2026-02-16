@@ -59,12 +59,12 @@ const Register = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-900">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#0f172a] via-[#0b1f3a] to-[#1e3a8a] p-6 text-gray-100">
       <form 
         onSubmit={handleSubmit}
-        className="bg-white p-8 rounded-2xl shadow-xl w-[420px]">
+        className="bg-[#0b1f3a] border border-blue-700 p-8 rounded-2xl shadow-2xl w-[420px] backdrop-blur-md">
 
-        <h2 className="text-2xl font-bold text-center text-sky-900 mb-6">
+        <h2 className="text-2xl font-bold text-center text-blue-300 mb-6 tracking-wide">
           Create Account
         </h2>
 
@@ -72,7 +72,7 @@ const Register = () => {
           type="text"
           name="name"
           placeholder="Full Name"
-          className="w-full mb-4 px-4 py-2 border rounded-lg"
+          className="w-full mb-4 px-4 py-3 bg-[#132c52] border border-blue-600 rounded-xl text-white placeholder-blue-300 focus:ring-2 focus:ring-blue-400 outline-none transition"
           value={form.name}
           onChange={handleChange}
           required
@@ -82,7 +82,7 @@ const Register = () => {
           type="email"
           name="email"
           placeholder="Email"
-          className="w-full mb-4 px-4 py-2 border rounded-lg"
+          className="w-full mb-4 px-4 py-3 bg-[#132c52] border border-blue-600 rounded-xl text-white placeholder-blue-300 focus:ring-2 focus:ring-blue-400 outline-none transition"
           value={form.email}
           onChange={handleChange}
           required
@@ -92,7 +92,7 @@ const Register = () => {
           type="password"
           name="password"
           placeholder="Password"
-          className="w-full mb-4 px-4 py-2 border rounded-lg"
+          className="w-full mb-4 px-4 py-3 bg-[#132c52] border border-blue-600 rounded-xl text-white placeholder-blue-300 focus:ring-2 focus:ring-blue-400 outline-none transition"
           value={form.password}
           onChange={handleChange}
           required
@@ -102,7 +102,7 @@ const Register = () => {
           type="text"
           name="phone"
           placeholder="Phone Number"
-          className="w-full mb-4 px-4 py-2 border rounded-lg"
+          className="w-full mb-4 px-4 py-3 bg-[#132c52] border border-blue-600 rounded-xl text-white placeholder-blue-300 focus:ring-2 focus:ring-blue-400 outline-none transition"
           value={form.phone}
           onChange={handleChange}
           required
@@ -112,7 +112,7 @@ const Register = () => {
             name="role_name"
             value={form.role_name}
             onChange={handleChange}
-            className="w-full mb-4 px-4 py-2 border rounded-lg"    
+            className="w-full mb-6 px-4 py-3 bg-[#132c52] border border-blue-600 rounded-xl text-white focus:ring-2 focus:ring-blue-400 outline-none transition"    
             required    
         >
             <option value="">Select Role</option>
@@ -123,7 +123,7 @@ const Register = () => {
 
         <button
             type="submit"
-            className="w-full bg-sky-900 text-white py-2 rounded-lg hover:bg-sky-800"
+            className="w-full bg-blue-600 text-white py-3 rounded-xl font-semibold hover:bg-blue-700 hover:scale-[1.02] transition-all duration-200 shadow-lg"
         >
             Register
         </button>

@@ -68,7 +68,6 @@ const User = () => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
   
-  //fill form after ID fetch
   const populateFormFromUser = (u) => {
     setForm({
       id: u.user_id,
@@ -83,7 +82,6 @@ const User = () => {
 
   /*  API ACTIONS  */
 
-  //  ADD
   const addUser = async () => {
     try {
       setLoading(true);
@@ -103,7 +101,6 @@ const User = () => {
     }
   };
 
-  // FIND
   const findUser = async () => {
     try {
       setLoading(true);
@@ -114,7 +111,7 @@ const User = () => {
       if (searchType === "id") {
         if (!form.id)return alert("Enter user ID");
         const res = await userAPI.getUserById(form.id); 
-        setUsers([res.data.data]); //data arrives
+        setUsers([res.data.data]);
         setShowResults(true);
       }
 
@@ -144,7 +141,6 @@ const User = () => {
     }
   };
 
-  //Load user by ID
   const loadUserForEdit = async () => {
     if (!form.id) return alert("Enter User ID");
     try {
@@ -160,7 +156,6 @@ const User = () => {
     }
   };
 
-  //  UPDATE
   const updateUser = async () => {
     try {
       setLoading(true);
@@ -185,14 +180,12 @@ const User = () => {
     }
   };
 
-  // DELETE
   const deleteUser = async () => {
     try {
       setLoading(true);
       await userAPI.deleteUser(form.id);
       alert("✅ User deleted");
 
-      //load users after delete
       const res = await userAPI.getAllUsers();
       setUsers(res.data.data);
       setShowResults(true);
@@ -204,7 +197,6 @@ const User = () => {
     }
   };
 
-  /*  SUBMIT  */
   const handleSubmit = () => {
     if (mode === "add") addUser();
     if (mode === "find") findUser();
@@ -213,125 +205,85 @@ const User = () => {
     if (mode === "delete") deleteUser();
   };
 
-
-  // UI
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 to-sky-600 p-6">
+    <div className="min-h-screen bg-gradient-to-br from-[#0f172a] via-[#0b1f3a] to-[#1e3a8a] p-6 text-gray-100">
 
-      {/* Back Button */}
-        <button 
-          type="button"
-          onClick={() => {
-            if (mode) {
-              setMode(null); //go back to action btns
-            } else {
-              navigate("/admin"); //go back to admin dashboard
-            }
-          }}
-          className="fixed top-6 left-6 z-50 flex items-center gap-2 mt-15
-            bg-white/90 backdrop-blur-md text-slate-800 px-4 py-2 rounded-full 
-            shadow-lg hover:bg-white hover:scale-105 transition"
-        >
-          <FaArrowLeft className="text-sky-600"/>
-          <span className="font-semibold text-sm">Back</span>
-        </button>     
+      <button 
+        type="button"
+        onClick={() => {
+          if (mode) {
+            setMode(null);
+          } else {
+            navigate("/admin");
+          }
+        }}
+        className="fixed top-6 left-6 z-50 flex items-center gap-2 mt-15
+          bg-[#0b1f3a]/80 backdrop-blur-md text-white px-4 py-2 rounded-full 
+          shadow-lg border border-blue-500 hover:bg-blue-600 hover:scale-105 transition"
+      >
+        <FaArrowLeft className="text-blue-400"/>
+        <span className="font-semibold text-sm">Back</span>
+      </button>     
 
-      <h1 className="text-3xl font-bold text-white mb-8">
+      <h1 className="text-3xl font-bold text-blue-300 mb-8 tracking-wide">
         User Management
       </h1>
 
-      {/* ACTION BUTTONS */}
       {!mode && (
-        <div className="mt-25 flex flex-col items-center gap-5 mb-10 
-          [&>button]:w-72"
-        >
-          <ActionBtn 
-            icon={<FaUserPlus />} 
-            text="Add User" 
-            onClick={() => setMode("add")} 
-          />
-
-          <ActionBtn 
-            icon={<FaUserCheck />} 
-            text="Find User" 
-            onClick={() => setMode("find")} 
-          />
-
-          <ActionBtn 
-            icon={<FaUserEdit />} 
-            text="Update User" 
-            onClick={() => setMode("edit")} 
-          />
-
-          <ActionBtn 
-            icon={<FaUserTimes />} 
-            text="Delete User" 
-            onClick={() => setMode("delete")} 
-          />
+        <div className="mt-25 flex flex-col items-center gap-5 mb-10 [&>button]:w-72">
+          <ActionBtn icon={<FaUserPlus />} text="Add User" onClick={() => setMode("add")} />
+          <ActionBtn icon={<FaUserCheck />} text="Find User" onClick={() => setMode("find")} />
+          <ActionBtn icon={<FaUserEdit />} text="Update User" onClick={() => setMode("edit")} />
+          <ActionBtn icon={<FaUserTimes />} text="Delete User" onClick={() => setMode("delete")} />
         </div>
       )}
 
-      {/*  FORM  */}
       {mode && (
-        <div className="flex justify-center items-center h-100vh mt-30 overflow-hidden">
+        <div className="flex justify-center items-center h-100vh mt-20 overflow-hidden">
+        <div className="max-w-xl w-full bg-[#0b1f3a] border border-blue-700 rounded-2xl shadow-2xl p-6">
 
-        <div className="max-w-xl w-full bg-white rounded-2xl shadow-xl p-6">
-          <h2 className="text-xl font-bold mb-4 capitalize">{mode} User</h2>
+          <h2 className="text-xl font-bold mb-4 capitalize text-blue-300">{mode} User</h2>
 
-          {/* UPDATE STEP 1 – ID ONLY */}
           {mode === "edit" && !editLoaded && (
             <input
               name="id"
               value={form.id}
               onChange={handleChange}
               placeholder="Enter User ID"
-              className="w-full p-3 mb-3 border rounded-xl"
+              className="w-full p-3 mb-3 bg-[#132c52] border border-blue-600 rounded-xl text-white focus:ring-2 focus:ring-blue-400 outline-none"
             />
           )}
 
-          {/* FULL FORM (ADD or EDIT after ID) */}
           {(mode === "add" || (mode === "edit" && editLoaded)) && (
             <>
-              <input
-                name="name"
-                value={form.name}
-                onChange={handleChange}
+              <input name="name" value={form.name} onChange={handleChange}
                 placeholder="Name"
-                className="w-full p-3 mb-3 border rounded-xl"
+                className="w-full p-3 mb-3 bg-[#132c52] border border-blue-600 rounded-xl text-white focus:ring-2 focus:ring-blue-400 outline-none"
               />
 
-              <input
-                name="email"
-                value={form.email}
-                onChange={handleChange}
+              <input name="email" value={form.email} onChange={handleChange}
                 placeholder="Email"
-                className="w-full p-3 mb-3 border rounded-xl"
+                className="w-full p-3 mb-3 bg-[#132c52] border border-blue-600 rounded-xl text-white focus:ring-2 focus:ring-blue-400 outline-none"
               />
 
               {mode === "add" && (
-                <input
-                  name="password"
-                  type="password"
-                  value={form.password}
+                <input name="password" type="password" value={form.password}
                   onChange={handleChange}
                   placeholder="Password"
-                  className="w-full p-3 mb-3 border rounded-xl"
+                  className="w-full p-3 mb-3 bg-[#132c52] border border-blue-600 rounded-xl text-white focus:ring-2 focus:ring-blue-400 outline-none"
                 />
               )}
 
-              <input
-                name="phone"
-                value={form.phone}
-                onChange={handleChange}
+              <input name="phone" value={form.phone} onChange={handleChange}
                 placeholder="Phone"
-                className="w-full p-3 mb-3 border rounded-xl"
+                className="w-full p-3 mb-3 bg-[#132c52] border border-blue-600 rounded-xl text-white focus:ring-2 focus:ring-blue-400 outline-none"
               />
 
               <select
                 name="role_name"
                 value={form.role_name}
                 onChange={handleChange}
-                className="w-full p-3 mb-3 border rounded-xl"
+                className="w-full p-3 mb-3 bg-[#132c52] border border-blue-600 rounded-xl text-white focus:ring-2 focus:ring-blue-400 outline-none"
               >
                 <option value="">Select Role</option>
                 {roles.map(r => (
@@ -343,13 +295,12 @@ const User = () => {
             </>
           )}
 
-          {/* FIND MODE ONLY */}
           {mode === "find" && (
             <>
               <select
                 value={searchType}
                 onChange={(e) => setSearchType(e.target.value)}
-                className="w-full p-3 mb-3 border rounded-xl"
+                className="w-full p-3 mb-3 bg-[#132c52] border border-blue-600 rounded-xl text-white focus:ring-2 focus:ring-blue-400 outline-none"
               >
                 <option value="id">Find by ID</option>
                 <option value="all">Get All Users</option>
@@ -357,91 +308,75 @@ const User = () => {
               </select>
 
               {searchType === "id" && (
-                <input
-                  name="id"
-                  value={form.id}
-                  onChange={handleChange}
+                <input name="id" value={form.id} onChange={handleChange}
                   placeholder="User ID"
-                  className="w-full p-3 mb-3 border rounded-xl"
+                  className="w-full p-3 mb-3 bg-[#132c52] border border-blue-600 rounded-xl text-white focus:ring-2 focus:ring-blue-400 outline-none"
                 />
               )}
 
               {searchType === "text" && (
-                <input
-                  value={searchText}
+                <input value={searchText}
                   onChange={(e) => setSearchText(e.target.value)}
                   placeholder="Search name / email / phone"
-                  className="w-full p-3 mb-3 border rounded-xl"
+                  className="w-full p-3 mb-3 bg-[#132c52] border border-blue-600 rounded-xl text-white focus:ring-2 focus:ring-blue-400 outline-none"
                 />
               )}
             </>
           )}
 
-          {/* DELETE MODE */}
           {mode === "delete" && (
-            <input
-              name="id"
-              value={form.id}
-              onChange={handleChange}
+            <input name="id" value={form.id} onChange={handleChange}
               placeholder="User ID"
-              className="w-full p-3 mb-3 border rounded-xl"
+              className="w-full p-3 mb-3 bg-[#132c52] border border-blue-600 rounded-xl text-white focus:ring-2 focus:ring-blue-400 outline-none"
             />
           )}
 
-          {/* ACTION BUTTONS */}
           <div className="flex gap-3">
             <button
               onClick={handleSubmit}
               disabled={loading}
-              className="bg-sky-600 text-white px-6 py-2 rounded-xl"
+              className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-xl transition"
             >
               {loading ? "Please wait..." : "Submit"}
             </button>
 
             <button
               onClick={resetAll}
-              className="bg-gray-500 text-white px-6 py-2 rounded-xl"
+              className="bg-gray-700 hover:bg-gray-600 text-white px-6 py-2 rounded-xl transition"
             >
               Cancel
             </button>
           </div>
+
         </div>
         </div>
       )}
 
-       {/* RESULTS */}
       {showResults && users.length > 0 && (
-        <div className="bg-white rounded-2xl shadow-xl p-6 mt-10">
-          <h2 className="text-xl font-bold mb-6 text-gray-800">
+        <div className="bg-[#0b1f3a] border border-blue-700 rounded-2xl shadow-xl p-6 mt-10">
+          <h2 className="text-xl font-bold mb-6 text-blue-300">
             🔍 Search Results
           </h2>
 
           <div className="space-y-4">
             {users.map((u) => (
-              <div
-                key={u.user_id}
-                className="flex items-center justify-between gap-4 p-4 rounded-xl border border-gray-200 hover:shadow-lg hover:scale-[1.01] transition-all duration-200"
+              <div key={u.user_id}
+                className="flex items-center justify-between gap-4 p-4 rounded-xl border border-blue-700 bg-[#132c52] hover:bg-[#1e3a8a] transition-all duration-200"
               >
-                {/* LEFT */}
                 <div className="flex items-center gap-4">
-                  {/* Avatar */}
-                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-indigo-500 to-purple-500 text-white flex items-center justify-center font-bold text-lg">
+                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 text-white flex items-center justify-center font-bold text-lg">
                     {u.name?.charAt(0).toUpperCase()}
                   </div>
 
-                  {/* User Info */}
                   <div>
-                    <p className="text-lg font-semibold text-gray-900">
-                      {u.name}
-                    </p>
-                    <p className="text-sm text-gray-500">{u.email}</p>
-                    <p className="text-sm text-gray-500">{u.phone}</p>
+                    <p className="text-lg font-semibold text-white">{u.name}</p>
+                    <p className="text-sm text-blue-200">{u.email}</p>
+                    <p className="text-sm text-blue-200">{u.phone}</p>
                   </div>
                 </div>
 
-                {/* RIGHT */}
                 <div className="text-right">
-                  <span className="text-xs text-gray-400 block mb-1">
+                  <span className="text-xs text-blue-300 block mb-1">
                     UID-{u.user_id}
                   </span>
 
@@ -449,10 +384,10 @@ const User = () => {
                     className={`px-3 py-1 rounded-full text-sm font-medium
                       ${
                         u.role_name === "Admin"
-                          ? "bg-red-100 text-red-700"
+                          ? "bg-red-500/20 text-red-400"
                           : u.role_name === "Owner"
-                          ? "bg-indigo-100 text-indigo-700"
-                          : "bg-green-100 text-green-700"
+                          ? "bg-indigo-500/20 text-indigo-300"
+                          : "bg-green-500/20 text-green-400"
                       }
                     `}
                   >
@@ -466,20 +401,18 @@ const User = () => {
       )}
     </div>
   );
-
 };
 
-  /*  SMALL COMPONENT  */
-  const ActionBtn = ({ icon, text, onClick }) => (
-    <button
-      type="button"
-      onClick={onClick}
-      className="mt-2 flex items-center gap-3 p-5 bg-white rounded-3xl 
-        shadow hover:scale-105 transition"
-    >
-      <span className="text-sky-600 text-2xl">{icon}</span>
-      <span className="font-semibold text-lg">{text}</span>
-    </button>
-  );
+const ActionBtn = ({ icon, text, onClick }) => (
+  <button
+    type="button"
+    onClick={onClick}
+    className="mt-2 flex items-center gap-3 p-5 bg-[#0b1f3a] border border-blue-700 rounded-3xl 
+      shadow-lg hover:bg-blue-700 hover:scale-105 transition text-white"
+  >
+    <span className="text-blue-400 text-2xl">{icon}</span>
+    <span className="font-semibold text-lg">{text}</span>
+  </button>
+);
 
 export default User;

@@ -18,57 +18,57 @@ const MainDashboard = ({ onSelectRole, onLogout }) => {
 
   return (
     <div className="min-h-screen flex justify-center items-center 
-      bg-linear-to-br from-slate-900 to-sky-500">
-      <div className="mt-10 w-[950px] max-w-[50%] bg-gray-300 rounded-2xl 
+      bg-gradient-to-br from-[#0f172a] via-[#0b1f3a] to-[#1e3a8a] p-6 text-gray-100">
+      <div className="mt-10 w-[950px] max-w-[50%] bg-[#0b1f3a] border border-blue-700 rounded-2xl 
         shadow-2xl p-10">
 
         {/* Title */}
         <div className="text-center mb-10">
-          <h1 className="text-3xl font-bold text-sky-900 mb-2">
+          <h1 className="text-3xl font-bold text-blue-300 mb-2 tracking-wide">
             Welcome to PublicPilot
           </h1>
-          <p className="mt-3 text-slate-700">
+          <p className="mt-3 text-blue-200 tracking-widest text-sm">
             CONTINUE AS
           </p>
         </div>
 
         {/* Role Cards */}
-        <div className="grid grid-cols-1 md:grid-cols lg:grid-cols-4 gap-3">
+        <div className="grid grid-cols-1 md:grid-cols lg:grid-cols-4 gap-6">
 
           {/* Passenger */}
           <div 
             onClick={() => handleSelect("Passenger", "/passenger")} 
-            className="mt-3 cursor-pointer bg-white rounded-xl p-6 text-center 
-            shadow-md hover:shadow-xl hover:scale-105 transition duration-300">
-            <FaUsers className="text-4xl text-sky-700 mx-auto mb-3"/>
-            <h3 className="font-semibold text-lg text-sky-900">Passenger</h3>
+            className="mt-3 cursor-pointer bg-[#132c52] border border-blue-700 rounded-xl p-6 text-center 
+            shadow-lg hover:shadow-blue-900/40 hover:bg-[#1e3a8a] hover:scale-105 transition duration-300">
+            <FaUsers className="text-4xl text-blue-400 mx-auto mb-3"/>
+            <h3 className="font-semibold text-lg text-white">Passenger</h3>
           </div>
 
           {/* Owner */}
           <div 
             onClick={() => handleSelect("Owner", "/owner")} 
-            className="mt-3 cursor-pointer bg-white rounded-xl p-6 text-center 
-            shadow-md hover:shadow-xl hover:scale-105 transition duration-300">
-            <FaUserTie className="text-4xl text-sky-700 mx-auto mb-3"/>
-            <h3 className="font-semibold text-lg text-sky-900">Owner</h3>
+            className="mt-3 cursor-pointer bg-[#132c52] border border-blue-700 rounded-xl p-6 text-center 
+            shadow-lg hover:shadow-blue-900/40 hover:bg-[#1e3a8a] hover:scale-105 transition duration-300">
+            <FaUserTie className="text-4xl text-blue-400 mx-auto mb-3"/>
+            <h3 className="font-semibold text-lg text-white">Owner</h3>
           </div>
 
           {/* Driver/Conductor */}
           <div 
             onClick={() => handleSelect("Driver/Conductor", "/cd")} 
-            className="mt-3 cursor-pointer bg-white rounded-xl p-6 text-center 
-            shadow-md hover:shadow-xl hover:scale-105 transition duration-300">
-            <FaUserShield className="text-4xl text-sky-700 mx-auto mb-3"/>
-            <h3 className="font-semibold text-lg text-sky-900">Driver / Conductor</h3>
+            className="mt-3 cursor-pointer bg-[#132c52] border border-blue-700 rounded-xl p-6 text-center 
+            shadow-lg hover:shadow-blue-900/40 hover:bg-[#1e3a8a] hover:scale-105 transition duration-300">
+            <FaUserShield className="text-4xl text-blue-400 mx-auto mb-3"/>
+            <h3 className="font-semibold text-lg text-white">Driver / Conductor</h3>
           </div>
 
           {/* Admin */}
           <div 
             onClick={() => handleSelect("Admin", "/admin")} 
-            className="mt-3 cursor-pointer bg-white rounded-xl p-6 text-center 
-            shadow-md hover:shadow-xl hover:scale-105 transition duration-300">
-            <FaIdBadge className="text-4xl text-sky-700 mx-auto mb-3"/>
-            <h3 className="font-semibold text-lg text-sky-900">Admin</h3>
+            className="mt-3 cursor-pointer bg-[#132c52] border border-blue-700 rounded-xl p-6 text-center 
+            shadow-lg hover:shadow-blue-900/40 hover:bg-[#1e3a8a] hover:scale-105 transition duration-300">
+            <FaIdBadge className="text-4xl text-blue-400 mx-auto mb-3"/>
+            <h3 className="font-semibold text-lg text-white">Admin</h3>
           </div>
 
         </div>
@@ -78,16 +78,16 @@ const MainDashboard = ({ onSelectRole, onLogout }) => {
 
           <button 
             onClick={() => navigate("/register")}
-            className="px-6 py-2 rounded-xl bg-sky-900 text-white 
-                      hover:bg-sky-800 transition"
+            className="px-6 py-2 rounded-xl bg-blue-600 text-white 
+                      hover:bg-blue-700 transition shadow-md"
           >
             Register 
           </button>
 
           <button 
             onClick={handleLogout}
-            className="px-6 py-2 rounded-xl border border-sky-900 
-                            text-sky-900 hover:bg-sky-100 transition"
+            className="px-6 py-2 rounded-xl border border-blue-500 
+                            text-blue-300 hover:bg-[#132c52] hover:text-white transition"
           >
             Logout       
           </button>

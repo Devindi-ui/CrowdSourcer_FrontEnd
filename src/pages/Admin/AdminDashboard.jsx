@@ -138,106 +138,79 @@ const AdminDashboard = () => {
     ];
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-slate-900 to-sky-500 p-6">
+        <div className="min-h-screen bg-gradient-to-br from-[#0f172a] via-[#0b1f3a] to-[#1e3a8a] p-6 text-gray-100">
 
             {/* Main container */}
             <div className="mt-13 max-w-7xl mx-auto space-y-8">
                 {/* Welcome Bar */}
-                <div className="rounded-3xl bg-white/70 backdrop-blur shadow-lg p-6">
-                    <h1 className="text-2xl font-bold text-sky-900">
+                <div className="rounded-3xl bg-[#0b1f3a] border border-blue-700 shadow-2xl p-6">
+                    <h1 className="text-2xl font-bold text-blue-300 tracking-wide">
                         Admin Command Center 
                     </h1>
-                    <p className="text-sm text-gray-600">
+                    <p className="text-sm text-blue-200">
                         Full system control & real-time monitoring
                     </p>
                 </div>
+
                 {/* System Stats */}
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                     {stats.map((item, index) => (
                         <div 
                             key={index}
-                            className="rounded-3xl bg-white/70 backdrop-blur shadow-md p-6 
-                            hover:shadow-xl transition"
+                            className="rounded-3xl bg-[#0b1f3a] border border-blue-700 shadow-xl p-6 
+                            hover:bg-[#132c52] hover:shadow-2xl transition"
                         >
                             <div className="flex items-center justify-between">
                                 <div>
-                                    <p className="text-sm text-gray-500">
+                                    <p className="text-sm text-blue-200">
                                         {item.title}
                                     </p>
-                                    <h2 className="text-3xl font-bold text-sky-900 mt-2">
+                                    <h2 className="text-3xl font-bold text-white mt-2">
                                         {item.value}
                                     </h2>
                                 </div>
-                                <div className="text-3xl text-sky-600">
+                                <div className="text-3xl text-blue-400">
                                     {item.icon}
                                 </div>
                             </div>
                         </div>
                     ))}
                 </div>
+
                 {/* Live Operations */}
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
                     {/* Map */}
-                    <div className="lg:col-span-4 rounded-3xl bg-white/70 backdrop-blur shadow-lg p-6">
-                        <h3 className="font-semibold text-lg text-sky-900 mb-4">
+                    <div className="lg:col-span-4 rounded-3xl bg-[#0b1f3a] border border-blue-700 shadow-2xl p-6">
+                        <h3 className="font-semibold text-lg text-blue-300 mb-4">
                             Live Bus Locations
                         </h3>
-                        <div className="h-64 rounded-2xl bg-gray-200 
-                            flex-items-center justify-center text-gray-500">
-                            <FaMapMarkedAlt className="ml-3 text-4xl"/>
+                        <div className="h-64 rounded-2xl bg-[#132c52] 
+                            flex items-center justify-center text-blue-300">
+                            <FaMapMarkedAlt className="ml-3 text-4xl text-blue-400"/>
                             <span className="mt-3 ml-3">Live Map Preview</span>
                         </div>
                     </div>
-                    {/* Alerts */}
-                    {/* <div className="rounded-3xl bg-white/70 backdrop-blur shadow-lg p-6">
-                        <h3 className="font-semibold text-lg text-sky-900 mb-4">
-                            Active Alerts
-                        </h3>
-                        <ul className="space-y-3 text-sm">
-                            <li className="p-3 rounded-xl bg-red-50 text-red-700
-                                cursor-pointer hover:shadow-xl hover:bg-red-100">
-                                🚨 Heavy crowd on Route 138
-                            </li>
-                            <li className="p-3 rounded-xl bg-yellow-50 text-yellow-700
-                                cursor-pointer hover:shadow-xl hover:bg-yellow-100">
-                                ⚠ Bus delay detected (Bus 22)
-                            </li>
-                            <li className="p-3 rounded-xl bg-blue-50 text-blue-700
-                                cursor-pointer hover:shadow-xl hover:bg-blue-100">
-                                ℹ Route update pending approval
-                            </li>
-                        </ul>
-                    </div> */}
+
                 </div>
-                {/* Activity Log */}
-                {/* <div className="rounded-3xl bg-white/70 backdrop-blur shadow-lg p-6">
-                    <h3 className="font-semibold text-lg text-sky-900 mb-4">
-                        Recent System Activity
-                    </h3>
-                    <ul className="space-y-4 text-sm text-gray-700">
-                        <li>✔ New bus added (Bus #45)</li>
-                        <li>✏ Route 120 updated</li>
-                        <li>🧑 User role changed to Owner</li>
-                        <li>📢 Alert sent to Route 138</li>
-                    </ul>
-                </div> */}
+
                 {/* Quick actions */}
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
                     {quickActions.map((action, index) => (
                         <button 
                             key={index}
-                            className="rounded-2xl bg-white/70 backdrop-blur shadow-md 
-                            p-5 text-left hover:shadow-xl hover:scale-105 
-                            transition"
+                            className="rounded-2xl bg-[#0b1f3a] border border-blue-700 shadow-lg 
+                            p-5 text-left hover:bg-[#132c52] hover:scale-105 
+                            transition text-white"
                             onClick={() => navigate(action.path)}
                         >
-                            <div className="text-2xl text-sky-600 mb-2">
+                            <div className="text-2xl text-blue-400 mb-2">
                                 {action.icon}
                             </div>
-                            <h4 className="font-semibold text-sky-900">
+                            <h4 className="font-semibold text-blue-200">
                                 {action.title}
                             </h4>
-                            <p className="text-sm text-gray-500">
+                            <p className="text-sm text-blue-300">
                                 {action.desc}
                             </p>
                         </button>

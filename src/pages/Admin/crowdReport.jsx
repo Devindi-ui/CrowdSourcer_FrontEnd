@@ -22,20 +22,19 @@ const CrowdReport = () => {
     bus_id: "",
     trip_id: "",
     current_count: "",
-    crowd_status: "Low"
+    crowd_status: "Medium"
   });
 
   const [searchType, setSearchType] = useState("id");
   const [searchText, setSearchText] = useState("");
-
   const [reports, setReports] = useState([]);
-  const [buses, setBuses] = useState([]);
-  const [trips, setTrips] = useState([]);
-
-  const [editLoaded, setEditLoaded] = useState(false);
   const [showResults, setShowResults] = useState(false);
+  const [editLoaded, setEditLoaded] = useState(false);
 
-  /* LOAD SELECT OPTIONS */
+  const [buses, setBuses] = useState([]);
+  const [uniqueRoutes, setUniqueRoutes] = useState([]);
+
+  /* ================= LOAD DATA ================= */
   useEffect(() => {
     const loadData = async () => {
       try {
@@ -45,25 +44,24 @@ const CrowdReport = () => {
         const tripRes = await tripAPI.getAllTrips();
         const tripData = tripRes.data.data || [];
 
-        const uniqueTrips = [];
-        const seenRoutes = new Set();
-
-        tripData.forEach((trip) => {
-          if (!seenRoutes.has(trip.route_name)) {
-            seenRoutes.add(trip.route_name);
-            uniqueTrips.push(trip);
+        const routeMap = {};
+        tripData.forEach((t) => {
+          if (!routeMap[t.route_name]) {
+            routeMap[t.route_name] = t;
           }
         });
 
-        setTrips(uniqueTrips);
+        setUniqueRoutes(Object.values(routeMap));
 
       } catch (err) {
-        console.error("Failed loading dropdown data", err);
+        console.error(err);
       }
     };
+
     loadData();
   }, []);
 
+  /* ================= RESET ================= */
   const resetAll = () => {
     setMode(null);
     setSearchType("id");
@@ -76,7 +74,7 @@ const CrowdReport = () => {
       bus_id: "",
       trip_id: "",
       current_count: "",
-      crowd_status: "Low"
+      crowd_status: "Medium"
     });
   };
 
@@ -84,10 +82,11 @@ const CrowdReport = () => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  /* CREATE */
-  const createReport = async () => {
+  /* ================= ADD ================= */
+  const addReport = async () => {
     try {
       setLoading(true);
+
       await crowdReportAPI.createCrowdReport({
         bus_id: form.bus_id,
         trip_id: form.trip_id,
@@ -95,78 +94,99 @@ const CrowdReport = () => {
         crowd_status: form.crowd_status
       });
 
-      alert("✅ Crowd Report Created");
+      alert("✅ Crowd Report added successfully");
       resetAll();
 
     } catch {
-      alert("❌ Failed to create");
+      alert("❌ Failed to add Crowd Report");
     } finally {
       setLoading(false);
     }
   };
 
-  /* FIND */
+  /* ================= FIND ================= */
   const findReport = async () => {
     try {
       setLoading(true);
       setReports([]);
       setShowResults(false);
 
+      let res;
+
       if (searchType === "id") {
         if (!form.report_id) return alert("Enter Report ID");
-        const res = await crowdReportAPI.getCrowdReportById(form.report_id);
-        setReports(res.data.data || []);
+
+        res = await crowdReportAPI.getCrowdReportById(form.report_id);
+
+        if (!res.data || !res.data.data) {
+          alert("Report not found");
+          return;
+        }
+        setReports([res.data.data]);
       }
 
       if (searchType === "all") {
-        const res = await crowdReportAPI.getAllCrowdReports();
+        res = await crowdReportAPI.getAllCrowdReports();
         setReports(res.data.data || []);
       }
 
       if (searchType === "text") {
-        if (!searchText.trim()) return alert("Enter search text");
-        const res = await crowdReportAPI.getCrowdReportByText(searchText);
+        if (!searchText.trim())
+          return alert("Enter text to search");
+
+        res = await crowdReportAPI.getCrowdReportByText(searchText);
+
+        if (!res.data || !res.data.data) {
+          alert ("No matching reports");
+          return;
+        }
         setReports(res.data.data || []);
       }
 
       setShowResults(true);
 
     } catch {
-      alert("❌ Not Found");
+      alert("❌ Crowd Report not found");
+      setReports([]);
+      setShowResults(false); 
     } finally {
       setLoading(false);
     }
   };
 
-  /* LOAD FOR EDIT */
-  const loadForEdit = async () => {
+  /* ================= LOAD FOR EDIT ================= */
+  const loadReportForEdit = async () => {
     if (!form.report_id) return alert("Enter Report ID");
 
     try {
       setLoading(true);
+
       const res = await crowdReportAPI.getCrowdReportById(form.report_id);
-      const data = res.data.data[0];
+
+      if (!res.data || !res.data.data) {
+        alert("Report not found");
+        return;
+      }
+      const r = res.data.data;
 
       setForm({
-        report_id: data.report_id,
-        bus_id: data.bus_id,
-        trip_id: data.trip_id,
-        current_count: data.current_count,
-        crowd_status: data.crowd_status
+        report_id: r.report_id,
+        bus_id: r.bus_id,
+        trip_id: r.trip_id,
+        current_count: r.current_count,
+        crowd_status: r.crowd_status
       });
 
-      setReports([data]);
-      setShowResults(true);
       setEditLoaded(true);
 
     } catch {
-      alert("❌ Report Not Found");
+      alert("❌ Crowd Report not found");
     } finally {
       setLoading(false);
     }
   };
 
-  /* UPDATE */
+  /* ================= UPDATE ================= */
   const updateReport = async () => {
     try {
       setLoading(true);
@@ -178,48 +198,53 @@ const CrowdReport = () => {
         crowd_status: form.crowd_status
       });
 
-      alert("✅ Updated Successfully");
+      alert("✅ Crowd Report updated");
 
       const res = await crowdReportAPI.getCrowdReportById(form.report_id);
-      setReports(res.data.data || []);
-      setShowResults(true);
+
+      if (res.data && res.data.data) {
+        setReports([res.data.data]);
+        setShowResults(true);
+      }
+
+      setEditLoaded(false);
 
     } catch {
-      alert("❌ Update Failed");
+      alert("❌ Update failed");
     } finally {
       setLoading(false);
     }
   };
 
-  /* DELETE */
+  /* ================= DELETE ================= */
   const deleteReport = async () => {
+    if (!form.report_id) return alert("Enter Report ID");
+
     try {
       setLoading(true);
 
       await crowdReportAPI.deleteCrowdReport(form.report_id);
-      alert("✅ Deleted Successfully");
-
-      const res = await crowdReportAPI.getAllCrowdReports();
-      setReports(res.data.data || []);
-      setShowResults(true);
+      alert("✅ Crowd Report deleted");
+      resetAll();
 
     } catch {
-      alert("❌ Delete Failed");
+      alert("❌ Delete failed");
     } finally {
       setLoading(false);
     }
   };
 
+  /* ================= SUBMIT ================= */
   const handleSubmit = () => {
-    if (mode === "add") createReport();
-    if (mode === "find") findReport();
-    if (mode === "edit" && !editLoaded) loadForEdit();
-    else if (mode === "edit") updateReport();
-    if (mode === "delete") deleteReport();
+    if (mode === "add") addReport();
+    else if (mode === "find") findReport();
+    else if (mode === "edit" && !editLoaded) loadReportForEdit();
+    else if (mode === "edit" && editLoaded) updateReport();
+    else if (mode === "delete") deleteReport();
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 to-black p-6 text-white">
+    <div className="min-h-screen bg-gradient-to-br from-[#0f172a] via-[#0b1f3a] to-[#1e3a8a] p-6 text-gray-100">
 
       <button
         type="button"
@@ -228,19 +253,19 @@ const CrowdReport = () => {
           else navigate("/admin");
         }}
         className="fixed top-6 left-6 z-50 flex items-center gap-2 mt-15
-        bg-gray-800 text-white px-4 py-2 rounded-full 
-        shadow-lg hover:bg-gray-700 hover:scale-105 transition"
+        bg-[#0b1f3a]/80 backdrop-blur-md text-white px-4 py-2 rounded-full
+        shadow-lg border border-blue-500 hover:bg-blue-600 hover:scale-105 transition"
       >
         <FaArrowLeft className="text-blue-400" />
-        <span className="font-semibold text-sm">Back</span>
+        <span className="text-sm font-semibold">Back</span>
       </button>
 
-      <h1 className="text-3xl font-bold mb-8">
+      <h1 className="text-3xl font-bold text-blue-300 mb-8 tracking-wide">
         Crowd Report Management
       </h1>
 
       {!mode && (
-        <div className="mt-25 flex flex-col items-center gap-5 [&>button]:w-72">
+        <div className="mt-25 flex flex-col items-center gap-5 mb-10 [&>button]:w-72">
           <ActionBtn icon={<FaPlus />} text="Add Crowd Report" onClick={() => setMode("add")} />
           <ActionBtn icon={<FaSearch />} text="Find Crowd Report" onClick={() => setMode("find")} />
           <ActionBtn icon={<FaEdit />} text="Update Crowd Report" onClick={() => setMode("edit")} />
@@ -249,24 +274,84 @@ const CrowdReport = () => {
       )}
 
       {mode && (
-        <div className="flex justify-center items-center mt-30">
-          <div className="max-w-xl w-full bg-gray-800 rounded-2xl shadow-xl p-6">
+        <div className="flex justify-center items-center h-100vh mt-20 overflow-hidden">
+          <div className="max-w-xl w-full bg-[#0b1f3a] border border-blue-700 rounded-2xl shadow-2xl p-6">
 
-            <h2 className="text-xl font-bold mb-4 capitalize">
+            <h2 className="text-xl font-bold mb-4 capitalize text-blue-300">
               {mode} Crowd Report
             </h2>
 
-            {/* FIND SECTION FIX */}
+            {mode === "edit" && !editLoaded && (
+              <input
+                name="report_id"
+                value={form.report_id}
+                onChange={handleChange}
+                placeholder="Enter Report ID"
+                className="w-full p-3 mb-3 bg-[#132c52] border border-blue-600 rounded-xl text-white focus:ring-2 focus:ring-blue-400 outline-none"
+              />
+            )}
+
+            {(mode === "add" || (mode === "edit" && editLoaded)) && (
+              <>
+                <select
+                  name="bus_id"
+                  value={form.bus_id}
+                  onChange={handleChange}
+                  className="w-full p-3 mb-3 bg-[#132c52] border border-blue-600 rounded-xl text-white focus:ring-2 focus:ring-blue-400 outline-none"
+                >
+                  <option value="">Select Bus</option>
+                  {buses.map((b) => (
+                    <option key={b.bus_id} value={b.bus_id}>
+                      {b.bus_number}
+                    </option>
+                  ))}
+                </select>
+
+                <select
+                  name="trip_id"
+                  value={form.trip_id}
+                  onChange={handleChange}
+                  className="w-full p-3 mb-3 bg-[#132c52] border border-blue-600 rounded-xl text-white focus:ring-2 focus:ring-blue-400 outline-none"
+                >
+                  <option value="">Select Route</option>
+                  {uniqueRoutes.map((t) => (
+                    <option key={t.trip_id} value={t.trip_id}>
+                      {t.route_name}
+                    </option>
+                  ))}
+                </select>
+
+                <input
+                  name="current_count"
+                  value={form.current_count}
+                  onChange={handleChange}
+                  placeholder="Passenger Count"
+                  className="w-full p-3 mb-3 bg-[#132c52] border border-blue-600 rounded-xl text-white focus:ring-2 focus:ring-blue-400 outline-none"
+                />
+
+                <select
+                  name="crowd_status"
+                  value={form.crowd_status}
+                  onChange={handleChange}
+                  className="w-full p-3 mb-3 bg-[#132c52] border border-blue-600 rounded-xl text-white focus:ring-2 focus:ring-blue-400 outline-none"
+                >
+                  <option value="Low">Low</option>
+                  <option value="Medium">Medium</option>
+                  <option value="High">High</option>
+                </select>
+              </>
+            )}
+
             {mode === "find" && (
               <>
                 <select
                   value={searchType}
                   onChange={(e) => setSearchType(e.target.value)}
-                  className="w-full p-3 mb-3 bg-gray-700 border border-gray-600 rounded-xl"
+                  className="w-full p-3 mb-3 bg-[#132c52] border border-blue-600 rounded-xl text-white focus:ring-2 focus:ring-blue-400 outline-none"
                 >
                   <option value="id">Find by ID</option>
-                  <option value="all">Find All</option>
-                  <option value="text">Find by Text</option>
+                  <option value="all">Get All Reports</option>
+                  <option value="text">Search by Text</option>
                 </select>
 
                 {searchType === "id" && (
@@ -274,8 +359,8 @@ const CrowdReport = () => {
                     name="report_id"
                     value={form.report_id}
                     onChange={handleChange}
-                    placeholder="Enter Report ID"
-                    className="w-full p-3 mb-3 bg-gray-700 border border-gray-600 rounded-xl"
+                    placeholder="Report ID"
+                    className="w-full p-3 mb-3 bg-[#132c52] border border-blue-600 rounded-xl text-white focus:ring-2 focus:ring-blue-400 outline-none"
                   />
                 )}
 
@@ -283,21 +368,11 @@ const CrowdReport = () => {
                   <input
                     value={searchText}
                     onChange={(e) => setSearchText(e.target.value)}
-                    placeholder="Enter search text"
-                    className="w-full p-3 mb-3 bg-gray-700 border border-gray-600 rounded-xl"
+                    placeholder="Search text"
+                    className="w-full p-3 mb-3 bg-[#132c52] border border-blue-600 rounded-xl text-white focus:ring-2 focus:ring-blue-400 outline-none"
                   />
                 )}
               </>
-            )}
-
-            {(mode === "edit" && !editLoaded) && (
-              <input
-                name="report_id"
-                value={form.report_id}
-                onChange={handleChange}
-                placeholder="Enter Report ID"
-                className="w-full p-3 mb-3 bg-gray-700 border border-gray-600 rounded-xl"
-              />
             )}
 
             {mode === "delete" && (
@@ -305,8 +380,8 @@ const CrowdReport = () => {
                 name="report_id"
                 value={form.report_id}
                 onChange={handleChange}
-                placeholder="Enter Report ID"
-                className="w-full p-3 mb-3 bg-gray-700 border border-gray-600 rounded-xl"
+                placeholder="Report ID"
+                className="w-full p-3 mb-3 bg-[#132c52] border border-blue-600 rounded-xl text-white focus:ring-2 focus:ring-blue-400 outline-none"
               />
             )}
 
@@ -314,19 +389,57 @@ const CrowdReport = () => {
               <button
                 onClick={handleSubmit}
                 disabled={loading}
-                className="bg-blue-600 text-white px-6 py-2 rounded-xl"
+                className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-xl transition"
               >
                 {loading ? "Please wait..." : "Submit"}
               </button>
 
               <button
                 onClick={resetAll}
-                className="bg-gray-600 text-white px-6 py-2 rounded-xl"
+                className="bg-gray-700 hover:bg-gray-600 text-white px-6 py-2 rounded-xl transition"
               >
                 Cancel
               </button>
             </div>
 
+          </div>
+        </div>
+      )}
+
+      {showResults && reports.length > 0 && (
+        <div className="bg-[#0b1f3a] border border-blue-700 rounded-2xl shadow-xl p-6 mt-10">
+          <h2 className="text-xl font-bold mb-6 text-blue-300">
+            🔍 Search Results
+          </h2>
+
+          <div className="space-y-4">
+            {reports.map((r) => (
+              <div
+                key={r.report_id}
+                className="flex items-center justify-between gap-4 p-4 rounded-xl border border-blue-700 bg-[#132c52] hover:bg-[#1e3a8a] transition-all duration-200"
+              >
+                <div>
+                  <p className="text-sm text-blue-300 mb-1">Report ID: {r.report_id}</p>
+                  <p className="text-white font-semibold">Bus: {r.bus_id}</p>
+                  <p className="text-blue-200 text-sm">Trip: {r.trip_id}</p>
+                  <p className="text-blue-200 text-sm">Passengers: {r.current_count}</p>
+                </div>
+
+                <span
+                  className={`px-3 py-1 rounded-full text-sm font-medium
+                    ${
+                      r.crowd_status === "High"
+                        ? "bg-red-500/20 text-red-400"
+                        : r.crowd_status === "Medium"
+                        ? "bg-yellow-500/20 text-yellow-300"
+                        : "bg-green-500/20 text-green-400"
+                    }
+                  `}
+                >
+                  {r.crowd_status}
+                </span>
+              </div>
+            ))}
           </div>
         </div>
       )}
@@ -339,10 +452,11 @@ const ActionBtn = ({ icon, text, onClick }) => (
   <button
     type="button"
     onClick={onClick}
-    className="mt-2 flex items-center gap-3 p-5 bg-gray-800 rounded-3xl shadow hover:scale-105 transition"
+    className="mt-2 flex items-center gap-3 p-5 bg-[#0b1f3a] border border-blue-700 rounded-3xl 
+      shadow-lg hover:bg-blue-700 hover:scale-105 transition text-white"
   >
     <span className="text-blue-400 text-2xl">{icon}</span>
-    <span className="font-semibold text-lg text-white">{text}</span>
+    <span className="font-semibold text-lg">{text}</span>
   </button>
 );
 
