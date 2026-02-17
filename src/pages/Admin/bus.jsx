@@ -1,3 +1,4 @@
+// src/pages/Bus.jsx
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
@@ -9,6 +10,8 @@ import {
   FaArrowLeft
 } from "react-icons/fa";
 import { busAPI, routeAPI } from "../../services/api";
+import ThemeLayout from "../../components/Layout/ThemeLayout";
+import ActionBtn from "../../components/Layout/ActionBtn";
 
 const Bus = () => {
 
@@ -80,7 +83,6 @@ const Bus = () => {
 
   /* API ACTIONS */
 
-  // ADD
   const addBus = async () => {
     try {
       setLoading(true);
@@ -93,15 +95,13 @@ const Bus = () => {
       alert("✅ Bus added successfully");
       resetAll();
     } catch (err) {
-        console.error(err);
-        
+      console.error(err);
       alert("❌ Failed to add bus");
     } finally {
       setLoading(false);
     }
   };
 
-  // FIND
   const findBus = async () => {
     try {
       setLoading(true);
@@ -136,7 +136,6 @@ const Bus = () => {
     }
   };
 
-  // LOAD FOR EDIT
   const loadBusForEdit = async () => {
     if (!form.id) return alert("Enter Bus ID");
     try {
@@ -152,7 +151,6 @@ const Bus = () => {
     }
   };
 
-  // UPDATE
   const updateBus = async () => {
     try {
       setLoading(true);
@@ -177,7 +175,6 @@ const Bus = () => {
     }
   };
 
-  // DELETE
   const deleteBus = async () => {
     try {
       setLoading(true);
@@ -204,25 +201,20 @@ const Bus = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 to-sky-600 p-6">
-
-      {/* Back */}
+    <ThemeLayout pageTitle="Bus Management">
       <button
         onClick={() => mode ? setMode(null) : navigate("/admin")}
-        className="mt-15 fixed top-6 left-6 z-50 flex items-center gap-2
-        bg-white/90 px-4 py-2 rounded-full shadow-lg"
+        className="fixed top-6 left-6 z-50 flex items-center gap-2 mt-15
+        bg-black/60 backdrop-blur-md text-yellow-400 px-4 py-2 rounded-full 
+        shadow-[0_0_20px_rgba(255,215,0,0.25)]
+        hover:bg-yellow-500 hover:text-black transition duration-300"
       >
-        <FaArrowLeft className="text-sky-600" />
-        Back
+        <FaArrowLeft className="text-yellow-400" />
+        <span className="font-semibold text-sm">Back</span>
       </button>
 
-      <h1 className="text-3xl font-bold text-white mb-8">
-        Bus Management
-      </h1>
-
-      {/* ACTION BUTTONS */}
       {!mode && (
-        <div className="mt-20 flex flex-col items-center gap-5 [&>button]:w-72">
+        <div className="mt-6 flex flex-col items-center gap-5 mb-10 [&>button]:w-72">
           <ActionBtn icon={<FaPlus />} text="Add Bus" onClick={() => setMode("add")} />
           <ActionBtn icon={<FaSearch />} text="Find Bus" onClick={() => setMode("find")} />
           <ActionBtn icon={<FaEdit />} text="Update Bus" onClick={() => setMode("edit")} />
@@ -230,23 +222,19 @@ const Bus = () => {
         </div>
       )}
 
-      {/* FORM */}
       {mode && (
-        <div className="flex justify-center mt-20">
-          <div className="max-w-xl w-full bg-white rounded-2xl shadow-xl p-6">
+        <div className="flex justify-center items-center h-full mt-10 overflow-hidden">
+          <div className="max-w-xl w-full bg-black/70 border border-yellow-600/40 rounded-2xl shadow-[0_0_30px_rgba(255,215,0,0.2)] p-6 backdrop-blur-md">
 
-            <h2 className="text-xl font-bold mb-4 capitalize">
-              {mode} Bus
-            </h2>
+            <h2 className="text-xl font-bold mb-4 capitalize text-yellow-400">{mode} Bus</h2>
 
-            {/* EDIT STEP 1 */}
             {mode === "edit" && !editLoaded && (
               <input
                 name="id"
                 value={form.id}
                 onChange={handleChange}
                 placeholder="Enter Bus ID"
-                className="w-full p-3 mb-3 border rounded-xl"
+                className="w-full p-3 mb-3 bg-black/60 border border-yellow-600 rounded-xl text-white focus:ring-2 focus:ring-yellow-500 outline-none"
               />
             )}
 
@@ -257,7 +245,7 @@ const Bus = () => {
                   value={form.bus_number}
                   onChange={handleChange}
                   placeholder="Bus Number"
-                  className="w-full p-3 mb-3 border rounded-xl"
+                  className="w-full p-3 mb-3 bg-black/60 border border-yellow-600 rounded-xl text-white focus:ring-2 focus:ring-yellow-500 outline-none"
                 />
 
                 <input
@@ -265,14 +253,14 @@ const Bus = () => {
                   value={form.seat_capacity}
                   onChange={handleChange}
                   placeholder="Seat Capacity"
-                  className="w-full p-3 mb-3 border rounded-xl"
+                  className="w-full p-3 mb-3 bg-black/60 border border-yellow-600 rounded-xl text-white focus:ring-2 focus:ring-yellow-500 outline-none"
                 />
 
                 <select
                   name="route_id"
                   value={form.route_id}
                   onChange={handleChange}
-                  className="w-full p-3 mb-3 border rounded-xl"
+                  className="w-full p-3 mb-3 bg-black/60 border border-yellow-600 rounded-xl text-white focus:ring-2 focus:ring-yellow-500 outline-none"
                 >
                   <option value="">Select Route</option>
                   {routes.map(r => (
@@ -282,8 +270,7 @@ const Bus = () => {
                   ))}
                 </select>
 
-                {/* STATUS RADIO */}
-                <div className="flex gap-6 mb-3">
+                <div className="flex gap-6 mb-3 text-yellow-300">
                   <label className="flex items-center gap-2">
                     <input
                       type="radio"
@@ -291,6 +278,7 @@ const Bus = () => {
                       value="active"
                       checked={form.status === "active"}
                       onChange={handleChange}
+                      className="accent-yellow-500"
                     />
                     Active
                   </label>
@@ -302,6 +290,7 @@ const Bus = () => {
                       value="inactive"
                       checked={form.status === "inactive"}
                       onChange={handleChange}
+                      className="accent-yellow-500"
                     />
                     Inactive
                   </label>
@@ -309,13 +298,12 @@ const Bus = () => {
               </>
             )}
 
-            {/* FIND MODE */}
             {mode === "find" && (
               <>
                 <select
                   value={searchType}
                   onChange={(e) => setSearchType(e.target.value)}
-                  className="w-full p-3 mb-3 border rounded-xl"
+                  className="w-full p-3 mb-3 bg-black/60 border border-yellow-600 rounded-xl text-white focus:ring-2 focus:ring-yellow-500 outline-none"
                 >
                   <option value="id">Find by ID</option>
                   <option value="all">Get All Buses</option>
@@ -328,7 +316,7 @@ const Bus = () => {
                     value={form.id}
                     onChange={handleChange}
                     placeholder="Bus ID"
-                    className="w-full p-3 mb-3 border rounded-xl"
+                    className="w-full p-3 mb-3 bg-black/60 border border-yellow-600 rounded-xl text-white focus:ring-2 focus:ring-yellow-500 outline-none"
                   />
                 )}
 
@@ -337,20 +325,19 @@ const Bus = () => {
                     value={searchText}
                     onChange={(e) => setSearchText(e.target.value)}
                     placeholder="Search bus number / route"
-                    className="w-full p-3 mb-3 border rounded-xl"
+                    className="w-full p-3 mb-3 bg-black/60 border border-yellow-600 rounded-xl text-white focus:ring-2 focus:ring-yellow-500 outline-none"
                   />
                 )}
               </>
             )}
 
-            {/* DELETE */}
             {mode === "delete" && (
               <input
                 name="id"
                 value={form.id}
                 onChange={handleChange}
                 placeholder="Bus ID"
-                className="w-full p-3 mb-3 border rounded-xl"
+                className="w-full p-3 mb-3 bg-black/60 border border-yellow-600 rounded-xl text-white focus:ring-2 focus:ring-yellow-500 outline-none"
               />
             )}
 
@@ -358,14 +345,14 @@ const Bus = () => {
               <button
                 onClick={handleSubmit}
                 disabled={loading}
-                className="bg-sky-600 text-white px-6 py-2 rounded-xl"
+                className="bg-yellow-500 hover:bg-yellow-600 text-black px-6 py-2 rounded-xl font-semibold transition shadow-[0_0_15px_rgba(255,215,0,0.3)]"
               >
                 {loading ? "Please wait..." : "Submit"}
               </button>
 
               <button
                 onClick={resetAll}
-                className="bg-gray-500 text-white px-6 py-2 rounded-xl"
+                className="bg-gray-800 hover:bg-gray-700 text-white px-6 py-2 rounded-xl transition"
               >
                 Cancel
               </button>
@@ -375,10 +362,10 @@ const Bus = () => {
         </div>
       )}
 
-      {/* RESULTS */}
       {showResults && buses.length > 0 && (
-        <div className="bg-white rounded-2xl shadow-xl p-6 mt-10">
-          <h2 className="text-xl font-bold mb-6">
+        <div className="bg-black/70 border border-yellow-600/40 rounded-2xl shadow-[0_0_25px_rgba(255,215,0,0.15)] p-6 mt-10 backdrop-blur-md">
+
+          <h2 className="text-xl font-bold mb-6 text-yellow-400 drop-shadow-[0_0_6px_rgba(255,215,0,0.4)]">
             🚌 Bus Results
           </h2>
 
@@ -386,30 +373,22 @@ const Bus = () => {
             {buses.map(b => (
               <div
                 key={b.bus_id}
-                className="flex justify-between p-4 border rounded-xl hover:shadow-lg transition"
+                className="flex justify-between items-center p-4 rounded-xl border border-yellow-600/30 bg-black/60 hover:bg-black/50 transition-all duration-200"
               >
                 <div>
-                  <p className="font-semibold text-lg">
-                    {b.bus_number}
-                  </p>
-                  <p className="text-sm text-gray-500">
-                    Seats: {b.seat_capacity}
-                  </p>
-                  <p className="text-sm text-gray-500">
-                    Route: {b.route_name}
-                  </p>
+                  <p className="font-semibold text-lg text-white">{b.bus_number}</p>
+                  <p className="text-sm text-yellow-300">Seats: {b.seat_capacity}</p>
+                  <p className="text-sm text-yellow-300">Route: {b.route_name}</p>
                 </div>
 
                 <div className="text-right">
-                  <span className="text-xs text-gray-400 block mb-1">
-                    BID-{b.bus_id}
-                  </span>
+                  <span className="text-xs text-yellow-400 block mb-1">BID-{b.bus_id}</span>
 
                   <span
                     className={`px-3 py-1 rounded-full text-sm font-medium
                       ${b.status === "active"
-                        ? "bg-green-100 text-green-700"
-                        : "bg-red-100 text-red-700"
+                        ? "bg-green-500/20 text-green-400"
+                        : "bg-red-500/20 text-red-400"
                       }`}
                   >
                     {b.status}
@@ -421,19 +400,8 @@ const Bus = () => {
         </div>
       )}
 
-    </div>
+    </ThemeLayout>
   );
 };
-
-const ActionBtn = ({ icon, text, onClick }) => (
-  <button
-    type="button"
-    onClick={onClick}
-    className="flex items-center gap-3 p-5 bg-white rounded-3xl shadow hover:scale-105 transition"
-  >
-    <span className="text-sky-600 text-2xl">{icon}</span>
-    <span className="font-semibold text-lg">{text}</span>
-  </button>
-);
 
 export default Bus;
