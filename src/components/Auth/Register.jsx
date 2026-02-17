@@ -6,7 +6,6 @@ import { userAPI } from "../../services/api";
 const Register = () => {
     const navigate = useNavigate();
 
-    //Single form state
     const [form, setForm] = useState({
         name: "",
         email: "",
@@ -15,7 +14,6 @@ const Register = () => {
         role_name: ""
     });
 
-    //handle input changes
     const handleChange = (e) => {
         const {name, value} = e.target;
 
@@ -25,11 +23,9 @@ const Register = () => {
         }));
     };
 
-    //Handle submit
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        //Role validation
         if(!form.role_name) {
             toast.error("Please select a role");
             return;
@@ -59,12 +55,17 @@ const Register = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#0f172a] via-[#0b1f3a] to-[#1e3a8a] p-6 text-gray-100">
+    <div className="relative min-h-screen flex items-center justify-center bg-black text-white p-6 overflow-hidden">
+
+      <div className="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-yellow-500 to-transparent animate-[shimmer_3s_linear_infinite]" />
+
+      <div className="absolute inset-0 bg-gradient-to-br from-white/5 via-transparent to-yellow-500/5 pointer-events-none" />
+
       <form 
         onSubmit={handleSubmit}
-        className="bg-[#0b1f3a] border border-blue-700 p-8 rounded-2xl shadow-2xl w-[420px] backdrop-blur-md">
+        className="relative bg-black/70 border border-yellow-600/40 p-10 rounded-3xl shadow-[0_0_40px_rgba(255,215,0,0.15)] w-[440px] backdrop-blur-2xl animate-[fadeIn_0.6s_ease-out]">
 
-        <h2 className="text-2xl font-bold text-center text-blue-300 mb-6 tracking-wide">
+        <h2 className="text-3xl font-semibold text-center mb-8 tracking-wide bg-gradient-to-r from-yellow-400 via-yellow-200 to-yellow-500 bg-clip-text text-transparent drop-shadow-[0_0_12px_rgba(255,215,0,0.5)]">
           Create Account
         </h2>
 
@@ -72,7 +73,7 @@ const Register = () => {
           type="text"
           name="name"
           placeholder="Full Name"
-          className="w-full mb-4 px-4 py-3 bg-[#132c52] border border-blue-600 rounded-xl text-white placeholder-blue-300 focus:ring-2 focus:ring-blue-400 outline-none transition"
+          className="w-full mb-5 px-5 py-3 bg-black/60 border border-yellow-600/30 rounded-2xl text-white placeholder-gray-400 focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 outline-none transition-all duration-300"
           value={form.name}
           onChange={handleChange}
           required
@@ -82,7 +83,7 @@ const Register = () => {
           type="email"
           name="email"
           placeholder="Email"
-          className="w-full mb-4 px-4 py-3 bg-[#132c52] border border-blue-600 rounded-xl text-white placeholder-blue-300 focus:ring-2 focus:ring-blue-400 outline-none transition"
+          className="w-full mb-5 px-5 py-3 bg-black/60 border border-yellow-600/30 rounded-2xl text-white placeholder-gray-400 focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 outline-none transition-all duration-300"
           value={form.email}
           onChange={handleChange}
           required
@@ -92,7 +93,7 @@ const Register = () => {
           type="password"
           name="password"
           placeholder="Password"
-          className="w-full mb-4 px-4 py-3 bg-[#132c52] border border-blue-600 rounded-xl text-white placeholder-blue-300 focus:ring-2 focus:ring-blue-400 outline-none transition"
+          className="w-full mb-5 px-5 py-3 bg-black/60 border border-yellow-600/30 rounded-2xl text-white placeholder-gray-400 focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 outline-none transition-all duration-300"
           value={form.password}
           onChange={handleChange}
           required
@@ -102,7 +103,7 @@ const Register = () => {
           type="text"
           name="phone"
           placeholder="Phone Number"
-          className="w-full mb-4 px-4 py-3 bg-[#132c52] border border-blue-600 rounded-xl text-white placeholder-blue-300 focus:ring-2 focus:ring-blue-400 outline-none transition"
+          className="w-full mb-5 px-5 py-3 bg-black/60 border border-yellow-600/30 rounded-2xl text-white placeholder-gray-400 focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 outline-none transition-all duration-300"
           value={form.phone}
           onChange={handleChange}
           required
@@ -112,22 +113,37 @@ const Register = () => {
             name="role_name"
             value={form.role_name}
             onChange={handleChange}
-            className="w-full mb-6 px-4 py-3 bg-[#132c52] border border-blue-600 rounded-xl text-white focus:ring-2 focus:ring-blue-400 outline-none transition"    
+            className="w-full mb-8 px-5 py-3 bg-black/60 border border-yellow-600/30 rounded-2xl text-white focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 outline-none transition-all duration-300 appearance-none"
             required    
         >
-            <option value="">Select Role</option>
-            <option value="Passenger">Passenger</option>
-            <option value="Owner">Owner</option>
-            <option value="Admin">Admin</option>
+            <option value="" className="bg-black text-white">Select Role</option>
+            <option value="Passenger" className="bg-black text-white">Passenger</option>
+            <option value="Owner" className="bg-black text-white">Owner</option>
+            <option value="Admin" className="bg-black text-white">Admin</option>
         </select>
 
         <button
             type="submit"
-            className="w-full bg-blue-600 text-white py-3 rounded-xl font-semibold hover:bg-blue-700 hover:scale-[1.02] transition-all duration-200 shadow-lg"
+            className="w-full bg-gradient-to-r from-yellow-500 via-yellow-400 to-yellow-600 text-black py-3 rounded-2xl font-semibold hover:scale-[1.03] hover:shadow-[0_0_25px_rgba(255,215,0,0.4)] transition-all duration-300"
         >
             Register
         </button>
       </form>
+
+      <style>
+        {`
+          @keyframes shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+          }
+
+          @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+          }
+        `}
+      </style>
+
     </div>
   );
 };

@@ -38,7 +38,6 @@ const Login = ({ onLoginSuccess, onShowSignup }) => {
           return;
         }
 
-        //allow login Only if status_d = 1
         localStorage.setItem("token", res.data.token);
 
         if (onLoginSuccess) {
@@ -55,81 +54,101 @@ const Login = ({ onLoginSuccess, onShowSignup }) => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center 
-      bg-gradient-to-br from-slate-900 to-sky-500">
-      <div className="flex w-[900px] max-w-[95%] h-[550px] rounded-xl 
-        shadow-2xl overflow-hidden bg-gray-300">
+    <div className="min-h-screen flex items-center justify-center bg-black relative overflow-hidden">
 
-        {/* Left Side */}
-        <div className="hidden md:flex w-1/2 bg-sky-900 text-white flex-col justify-center items-center p-10 text-center">
-          <FaTrafficLight className="text-4xl"/>
-          <h1 className="mt-3 text-3xl font-bold mb-4">
-             PUBLICPILOT
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(212,175,55,0.15),transparent_60%)] pointer-events-none"></div>
+
+      <div className="flex w-[950px] max-w-[95%] h-[560px] rounded-3xl 
+        shadow-[0_0_60px_rgba(212,175,55,0.15)] overflow-hidden 
+        border border-yellow-600/30 
+        backdrop-blur-xl bg-white/5 animate-fadeIn">
+
+        <div className="hidden md:flex w-1/2 bg-gradient-to-br from-black via-zinc-900 to-black 
+          text-white flex-col justify-center items-center p-10 text-center relative">
+
+          <div className="absolute top-0 left-0 w-full h-[2px] 
+            bg-gradient-to-r from-transparent via-yellow-500 to-transparent 
+            animate-pulse"></div>
+
+          <FaTrafficLight className="text-4xl text-yellow-400 drop-shadow-[0_0_15px_rgba(212,175,55,0.6)]"/>
+          <h1 className="mt-4 text-3xl font-semibold tracking-[4px] text-white">
+             <span className="text-yellow-400 drop-shadow-[0_0_10px_rgba(212,175,55,0.7)]">
+               PUBLIC
+             </span>
+             <span className="text-white ml-1">
+               PILOT
+             </span>
           </h1>
-          <p className="text-base opacity-90">
+          <p className="text-base text-zinc-300 mt-4">
             Login to continue your journey with us
           </p>
         </div>
 
-        {/* Right Side */}
-        <div className="w-full md:w-1/2 flex justify-center items-center p-8">
+        <div className="w-full md:w-1/2 flex justify-center items-center p-10 bg-black/70 backdrop-blur-xl relative">
+
+          <div className="absolute inset-0 bg-gradient-to-br from-white/5 via-transparent to-yellow-500/5 pointer-events-none"></div>
+
           <form
             onSubmit={handleLogin}
-            className="w-full max-w-sm animate-fadeIn"
+            className="w-full max-w-sm animate-fadeIn relative z-10"
           >
-            <h2 className="text-2xl font-bold text-center mb-6 text-sky-900">
-              Login
+            <h2 className="text-2xl font-semibold text-center mb-8 text-yellow-400 tracking-wide">
+              Executive Login
             </h2>
 
-            {/* Email */}
-            <div className="relative mb-4">
-              <FaEnvelope className="absolute top-3.5 left-3 text-sky-900" />
+            <div className="relative mb-5">
+              <FaEnvelope className="absolute top-3.5 left-3 text-yellow-500" />
               <input
                 type="email"
                 placeholder="Email"
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full pl-10 pr-3 py-2 border rounded-xl
+                className="w-full pl-10 pr-3 py-3 
+                           bg-black/60 border border-yellow-600/40 
+                           rounded-xl text-white
                            focus:outline-none focus:ring-2
-                           focus:ring-sky-900"
+                           focus:ring-yellow-500 focus:border-yellow-500
+                           transition duration-300"
               />
             </div>
 
-            {/* Password */}
-            <div className="relative mb-4">
-              <FaLock className="absolute top-3.5 left-3 text-sky-900" />
+            <div className="relative mb-6">
+              <FaLock className="absolute top-3.5 left-3 text-yellow-500" />
               <input
                 type="password"
                 placeholder="Password"
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full pl-10 pr-3 py-2 border rounded-xl
+                className="w-full pl-10 pr-3 py-3 
+                           bg-black/60 border border-yellow-600/40 
+                           rounded-xl text-white
                            focus:outline-none focus:ring-2
-                           focus:ring-sky-400"
+                           focus:ring-yellow-500 focus:border-yellow-500
+                           transition duration-300"
               />
             </div>
 
-            {/* Button */}
             <button
               type="submit"
               disabled={isSubmitting}
-              className="w-full py-2 mt-2 bg-sky-900 text-white
-                         rounded-xl font-semibold
-                         hover:bg-sky-800
+              className="w-full py-3 mt-2 
+                         bg-gradient-to-r from-yellow-500 via-yellow-400 to-yellow-600 
+                         text-black rounded-xl font-semibold tracking-wide
+                         shadow-[0_0_25px_rgba(212,175,55,0.4)]
+                         hover:scale-[1.02] hover:shadow-[0_0_35px_rgba(212,175,55,0.6)]
                          transition duration-300
                          disabled:opacity-60"
             >
               {isSubmitting ? "Logging in..." : "Login"}
             </button>
 
-            {/* Switch to Register */}
-            <p className="text-center text-sm mt-4 text-slate-700">
+            <p className="text-center text-sm mt-6 text-zinc-400">
               Don't have an account?{" "}
               <Link
-                to= "/register"
-                className="text-sky-900 font-semibold cursor-pointer hover:underline"
+                to="/register"
+                className="text-yellow-400 font-semibold cursor-pointer hover:underline"
               >
                 Sign up
               </Link>

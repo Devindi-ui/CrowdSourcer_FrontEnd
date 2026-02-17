@@ -72,6 +72,16 @@ export const crowdReportAPI = {
     deleteCrowdReport: (crowdReportId) => api.delete(`/crowdReport/delete/${crowdReportId}`),  // DELETE
 }
 
+//favouriteRoute API
+export const favouriteRouteAPI = {
+    create: (favouriteRoute) => api.post('/favouriteRoute/create', favouriteRoute),  // Add favouriteRoute 
+    getAllFavouriteRoutes: () => api.get(`/favouriteRoute/all`),  // FIND
+    getFavouriteRouteById: (id) => api.get(`/favouriteRoute/find/${id}`),  // FIND
+    getFavouriteRouteByText: (text) => api.get(`/favouriteRoute/search/${encodeURIComponent(text)}`),  // FIND
+    updateFavouriteRoute: (id, favouriteRoute) => api.put(`/favouriteRoute/update/${id}`, favouriteRoute), // UPDATE
+    deleteFavouriteRoute: (favouriteRouteId) => api.delete(`/favouriteRoute/delete/${favouriteRouteId}`),  // DELETE
+}
+
 //Alert API
 export const alertAPI = {
     create: (alert) => api.post('/alert/create', alert),  // Add alert 

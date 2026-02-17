@@ -9,6 +9,7 @@ import {
 } from "react-icons/fa";
 
 import { busTypeAPI } from "../../services/api";
+import ThemeLayout from "../../components/Layout/ThemeLayout";
 
 const BusType = () => {
 
@@ -30,7 +31,6 @@ const BusType = () => {
   const [showResults, setShowResults] = useState(false);
   const [editLoaded, setEditLoaded] = useState(false);
 
-  /* RESET */
   const resetAll = () => {
     setMode(null);
     setSearchType("id");
@@ -50,7 +50,6 @@ const BusType = () => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  /* ================= ADD ================= */
   const addBusType = async () => {
     try {
       setLoading(true);
@@ -70,7 +69,6 @@ const BusType = () => {
     }
   };
 
-  /* ================= FIND ================= */
   const findBusType = async () => {
     try {
       setLoading(true);
@@ -105,7 +103,6 @@ const BusType = () => {
     }
   };
 
-  /* ================= LOAD FOR EDIT ================= */
   const loadBusTypeForEdit = async () => {
     if (!form.id) return alert("Enter Bus Type ID");
 
@@ -132,7 +129,6 @@ const BusType = () => {
     }
   };
 
-  /* ================= UPDATE ================= */
   const updateBusType = async () => {
     try {
       setLoading(true);
@@ -156,7 +152,6 @@ const BusType = () => {
     }
   };
 
-  /* ================= DELETE (SOFT) ================= */
   const deleteBusType = async () => {
     try {
       setLoading(true);
@@ -175,7 +170,6 @@ const BusType = () => {
     }
   };
 
-  /* ================= SUBMIT ================= */
   const handleSubmit = () => {
     if (mode === "add") addBusType();
     if (mode === "find") findBusType();
@@ -185,9 +179,8 @@ const BusType = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#0f172a] via-[#0b1f3a] to-[#1e3a8a] p-6 text-gray-100">
+    <ThemeLayout pageTitle="Bus Type Management">
 
-      {/* BACK BUTTON */}
       <button
         type="button"
         onClick={() => {
@@ -195,16 +188,13 @@ const BusType = () => {
           else navigate("/admin");
         }}
         className="fixed top-6 left-6 z-50 flex items-center gap-2 mt-15
-        bg-[#0b1f3a]/80 backdrop-blur-md text-white px-4 py-2 rounded-full 
-        shadow-lg border border-blue-500 hover:bg-blue-600 hover:scale-105 transition"
+        bg-black/60 backdrop-blur-md text-yellow-400 px-4 py-2 rounded-full 
+        shadow-[0_0_20px_rgba(255,215,0,0.25)]
+        hover:bg-yellow-500 hover:text-black transition duration-300"
       >
-        <FaArrowLeft className="text-blue-400" />
+        <FaArrowLeft className="text-yellow-400" />
         <span className="font-semibold text-sm">Back</span>
       </button>
-
-      <h1 className="text-3xl font-bold text-blue-300 mb-8 tracking-wide">
-        Bus Type Management
-      </h1>
 
       {!mode && (
         <div className="mt-25 flex flex-col items-center gap-5 mb-10 [&>button]:w-72">
@@ -217,9 +207,9 @@ const BusType = () => {
 
       {mode && (
         <div className="flex justify-center items-center mt-20">
-          <div className="max-w-xl w-full bg-[#0b1f3a] border border-blue-700 rounded-2xl shadow-2xl p-6">
+          <div className="max-w-xl w-full bg-black/70 border border-yellow-600/40 rounded-2xl shadow-[0_0_30px_rgba(255,215,0,0.2)] p-6 backdrop-blur-md">
 
-            <h2 className="text-xl font-bold mb-4 capitalize text-blue-300">
+            <h2 className="text-xl font-bold mb-4 capitalize text-yellow-400">
               {mode} Bus Type
             </h2>
 
@@ -229,7 +219,7 @@ const BusType = () => {
                 value={form.id}
                 onChange={handleChange}
                 placeholder="Enter Bus Type ID"
-                className="w-full p-3 mb-3 bg-[#132c52] border border-blue-600 rounded-xl text-white focus:ring-2 focus:ring-blue-400 outline-none"
+                className="w-full p-3 mb-3 bg-black/60 border border-yellow-600 rounded-xl text-white focus:ring-2 focus:ring-yellow-500 outline-none"
               />
             )}
 
@@ -240,7 +230,7 @@ const BusType = () => {
                   value={form.type_name}
                   onChange={handleChange}
                   placeholder="Type Name"
-                  className="w-full p-3 mb-3 bg-[#132c52] border border-blue-600 rounded-xl text-white focus:ring-2 focus:ring-blue-400 outline-none"
+                  className="w-full p-3 mb-3 bg-black/60 border border-yellow-600 rounded-xl text-white focus:ring-2 focus:ring-yellow-500 outline-none"
                 />
 
                 <textarea
@@ -248,14 +238,14 @@ const BusType = () => {
                   value={form.description}
                   onChange={handleChange}
                   placeholder="Description"
-                  className="w-full p-3 mb-3 bg-[#132c52] border border-blue-600 rounded-xl text-white focus:ring-2 focus:ring-blue-400 outline-none"
+                  className="w-full p-3 mb-3 bg-black/60 border border-yellow-600 rounded-xl text-white focus:ring-2 focus:ring-yellow-500 outline-none"
                 />
 
                 <select
                   name="status"
                   value={form.status}
                   onChange={handleChange}
-                  className="w-full p-3 mb-3 bg-[#132c52] border border-blue-600 rounded-xl text-white focus:ring-2 focus:ring-blue-400 outline-none"
+                  className="w-full p-3 mb-3 bg-black/60 border border-yellow-600 rounded-xl text-white focus:ring-2 focus:ring-yellow-500 outline-none"
                 >
                   <option value={1}>Active</option>
                   <option value={0}>Deleted</option>
@@ -268,7 +258,7 @@ const BusType = () => {
                 <select
                   value={searchType}
                   onChange={(e) => setSearchType(e.target.value)}
-                  className="w-full p-3 mb-3 bg-[#132c52] border border-blue-600 rounded-xl text-white focus:ring-2 focus:ring-blue-400 outline-none"
+                  className="w-full p-3 mb-3 bg-black/60 border border-yellow-600 rounded-xl text-white focus:ring-2 focus:ring-yellow-500 outline-none"
                 >
                   <option value="id">Find by ID</option>
                   <option value="all">Get All Bus Types</option>
@@ -281,7 +271,7 @@ const BusType = () => {
                     value={form.id}
                     onChange={handleChange}
                     placeholder="Bus Type ID"
-                    className="w-full p-3 mb-3 bg-[#132c52] border border-blue-600 rounded-xl text-white focus:ring-2 focus:ring-blue-400 outline-none"
+                    className="w-full p-3 mb-3 bg-black/60 border border-yellow-600 rounded-xl text-white focus:ring-2 focus:ring-yellow-500 outline-none"
                   />
                 )}
 
@@ -290,7 +280,7 @@ const BusType = () => {
                     value={searchText}
                     onChange={(e) => setSearchText(e.target.value)}
                     placeholder="Search type name / description"
-                    className="w-full p-3 mb-3 bg-[#132c52] border border-blue-600 rounded-xl text-white focus:ring-2 focus:ring-blue-400 outline-none"
+                    className="w-full p-3 mb-3 bg-black/60 border border-yellow-600 rounded-xl text-white focus:ring-2 focus:ring-yellow-500 outline-none"
                   />
                 )}
               </>
@@ -302,7 +292,7 @@ const BusType = () => {
                 value={form.id}
                 onChange={handleChange}
                 placeholder="Bus Type ID"
-                className="w-full p-3 mb-3 bg-[#132c52] border border-blue-600 rounded-xl text-white focus:ring-2 focus:ring-blue-400 outline-none"
+                className="w-full p-3 mb-3 bg-black/60 border border-yellow-600 rounded-xl text-white focus:ring-2 focus:ring-yellow-500 outline-none"
               />
             )}
 
@@ -310,14 +300,14 @@ const BusType = () => {
               <button
                 onClick={handleSubmit}
                 disabled={loading}
-                className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-xl transition"
+                className="bg-yellow-500 hover:bg-yellow-600 text-black px-6 py-2 rounded-xl transition font-semibold shadow-[0_0_15px_rgba(255,215,0,0.3)]"
               >
                 {loading ? "Please wait..." : "Submit"}
               </button>
 
               <button
                 onClick={resetAll}
-                className="bg-gray-700 hover:bg-gray-600 text-white px-6 py-2 rounded-xl transition"
+                className="bg-gray-800 hover:bg-gray-700 text-white px-6 py-2 rounded-xl transition"
               >
                 Cancel
               </button>
@@ -327,8 +317,8 @@ const BusType = () => {
       )}
 
       {showResults && busTypes.length > 0 && (
-        <div className="bg-[#0b1f3a] border border-blue-700 rounded-2xl shadow-xl p-6 mt-10">
-          <h2 className="text-xl font-bold mb-6 text-blue-300">
+        <div className="bg-black/70 border border-yellow-600/40 rounded-2xl shadow-[0_0_25px_rgba(255,215,0,0.15)] p-6 mt-10 backdrop-blur-md">
+          <h2 className="text-xl font-bold mb-6 text-yellow-400">
             🔍 Search Results
           </h2>
 
@@ -336,19 +326,19 @@ const BusType = () => {
             {busTypes.map((bt) => (
               <div
                 key={bt.bus_type_id}
-                className="flex items-center justify-between gap-4 p-4 rounded-xl border border-blue-700 bg-[#132c52] hover:bg-[#1e3a8a] transition-all duration-200"
+                className="flex items-center justify-between gap-4 p-4 rounded-xl border border-yellow-600/30 bg-black/60 hover:bg-black/50 transition-all duration-200"
               >
                 <div>
                   <p className="text-lg font-semibold text-white">
                     {bt.type_name}
                   </p>
-                  <p className="text-sm text-blue-200">
+                  <p className="text-sm text-yellow-300">
                     {bt.description}
                   </p>
                 </div>
 
                 <div className="text-right">
-                  <span className="text-xs text-blue-300 block mb-1">
+                  <span className="text-xs text-yellow-400 block mb-1">
                     BTID-{bt.bus_type_id}
                   </span>
 
@@ -368,7 +358,7 @@ const BusType = () => {
         </div>
       )}
 
-    </div>
+    </ThemeLayout>
   );
 };
 
@@ -376,10 +366,10 @@ const ActionBtn = ({ icon, text, onClick }) => (
   <button
     type="button"
     onClick={onClick}
-    className="mt-2 flex items-center gap-3 p-5 bg-[#0b1f3a] border border-blue-700 rounded-3xl 
-      shadow-lg hover:bg-blue-700 hover:scale-105 transition text-white"
+    className="mt-2 flex items-center gap-3 p-5 bg-black/70 border border-yellow-600/40 rounded-3xl 
+      shadow-[0_0_20px_rgba(255,215,0,0.15)] hover:bg-black/50 hover:scale-105 transition text-white"
   >
-    <span className="text-blue-400 text-2xl">{icon}</span>
+    <span className="text-yellow-400 text-2xl">{icon}</span>
     <span className="font-semibold text-lg">{text}</span>
   </button>
 );
