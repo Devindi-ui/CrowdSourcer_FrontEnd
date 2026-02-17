@@ -8,6 +8,7 @@ import {
   FaArrowLeft
 } from "react-icons/fa";
 import { userAPI, roleAPI } from "../../services/api";
+import ThemeLayout from "../../components/Layout/ThemeLayout";
 
 const User = () => {
   const navigate = useNavigate();
@@ -200,7 +201,7 @@ const User = () => {
   };
 
   return (
-    <div className="min-h-screen bg-black/90 text-white p-6 font-sans">
+    <ThemeLayout pageTitle="User Management">
 
       <button 
         type="button"
@@ -220,10 +221,6 @@ const User = () => {
         <FaArrowLeft className="text-yellow-400"/>
         <span className="font-semibold text-sm">Back</span>
       </button>     
-
-      <h1 className="text-3xl font-bold mb-8 tracking-wide text-yellow-400 drop-shadow-[0_0_8px_rgba(255,215,0,0.6)]">
-        User Management
-      </h1>
 
       {!mode && (
         <div className="mt-25 flex flex-col items-center gap-5 mb-10 [&>button]:w-72">
@@ -397,7 +394,7 @@ const User = () => {
           </div>
         </div>
       )}
-    </div>
+    </ThemeLayout>
   );
 };
 
