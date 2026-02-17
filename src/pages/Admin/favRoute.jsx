@@ -63,7 +63,7 @@ const FavouriteRoute = () => {
     setForm({
       favourite_route_id: f.favourite_route_id,
       user_id: f.user_id,
-      route_id: f.route_id,
+      route_id: f.route_id || "",
     });
     setEditLoaded(true);
   };
@@ -335,7 +335,10 @@ const FavouriteRoute = () => {
                       User ID: {f.user_id}
                     </p>
                     <p className="text-sm text-yellow-300">
-                      Route ID: {f.route_id}
+                      User Name: {f.user_name}
+                    </p>
+                    <p className="text-sm text-yellow-300">
+                      Route: {f.route_name}
                     </p>
                   </div>
                 </div>
