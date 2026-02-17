@@ -34,7 +34,6 @@ const CrowdReport = () => {
   const [buses, setBuses] = useState([]);
   const [uniqueRoutes, setUniqueRoutes] = useState([]);
 
-  /* ================= LOAD DATA ================= */
   useEffect(() => {
     const loadData = async () => {
       try {
@@ -61,7 +60,6 @@ const CrowdReport = () => {
     loadData();
   }, []);
 
-  /* ================= RESET ================= */
   const resetAll = () => {
     setMode(null);
     setSearchType("id");
@@ -82,7 +80,6 @@ const CrowdReport = () => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  /* ================= ADD ================= */
   const addReport = async () => {
     try {
       setLoading(true);
@@ -104,7 +101,6 @@ const CrowdReport = () => {
     }
   };
 
-  /* ================= FIND ================= */
   const findReport = async () => {
     try {
       setLoading(true);
@@ -154,7 +150,6 @@ const CrowdReport = () => {
     }
   };
 
-  /* ================= LOAD FOR EDIT ================= */
   const loadReportForEdit = async () => {
     if (!form.report_id) return alert("Enter Report ID");
 
@@ -186,7 +181,6 @@ const CrowdReport = () => {
     }
   };
 
-  /* ================= UPDATE ================= */
   const updateReport = async () => {
     try {
       setLoading(true);
@@ -216,7 +210,6 @@ const CrowdReport = () => {
     }
   };
 
-  /* ================= DELETE ================= */
   const deleteReport = async () => {
     if (!form.report_id) return alert("Enter Report ID");
 
@@ -234,7 +227,6 @@ const CrowdReport = () => {
     }
   };
 
-  /* ================= SUBMIT ================= */
   const handleSubmit = () => {
     if (mode === "add") addReport();
     else if (mode === "find") findReport();
@@ -244,7 +236,12 @@ const CrowdReport = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#0f172a] via-[#0b1f3a] to-[#1e3a8a] p-6 text-gray-100">
+    <div className="min-h-screen bg-black text-white relative overflow-hidden">
+
+      <div className="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-yellow-500 to-transparent animate-pulse"></div>
+      <div className="absolute inset-0 bg-gradient-to-br from-white/5 via-transparent to-transparent pointer-events-none"></div>
+
+      <div className="relative z-10 p-6">
 
       <button
         type="button"
@@ -253,14 +250,15 @@ const CrowdReport = () => {
           else navigate("/admin");
         }}
         className="fixed top-6 left-6 z-50 flex items-center gap-2 mt-15
-        bg-[#0b1f3a]/80 backdrop-blur-md text-white px-4 py-2 rounded-full
-        shadow-lg border border-blue-500 hover:bg-blue-600 hover:scale-105 transition"
+        bg-black/60 backdrop-blur-xl text-yellow-400 px-4 py-2 rounded-full
+        shadow-[0_0_20px_rgba(255,215,0,0.25)] border border-yellow-600/40
+        hover:bg-yellow-500 hover:text-black transition duration-300"
       >
-        <FaArrowLeft className="text-blue-400" />
+        <FaArrowLeft className="text-yellow-400" />
         <span className="text-sm font-semibold">Back</span>
       </button>
 
-      <h1 className="text-3xl font-bold text-blue-300 mb-8 tracking-wide">
+      <h1 className="text-3xl font-bold text-yellow-400 mb-8 tracking-wide drop-shadow-[0_0_8px_rgba(255,215,0,0.4)]">
         Crowd Report Management
       </h1>
 
@@ -275,9 +273,9 @@ const CrowdReport = () => {
 
       {mode && (
         <div className="flex justify-center items-center h-100vh mt-20 overflow-hidden">
-          <div className="max-w-xl w-full bg-[#0b1f3a] border border-blue-700 rounded-2xl shadow-2xl p-6">
+          <div className="max-w-xl w-full bg-black/70 backdrop-blur-xl border border-yellow-600/40 rounded-2xl shadow-[0_0_30px_rgba(255,215,0,0.15)] p-6">
 
-            <h2 className="text-xl font-bold mb-4 capitalize text-blue-300">
+            <h2 className="text-xl font-bold mb-4 capitalize text-yellow-400">
               {mode} Crowd Report
             </h2>
 
@@ -287,7 +285,7 @@ const CrowdReport = () => {
                 value={form.report_id}
                 onChange={handleChange}
                 placeholder="Enter Report ID"
-                className="w-full p-3 mb-3 bg-[#132c52] border border-blue-600 rounded-xl text-white focus:ring-2 focus:ring-blue-400 outline-none"
+                className="w-full p-3 mb-3 bg-black/60 border border-yellow-600/40 rounded-xl text-white focus:ring-2 focus:ring-yellow-500 outline-none"
               />
             )}
 
@@ -297,7 +295,7 @@ const CrowdReport = () => {
                   name="bus_id"
                   value={form.bus_id}
                   onChange={handleChange}
-                  className="w-full p-3 mb-3 bg-[#132c52] border border-blue-600 rounded-xl text-white focus:ring-2 focus:ring-blue-400 outline-none"
+                  className="w-full p-3 mb-3 bg-black/60 border border-yellow-600/40 rounded-xl text-white focus:ring-2 focus:ring-yellow-500 outline-none"
                 >
                   <option value="">Select Bus</option>
                   {buses.map((b) => (
@@ -311,7 +309,7 @@ const CrowdReport = () => {
                   name="trip_id"
                   value={form.trip_id}
                   onChange={handleChange}
-                  className="w-full p-3 mb-3 bg-[#132c52] border border-blue-600 rounded-xl text-white focus:ring-2 focus:ring-blue-400 outline-none"
+                  className="w-full p-3 mb-3 bg-black/60 border border-yellow-600/40 rounded-xl text-white focus:ring-2 focus:ring-yellow-500 outline-none"
                 >
                   <option value="">Select Route</option>
                   {uniqueRoutes.map((t) => (
@@ -326,14 +324,14 @@ const CrowdReport = () => {
                   value={form.current_count}
                   onChange={handleChange}
                   placeholder="Passenger Count"
-                  className="w-full p-3 mb-3 bg-[#132c52] border border-blue-600 rounded-xl text-white focus:ring-2 focus:ring-blue-400 outline-none"
+                  className="w-full p-3 mb-3 bg-black/60 border border-yellow-600/40 rounded-xl text-white focus:ring-2 focus:ring-yellow-500 outline-none"
                 />
 
                 <select
                   name="crowd_status"
                   value={form.crowd_status}
                   onChange={handleChange}
-                  className="w-full p-3 mb-3 bg-[#132c52] border border-blue-600 rounded-xl text-white focus:ring-2 focus:ring-blue-400 outline-none"
+                  className="w-full p-3 mb-3 bg-black/60 border border-yellow-600/40 rounded-xl text-white focus:ring-2 focus:ring-yellow-500 outline-none"
                 >
                   <option value="Low">Low</option>
                   <option value="Medium">Medium</option>
@@ -347,7 +345,7 @@ const CrowdReport = () => {
                 <select
                   value={searchType}
                   onChange={(e) => setSearchType(e.target.value)}
-                  className="w-full p-3 mb-3 bg-[#132c52] border border-blue-600 rounded-xl text-white focus:ring-2 focus:ring-blue-400 outline-none"
+                  className="w-full p-3 mb-3 bg-black/60 border border-yellow-600/40 rounded-xl text-white focus:ring-2 focus:ring-yellow-500 outline-none"
                 >
                   <option value="id">Find by ID</option>
                   <option value="all">Get All Reports</option>
@@ -360,7 +358,7 @@ const CrowdReport = () => {
                     value={form.report_id}
                     onChange={handleChange}
                     placeholder="Report ID"
-                    className="w-full p-3 mb-3 bg-[#132c52] border border-blue-600 rounded-xl text-white focus:ring-2 focus:ring-blue-400 outline-none"
+                    className="w-full p-3 mb-3 bg-black/60 border border-yellow-600/40 rounded-xl text-white focus:ring-2 focus:ring-yellow-500 outline-none"
                   />
                 )}
 
@@ -369,7 +367,7 @@ const CrowdReport = () => {
                     value={searchText}
                     onChange={(e) => setSearchText(e.target.value)}
                     placeholder="Search text"
-                    className="w-full p-3 mb-3 bg-[#132c52] border border-blue-600 rounded-xl text-white focus:ring-2 focus:ring-blue-400 outline-none"
+                    className="w-full p-3 mb-3 bg-black/60 border border-yellow-600/40 rounded-xl text-white focus:ring-2 focus:ring-yellow-500 outline-none"
                   />
                 )}
               </>
@@ -381,7 +379,7 @@ const CrowdReport = () => {
                 value={form.report_id}
                 onChange={handleChange}
                 placeholder="Report ID"
-                className="w-full p-3 mb-3 bg-[#132c52] border border-blue-600 rounded-xl text-white focus:ring-2 focus:ring-blue-400 outline-none"
+                className="w-full p-3 mb-3 bg-black/60 border border-yellow-600/40 rounded-xl text-white focus:ring-2 focus:ring-yellow-500 outline-none"
               />
             )}
 
@@ -389,14 +387,14 @@ const CrowdReport = () => {
               <button
                 onClick={handleSubmit}
                 disabled={loading}
-                className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-xl transition"
+                className="bg-yellow-500 hover:bg-yellow-600 text-black px-6 py-2 rounded-xl transition shadow-[0_0_15px_rgba(255,215,0,0.3)]"
               >
                 {loading ? "Please wait..." : "Submit"}
               </button>
 
               <button
                 onClick={resetAll}
-                className="bg-gray-700 hover:bg-gray-600 text-white px-6 py-2 rounded-xl transition"
+                className="bg-gray-800 hover:bg-gray-700 text-white px-6 py-2 rounded-xl transition"
               >
                 Cancel
               </button>
@@ -407,8 +405,8 @@ const CrowdReport = () => {
       )}
 
       {showResults && reports.length > 0 && (
-        <div className="bg-[#0b1f3a] border border-blue-700 rounded-2xl shadow-xl p-6 mt-10">
-          <h2 className="text-xl font-bold mb-6 text-blue-300">
+        <div className="bg-black/70 backdrop-blur-xl border border-yellow-600/40 rounded-2xl shadow-[0_0_25px_rgba(255,215,0,0.15)] p-6 mt-10">
+          <h2 className="text-xl font-bold mb-6 text-yellow-400">
             🔍 Search Results
           </h2>
 
@@ -416,19 +414,19 @@ const CrowdReport = () => {
             {reports.map((r) => (
               <div
                 key={r.report_id}
-                className="flex items-center justify-between gap-4 p-4 rounded-xl border border-blue-700 bg-[#132c52] hover:bg-[#1e3a8a] transition-all duration-200"
+                className="flex items-center justify-between gap-4 p-4 rounded-xl border border-yellow-600/30 bg-black/60 hover:bg-black/50 transition-all duration-200"
               >
                 <div>
-                  <p className="text-sm text-blue-300 mb-1">Report ID: {r.report_id}</p>
-                  <p className="text-white font-semibold">Bus: {r.bus_id}</p>
-                  <p className="text-blue-200 text-sm">Trip: {r.trip_id}</p>
-                  <p className="text-blue-200 text-sm">Passengers: {r.current_count}</p>
+                  <p className="text-sm text-yellow-400 mb-1">Report ID: {r.report_id}</p>
+                  <p className="text-yellow-300 text-sm">Bus: {r.bus_id}</p>
+                  <p className="text-yellow-300 text-sm">Trip: {r.trip_id}</p>
+                  <p className="text-yellow-300 text-sm">Passengers: {r.current_count}</p>
                 </div>
 
                 <span
                   className={`px-3 py-1 rounded-full text-sm font-medium
                     ${
-                      r.crowd_status === "High"
+                      r.crowd_status === "high"
                         ? "bg-red-500/20 text-red-400"
                         : r.crowd_status === "Medium"
                         ? "bg-yellow-500/20 text-yellow-300"
@@ -444,6 +442,7 @@ const CrowdReport = () => {
         </div>
       )}
 
+      </div>
     </div>
   );
 };
@@ -452,10 +451,10 @@ const ActionBtn = ({ icon, text, onClick }) => (
   <button
     type="button"
     onClick={onClick}
-    className="mt-2 flex items-center gap-3 p-5 bg-[#0b1f3a] border border-blue-700 rounded-3xl 
-      shadow-lg hover:bg-blue-700 hover:scale-105 transition text-white"
+    className="mt-2 flex items-center gap-3 p-5 bg-black/70 border border-yellow-600/40 rounded-3xl 
+      shadow-[0_0_20px_rgba(255,215,0,0.15)] hover:bg-black/50 hover:scale-105 transition text-white"
   >
-    <span className="text-blue-400 text-2xl">{icon}</span>
+    <span className="text-yellow-400 text-2xl">{icon}</span>
     <span className="font-semibold text-lg">{text}</span>
   </button>
 );
