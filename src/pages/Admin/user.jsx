@@ -10,9 +10,8 @@ import {
 import { userAPI, roleAPI } from "../../services/api";
 
 const User = () => {
-  // State
   const navigate = useNavigate();
-  const [mode, setMode] = useState(null); // add | find | edit | delete
+  const [mode, setMode] = useState(null);
   const [loading, setLoading] = useState(false);
 
   const [form, setForm] = useState({
@@ -24,16 +23,13 @@ const User = () => {
     role_name: "",
   });
 
-  const [searchType, setSearchType] = useState("id"); // id | all | text
+  const [searchType, setSearchType] = useState("id");
   const [searchText, setSearchText] = useState("");
   const [users, setUsers] = useState([]);
   const [roles, setRoles] = useState([]);
   const [showResults, setShowResults] = useState(false);
   const [editLoaded, setEditLoaded] = useState(false);
-  const [roleDropdownOpen, setRoleDropdownOpen] = useState(false);
-  const [searchTypeDropdownOpen, setSearchTypeDropdownOpen] = useState(false);
 
-  /*  LOAD ROLES  */
   useEffect(() => {
     const loadRoles = async () => {
         try {
@@ -46,7 +42,6 @@ const User = () => {
     loadRoles();
   }, []);
 
-  /*  HELPERS  */
   const resetAll = () => {
     setMode(null);
     setUsers([]);
@@ -60,10 +55,8 @@ const User = () => {
       email: "",
       password: "",
       phone: "",
-      role_id: "",
+      role_name: "",
     });
-    setRoleDropdownOpen(false);
-    setSearchTypeDropdownOpen(false);
     setTimeout(() => setMode(null), 0);
   };
 
@@ -83,7 +76,6 @@ const User = () => {
     setEditLoaded(true);
   };
 
-  /*  API ACTIONS  */
   const addUser = async () => {
     try {
       setLoading(true);
@@ -210,7 +202,6 @@ const User = () => {
   return (
     <div className="min-h-screen bg-black/90 text-white p-6 font-sans">
 
-      {/* Back Button */}
       <button 
         type="button"
         onClick={() => {
@@ -230,12 +221,10 @@ const User = () => {
         <span className="font-semibold text-sm">Back</span>
       </button>     
 
-      {/* Page Title */}
       <h1 className="text-3xl font-bold mb-8 tracking-wide text-yellow-400 drop-shadow-[0_0_8px_rgba(255,215,0,0.6)]">
         User Management
       </h1>
 
-      {/* Action Buttons */}
       {!mode && (
         <div className="mt-25 flex flex-col items-center gap-5 mb-10 [&>button]:w-72">
           <ActionBtn icon={<FaUserPlus />} text="Add User" onClick={() => setMode("add")} />
@@ -245,7 +234,6 @@ const User = () => {
         </div>
       )}
 
-      {/* Form Section */}
       {mode && (
         <div className="flex justify-center items-center h-full mt-20 overflow-hidden">
         <div className="max-w-xl w-full bg-black/70 border border-yellow-600/40 rounded-2xl shadow-[0_0_30px_rgba(255,215,0,0.2)] p-6 backdrop-blur-md">
@@ -287,60 +275,33 @@ const User = () => {
                 className="w-full p-3 mb-3 bg-black/60 border border-yellow-600 rounded-xl text-white focus:ring-2 focus:ring-yellow-500 outline-none"
               />
 
-              {/* Custom Role Dropdown */}
-              <div className="relative w-full mb-3">
-                <div
-                  className="p-3 bg-black/60 border border-yellow-600 rounded-xl cursor-pointer flex justify-between items-center text-white"
-                  onClick={() => setRoleDropdownOpen(!roleDropdownOpen)}
-                >
-                  {form.role_name || "Select Role"}
-                  <span className="text-yellow-400">▼</span>
-                </div>
-                {roleDropdownOpen && (
-                  <ul className="absolute w-full bg-black/70 border border-yellow-600 rounded-xl mt-1 max-h-44 overflow-y-auto z-50">
-                    {roles.map((r) => (
-                      <li
-                        key={r.role_id}
-                        className="p-3 hover:bg-yellow-500 hover:text-black cursor-pointer"
-                        onClick={() => {
-                          setForm({ ...form, role_name: r.role_name });
-                          setRoleDropdownOpen(false);
-                        }}
-                      >
-                        {r.role_name}
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </div>
+              <select
+                name="role_name"
+                value={form.role_name}
+                onChange={handleChange}
+                className="w-full p-3 mb-3 bg-black/60 border border-yellow-600 rounded-xl text-white focus:ring-2 focus:ring-yellow-500 outline-none"
+              >
+                <option value="">Select Role</option>
+                {roles.map((r) => (
+                  <option key={r.role_id} value={r.role_name}>
+                    {r.role_name}
+                  </option>
+                ))}
+              </select>
             </>
           )}
 
-          {/* Custom Search Type Dropdown */}
           {mode === "find" && (
             <>
-              <div className="relative w-full mb-3">
-                <div
-                  className="p-3 bg-black/60 border border-yellow-600 rounded-xl cursor-pointer flex justify-between items-center text-white"
-                  onClick={() => setSearchTypeDropdownOpen(!searchTypeDropdownOpen)}
-                >
-                  {searchType === "id" ? "Find by ID" : searchType === "all" ? "Get All Users" : "Search by Text"}
-                  <span className="text-yellow-400">▼</span>
-                </div>
-                {searchTypeDropdownOpen && (
-                  <ul className="absolute w-full bg-black/70 border border-yellow-600 rounded-xl mt-1 max-h-44 overflow-y-auto z-50">
-                    <li className="p-3 hover:bg-yellow-500 hover:text-black cursor-pointer"
-                      onClick={() => { setSearchType("id"); setSearchTypeDropdownOpen(false); }}
-                    >Find by ID</li>
-                    <li className="p-3 hover:bg-yellow-500 hover:text-black cursor-pointer"
-                      onClick={() => { setSearchType("all"); setSearchTypeDropdownOpen(false); }}
-                    >Get All Users</li>
-                    <li className="p-3 hover:bg-yellow-500 hover:text-black cursor-pointer"
-                      onClick={() => { setSearchType("text"); setSearchTypeDropdownOpen(false); }}
-                    >Search by Text</li>
-                  </ul>
-                )}
-              </div>
+              <select
+                value={searchType}
+                onChange={(e) => setSearchType(e.target.value)}
+                className="w-full p-3 mb-3 bg-black/60 border border-yellow-600 rounded-xl text-white focus:ring-2 focus:ring-yellow-500 outline-none"
+              >
+                <option value="id">Find by ID</option>
+                <option value="all">Get All Users</option>
+                <option value="text">Search by Text</option>
+              </select>
 
               {searchType === "id" && (
                 <input name="id" value={form.id} onChange={handleChange}
@@ -366,7 +327,6 @@ const User = () => {
             />
           )}
 
-          {/* Buttons */}
           <div className="flex gap-3">
             <button
               onClick={handleSubmit}
@@ -388,7 +348,6 @@ const User = () => {
         </div>
       )}
 
-      {/* Search Results */}
       {showResults && users.length > 0 && (
         <div className="bg-black/70 border border-yellow-600/40 rounded-2xl shadow-[0_0_25px_rgba(255,215,0,0.15)] p-6 mt-10 backdrop-blur-md">
 
