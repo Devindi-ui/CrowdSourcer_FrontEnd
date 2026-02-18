@@ -92,6 +92,16 @@ export const alertAPI = {
     deleteAlert: (alertId) => api.delete(`/alert/delete/${alertId}`),  // DELETE
 }
 
+//feedback API
+export const feedbackAPI = {
+    create: (feedback) => api.post('/feedback/create', feedback),  // Add feedback 
+    getAllFeedbacks: () => api.get(`/feedback/all`),  // FIND
+    getFeedbackById: (id) => api.get(`/feedback/find/${id}`),  // FIND
+    getFeedbackByText: (text) => api.get(`/feedback/search/${encodeURIComponent(text)}`),  // FIND
+    updateFeedback: (id, feedback) => api.put(`/feedback/update/${id}`, feedback), // UPDATE
+    deleteFeedback: (feedbackId) => api.delete(`/feedback/delete/${feedbackId}`),  // DELETE
+}
+
 //Trip API
 export const tripAPI = {
     getAllTrips: () => api.get("/trip/all")
