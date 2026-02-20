@@ -116,3 +116,25 @@ export const roleAPI = {
 export const routeAPI = {
     getAllRoutes: () => api.get("/route/all")
 }
+
+//CurrentSituation API 
+export const currentSituationAPI = {
+    create: (data) => api.post("/currentSituation", data),
+    getAll: () => api.get("/currentSituation"),
+    getById: (id) => api.get(`/currentSituation/${id}`),
+    getByText: (text) => api.get(`/currentSituation/search/${text}`),
+    update: (id, data) => api.put(`/currentSituation/${id}`, data),
+    delete: (id) => api.delete(`/currentSituation/${id}`)
+}
+
+// routeStop API 
+export const routeStopAPI = {
+    createRouteStop: (data) => api.post('/routeStop/create', data),
+    bulkCreate: (data) => api.post('/routeStop/bulk', data),
+    getAllRouteStops: () => api.get('/routeStop/all'),
+    getByIdRouteStop: (id) => api.get(`/routeStop/find/${id}`),
+    getByTextRouteStop: (text) => api.get(`/routeStop/search/${encodeURIComponent(text)}`),
+    updateRouteStop: (id, data) => api.put(`/routeStop/update/${id}`, data),
+    bulkUpdate: (data) => api.put("/routeStop/bulk-update", data),
+    deleteRouteStop: (id) => api.delete(`/routeStop/delete/${id}`)
+};

@@ -21,24 +21,30 @@ const AdminDashboard = () => {
     useEffect(() => {
         const fetchStats = async () => {
             try {
-                const [users, buses, trips, alerts] = await Promise.all([
-                    dashboardAPI.users(),
-                    dashboardAPI.buses(),
-                    dashboardAPI.trips(),
-                    dashboardAPI.alerts()
+                const [
+                    authRes,
+                    busRes,
+                    tripRes,
+                    alertRes
+                ] = await Promise.all([
+                    dashboardAPI.getAuthCount(),
+                    dashboardAPI.getBusCount(),
+                    dashboardAPI.getTripCount(),
+                    dashboardAPI.getAlertCount()
                 ]);
 
-                setStats([
-                    {title: "Active Users", value: users.data.total, icon: <FaUsers/>},
-                    {title: "Active Buses", value: buses.data.total, icon: <FaBus/>},
-                    {title: "Ongoing Trips", value: trips.data.total, icon: <FaTripadvisor/>},
-                    {title: "Crowd Alerts", value: alerts.data.total, icon: <FaExclamationTriangle/>}
-                ]);
+                setStats({
+                    users: authRes.data.total,
+                    buses: busRes.data.total,
+                    trips: tripRes.data.total,
+                    alerts: alertRes.data.total,
+                });
 
             } catch (error) {
-                console.error("Failed to load dashboard stats", error.message);
+                console.error("Failed to load dashboard stats", error);
             }
         };
+
 
         fetchStats();
     }, []);
@@ -59,6 +65,8 @@ const AdminDashboard = () => {
         { title: "Route", desc: "Create & edit routes", icon: <FaRoute/>, path: "/route" },
         { title: "Route Stop", desc: "Manage route stops", icon: <FaMapSigns/>, path: "/routeStop" },
         { title: "Trip", desc: "Manage trips", icon: <FaRoad/>, path: "/trip" },
+        { title: "Current Situation", desc: "Manage live bus situations", icon: <FaClipboardList/>, path: "/currentSituation" },
+
     ];
 
     return (

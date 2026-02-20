@@ -18,6 +18,8 @@ import BusType from "./pages/Admin/busType";
 import CrowdReport from "./pages/Admin/crowdReport";
 import FavouriteRoute from "./pages/Admin/favRoute";
 import Feedback from "./pages/Admin/feedback";
+import CurrentSituation from "./pages/Admin/currentSituation";
+import RouteStop from "./pages/Admin/routeStop";
 
 function App() {
     const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -95,6 +97,8 @@ function App() {
                             <Route path="/crowdReport" element={<CrowdReport/>}/>
                             <Route path="/favouriteRoute" element={<FavouriteRoute/>}/>
                             <Route path="/feedback" element={<Feedback/>}/>
+                            <Route path="/currentSituation" element={<CurrentSituation/>}/>
+                            <Route path="/routeStop" element={<RouteStop/>}/>
 
                         </Routes>
                     </>
