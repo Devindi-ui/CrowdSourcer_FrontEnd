@@ -20,6 +20,7 @@ import FavouriteRoute from "./pages/Admin/favRoute";
 import Feedback from "./pages/Admin/feedback";
 import CurrentSituation from "./pages/Admin/currentSituation";
 import RouteStop from "./pages/Admin/routeStop";
+import BusRoute from "./pages/Admin/route";
 
 function App() {
     const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -99,6 +100,7 @@ function App() {
                             <Route path="/feedback" element={<Feedback/>}/>
                             <Route path="/currentSituation" element={<CurrentSituation/>}/>
                             <Route path="/routeStop" element={<RouteStop/>}/>
+                            <Route path="/route" element={<BusRoute/>}/>
 
                         </Routes>
                     </>

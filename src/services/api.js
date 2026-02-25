@@ -114,7 +114,12 @@ export const roleAPI = {
 
 //Route API
 export const routeAPI = {
-    getAllRoutes: () => api.get("/route/all")
+    getAllRoutes: () => api.get("/route/all"),
+    getRouteById: (id) => api.get(`/route/find/${id}`),
+    getRouteByText: (text) => api.get(`/route/search/${encodeURIComponent(text)}`),
+    createRoute: (data) => api.post("/route/create", data),
+    updateRoute: (id, data) => api.put(`/route/update/${id}`, data),
+    deleteRoute: (id) => api.delete(`/route/delete/${id}`)
 }
 
 //CurrentSituation API 
@@ -137,7 +142,7 @@ export const routeStopAPI = {
     // Get all route stops
     getAllRouteStops: () => api.get('/routeStop/all'),
 
-    // ✅ Get stops by route ID (FIXED)
+    // Get stops by route ID (FIXED)
     getByRouteId: (routeId) => 
         api.get(`/routeStop/byRoute/${routeId}`),
 
@@ -159,5 +164,9 @@ export const routeStopAPI = {
 
     // Delete
     deleteRouteStop: (id) => 
-        api.delete(`/routeStop/delete/${id}`)
+        api.delete(`/routeStop/delete/${id}`),
+
+    // Delete all stops by route ID 
+    deleteRouteStopsByRouteId: (routeId) =>
+        api.delete(`/routeStop/deleteByRoute/${routeId}`)
 };
