@@ -119,22 +119,45 @@ export const routeAPI = {
 
 //CurrentSituation API 
 export const currentSituationAPI = {
-    create: (data) => api.post("/currentSituation", data),
-    getAll: () => api.get("/currentSituation"),
-    getById: (id) => api.get(`/currentSituation/${id}`),
+    create: (data) => api.post("/currentSituation/create", data),
+    getAll: () => api.get("/currentSituation/all"),
+    getById: (id) => api.get(`/currentSituation/id/${id}`),
     getByText: (text) => api.get(`/currentSituation/search/${text}`),
-    update: (id, data) => api.put(`/currentSituation/${id}`, data),
-    delete: (id) => api.delete(`/currentSituation/${id}`)
+    delete: (id) => api.put(`/currentSituation/delete/${id}`)
 }
 
-// routeStop API 
+// routeStop API
 export const routeStopAPI = {
+    // Create single route stop
     createRouteStop: (data) => api.post('/routeStop/create', data),
+
+    // Bulk create
     bulkCreate: (data) => api.post('/routeStop/bulk', data),
+
+    // Get all route stops
     getAllRouteStops: () => api.get('/routeStop/all'),
-    getByIdRouteStop: (id) => api.get(`/routeStop/find/${id}`),
-    getByTextRouteStop: (text) => api.get(`/routeStop/search/${encodeURIComponent(text)}`),
-    updateRouteStop: (id, data) => api.put(`/routeStop/update/${id}`, data),
-    bulkUpdate: (data) => api.put("/routeStop/bulk-update", data),
-    deleteRouteStop: (id) => api.delete(`/routeStop/delete/${id}`)
+
+    // ✅ Get stops by route ID (FIXED)
+    getByRouteId: (routeId) => 
+        api.get(`/routeStop/byRoute/${routeId}`),
+
+    // Get route stop by ID
+    getByIdRouteStop: (id) => 
+        api.get(`/routeStop/find/${id}`),
+
+    // Search route stops
+    getByTextRouteStop: (text) => 
+        api.get(`/routeStop/search/${encodeURIComponent(text)}`),
+
+    // Update single route stop
+    updateRouteStop: (id, data) => 
+        api.put(`/routeStop/update/${id}`, data),
+
+    // Bulk update
+    bulkUpdate: (data) => 
+        api.put('/routeStop/bulk-update', data),
+
+    // Delete
+    deleteRouteStop: (id) => 
+        api.delete(`/routeStop/delete/${id}`)
 };
