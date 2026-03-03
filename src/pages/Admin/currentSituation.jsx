@@ -6,7 +6,7 @@ import {
   FaTrash,
   FaArrowLeft
 } from "react-icons/fa";
-import { currentSituationAPI, busAPI, routeStopAPI } from "../../services/api";
+import { currentSituationAPI, busAPI, routeAPI, routeStopAPI } from "../../services/api";
 import ThemeLayout from "../../components/Layout/ThemeLayout";
 
 const CurrentSituation = () => {
@@ -16,11 +16,9 @@ const CurrentSituation = () => {
 
   const [form, setForm] = useState({
     cr_id: "",
-    bus_id: "",
-    bus_number: "",
+    bus_no: "",
+    route_no: "",
     user_id: "",
-    route_id: "",
-    route_name: "",
     current_stop: "",
     avg_passengers: ""
   });
@@ -28,9 +26,14 @@ const CurrentSituation = () => {
   const [searchType, setSearchType] = useState("id");
   const [results, setResults] = useState([]);
   const [buses, setBuses] = useState([]);
+  const [routes, setRoutes] = useState([]);
   const [stops, setStops] = useState([]);
   const [showResults, setShowResults] = useState(false);
   const [error, setError] = useState("");
+
+  // For dynamic loading
+  const [availableBuses, setAvailableBuses] = useState([]);
+  const [selectedRouteName, setSelectedRouteName] = useState("");
 
   useEffect(() => {
     loadInitialData();
@@ -41,21 +44,58 @@ const CurrentSituation = () => {
       const busRes = await busAPI.getAllBuses();
       console.log("Buses response:", busRes);
       setBuses(busRes?.data?.data || []);
+      
+      const routeRes = await routeAPI.getAllRoutes();
+      console.log("Routes response:", routeRes);
+      setRoutes(routeRes?.data?.data || []);
     } catch (error) {
       console.error("Failed to load initial data", error);
     }
   };
 
-  const loadStopsByRoute = async (route_id) => {
-    try {
-      console.log("Loading stops for route:", route_id);
+  // Load buses when route is selected
+  useEffect(() => {
+    const loadBusesForRoute = async () => {
+      if (form.route_no) {
+        try {
+          // Filter buses that have this route_no
+          const route = routes.find(r => r.route_no === form.route_no);
+          if (route) {
+            const routeBuses = buses.filter(bus => bus.route_id === route.route_id);
+            setAvailableBuses(routeBuses);
+            setSelectedRouteName(route.route_name || "");
+          } else {
+            setAvailableBuses([]);
+            setSelectedRouteName("");
+          }
+          // Reset bus and stops when route changes
+          setForm(prev => ({ ...prev, bus_no: "", current_stop: "" }));
+          setStops([]);
+        } catch (error) {
+          console.error("Failed to load buses for route:", error);
+        }
+      } else {
+        setAvailableBuses([]);
+        setSelectedRouteName("");
+        setForm(prev => ({ ...prev, bus_no: "", current_stop: "" }));
+        setStops([]);
+      }
+    };
+    loadBusesForRoute();
+  }, [form.route_no, routes, buses]);
 
-      if (!route_id) {
+  // 🔴 FIXED: Load stops using route number
+  const loadStopsByRouteNo = async (routeNo) => {
+    try {
+      console.log("Loading stops for route number:", routeNo);
+
+      if (!routeNo) {
         setStops([]);
         return;
       }
 
-      const res = await routeStopAPI.getByRouteId(route_id);
+      // Use getByRouteNo instead of getByRouteId
+      const res = await routeStopAPI.getByRouteNo(routeNo);
       console.log("Stops response:", res);
 
       const stopsData = res?.data?.data || [];
@@ -67,39 +107,20 @@ const CurrentSituation = () => {
     }
   };
 
-  const handleBusNumberChange = async (e) => {
-    const selectedBusNumber = e.target.value;
+  // Handle bus selection
+  const handleBusChange = async (e) => {
+    const selectedBusNo = e.target.value;
+    
+    setForm({
+      ...form,
+      bus_no: selectedBusNo,
+      current_stop: "" // Reset stop when bus changes
+    });
 
-    const selectedBus = buses.find(
-      (bus) => bus.bus_number === selectedBusNumber
-    );
-
-    console.log("Selected Bus:", selectedBus);
-
-    if (selectedBus) {
-      setForm({
-        ...form,
-        bus_number: selectedBus.bus_number,
-        bus_id: selectedBus.bus_id,
-        route_id: selectedBus.route_id,
-        route_name: selectedBus.route_name || "",
-        current_stop: ""
-      });
-
-      if (selectedBus.route_id) {
-        await loadStopsByRoute(selectedBus.route_id);
-      } else {
-        setStops([]);
-      }
+    // Load stops using the route number (which we already have)
+    if (form.route_no) {
+      await loadStopsByRouteNo(form.route_no);
     } else {
-      setForm({
-        ...form,
-        bus_number: selectedBusNumber,
-        bus_id: "",
-        route_id: "",
-        route_name: "",
-        current_stop: ""
-      });
       setStops([]);
     }
   };
@@ -111,20 +132,20 @@ const CurrentSituation = () => {
     setShowResults(false);
     setSearchType("id");
     setError("");
+    setAvailableBuses([]);
+    setSelectedRouteName("");
     setForm({
       cr_id: "",
-      bus_id: "",
-      bus_number: "",
+      bus_no: "",
+      route_no: "",
       user_id: "",
-      route_id: "",
-      route_name: "",
       current_stop: "",
       avg_passengers: ""
     });
   };
 
   const addCurrentSituation = async () => {
-    if (!form.bus_id || !form.user_id || !form.current_stop || !form.avg_passengers) {
+    if (!form.route_no || !form.bus_no || !form.user_id || !form.current_stop || !form.avg_passengers) {
       alert("Please fill all fields");
       return;
     }
@@ -134,9 +155,9 @@ const CurrentSituation = () => {
       setError("");
 
       await currentSituationAPI.create({
-        bus_id: form.bus_id,
+        bus_no: form.bus_no,
+        route_no: form.route_no,
         user_id: form.user_id,
-        route_id: form.route_id,
         current_stop: form.current_stop,
         avg_passengers: parseInt(form.avg_passengers)
       });
@@ -347,40 +368,67 @@ const CurrentSituation = () => {
                   disabled={loading}
                 />
 
+                {/* Route Number Selection */}
                 <select
-                  value={form.bus_number}
-                  onChange={handleBusNumberChange}
+                  name="route_no"
+                  value={form.route_no}
+                  onChange={(e) => {
+                    setForm({ ...form, route_no: e.target.value, bus_no: "", current_stop: "" });
+                    setStops([]);
+                  }}
                   className="w-full p-3 mb-3 bg-black border border-yellow-600 rounded-xl text-white"
                   disabled={loading}
                 >
-                  <option value="">Select Bus Number</option>
-                  {buses.map(bus => (
-                    <option key={bus.bus_id} value={bus.bus_number}>
-                      {bus.bus_number} - {bus.route_name || 'No Route'}
+                  <option value="">Select Route Number</option>
+                  {routes.map(route => (
+                    <option key={route.route_id} value={route.route_no}>
+                      {route.route_no} - {route.route_name}
                     </option>
                   ))}
                 </select>
 
+                {/* Bus Number Selection (filtered by route) */}
+                {form.route_no && (
+                  <select
+                    name="bus_no"
+                    value={form.bus_no}
+                    onChange={handleBusChange}
+                    className="w-full p-3 mb-3 bg-black border border-yellow-600 rounded-xl text-white"
+                    disabled={loading || availableBuses.length === 0}
+                  >
+                    <option value="">Select Bus Number</option>
+                    {availableBuses.map(bus => (
+                      <option key={bus.bus_id} value={bus.bus_number}>
+                        {bus.bus_number}
+                      </option>
+                    ))}
+                  </select>
+                )}
+
+                {/* Route Name Display */}
                 <input
-                  value={form.route_name}
+                  value={selectedRouteName}
                   readOnly
-                  placeholder="Route (Auto-filled)"
+                  placeholder="Route Name (Auto-filled)"
                   className="w-full p-3 mb-3 bg-gray-900 border border-yellow-600 rounded-xl text-yellow-400"
                 />
 
-                <select
-                  value={form.current_stop}
-                  onChange={(e) => setForm({ ...form, current_stop: e.target.value })}
-                  className="w-full p-3 mb-3 bg-black border border-yellow-600 rounded-xl text-white"
-                  disabled={loading || stops.length === 0}
-                >
-                  <option value="">Select Stop</option>
-                  {stops.map(s => (
-                    <option key={s.stop_order_id} value={s.stop_name}>
-                      {s.stop_name}
-                    </option>
-                  ))}
-                </select>
+                {/* Current Stop Selection */}
+                {form.route_no && (
+                  <select
+                    value={form.current_stop}
+                    onChange={(e) => setForm({ ...form, current_stop: e.target.value })}
+                    className="w-full p-3 mb-3 bg-black border border-yellow-600 rounded-xl text-white"
+                    disabled={loading || stops.length === 0}
+                  >
+                    <option value="">Select Stop</option>
+                    {stops.map(s => (
+                      <option key={s.stop_order_id} value={s.stop_name}>
+                        {s.stop_name}
+                      </option>
+                    ))}
+                  </select>
+                )}
 
                 <input
                   type="number"
@@ -427,6 +475,7 @@ const CurrentSituation = () => {
                 <div className="grid grid-cols-2 gap-2">
                   <p className="text-white"><span className="text-yellow-400">CR ID:</span> {r.cr_id}</p>
                   <p className="text-white"><span className="text-yellow-400">Bus:</span> {r.bus_number}</p>
+                  <p className="text-white"><span className="text-yellow-400">Route No:</span> {r.route_no}</p>
                   <p className="text-white"><span className="text-yellow-400">Route:</span> {r.route_name}</p>
                   <p className="text-white"><span className="text-yellow-400">Stop:</span> {r.current_stop}</p>
                   <p className="text-white"><span className="text-yellow-400">Passengers:</span> {r.avg_passengers}</p>

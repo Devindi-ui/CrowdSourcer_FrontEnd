@@ -5,7 +5,7 @@ import { authAPI } from "../../services/api";
 import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
 
-const Login = ({ onLoginSuccess, onShowSignup }) => {
+const Login = ({ onLoginSuccess }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -20,37 +20,62 @@ const Login = ({ onLoginSuccess, onShowSignup }) => {
       password
     };
 
-    const loginPromise = authAPI.login(credentials);
+    try {
+      const res = await authAPI.login(credentials);
+      console.log("Login response:", res.data);
 
-    toast
-      .promise(loginPromise, {
-        loading: "Logging in...",
-        success: <b>Login successful!</b>,
-        error: <b>Invalid email or password</b>,
-      })
-      .then((res) => {
-        if (res.data?.user?.status_d === 0) {
+      // Check if login was successful
+      if (res.data?.success) {
+        // Check if user account is deactivated
+        if (res.data.data?.user?.status_d === 0) {
           toast.error(
             <b className="text-red-500">
               Your account has been deactivated. Please contact admin.
             </b>
           );
+          setIsSubmitting(false);
           return;
         }
 
-        localStorage.setItem("token", res.data.token);
-
-        if (onLoginSuccess) {
-          onLoginSuccess(res.data);
+        // Store user data in localStorage
+        localStorage.setItem("user", JSON.stringify(res.data.data.user));
+        
+        // Store token if available (for future JWT implementation)
+        if (res.data.data?.token) {
+          localStorage.setItem("token", res.data.data.token);
         }
+
+        // Store user role for role-based routing
+        localStorage.setItem("role", res.data.data.user?.role || res.data.data.user?.role_name);
+
+        toast.success("Login successful!");
+
+        // Call onLoginSuccess callback if provided
+        if (onLoginSuccess) {
+          onLoginSuccess(res.data.data);
+        }
+
+        // Navigate to main dashboard
         navigate("/");
-      })
-      .catch((err) => {
-        console.error(err);
-      })
-      .finally(() => {
-        setIsSubmitting(false);
-      });
+      } else {
+        toast.error(res.data?.message || "Invalid email or password");
+      }
+    } catch (err) {
+      console.error("Login error:", err);
+      
+      // Handle different error scenarios
+      if (err.response?.status === 401) {
+        toast.error("Invalid email or password");
+      } else if (err.response?.data?.message) {
+        toast.error(err.response.data.message);
+      } else if (err.message) {
+        toast.error(err.message);
+      } else {
+        toast.error("Login failed. Please try again.");
+      }
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -58,11 +83,12 @@ const Login = ({ onLoginSuccess, onShowSignup }) => {
 
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(212,175,55,0.15),transparent_60%)] pointer-events-none"></div>
 
-      <div className="flex w-[950px] max-w-[95%] h-[560px] rounded-3xl 
+      <div className="flex w-[950px] max-w-[95%] min-h-[560px] rounded-3xl 
         shadow-[0_0_60px_rgba(212,175,55,0.15)] overflow-hidden 
         border border-yellow-600/30 
         backdrop-blur-xl bg-white/5 animate-fadeIn">
 
+        {/* Left Side - Branding */}
         <div className="hidden md:flex w-1/2 bg-gradient-to-br from-black via-zinc-900 to-black 
           text-white flex-col justify-center items-center p-10 text-center relative">
 
@@ -84,6 +110,7 @@ const Login = ({ onLoginSuccess, onShowSignup }) => {
           </p>
         </div>
 
+        {/* Right Side - Form */}
         <div className="w-full md:w-1/2 flex justify-center items-center p-10 bg-black/70 backdrop-blur-xl relative">
 
           <div className="absolute inset-0 bg-gradient-to-br from-white/5 via-transparent to-yellow-500/5 pointer-events-none"></div>
@@ -110,10 +137,11 @@ const Login = ({ onLoginSuccess, onShowSignup }) => {
                            focus:outline-none focus:ring-2
                            focus:ring-yellow-500 focus:border-yellow-500
                            transition duration-300"
+                disabled={isSubmitting}
               />
             </div>
 
-            <div className="relative mb-6">
+            <div className="relative mb-2">
               <FaLock className="absolute top-3.5 left-3 text-yellow-500" />
               <input
                 type="password"
@@ -127,7 +155,18 @@ const Login = ({ onLoginSuccess, onShowSignup }) => {
                            focus:outline-none focus:ring-2
                            focus:ring-yellow-500 focus:border-yellow-500
                            transition duration-300"
+                disabled={isSubmitting}
               />
+            </div>
+
+            {/* Forgot Password link - Right aligned */}
+            <div className="flex justify-end mb-4">
+              <Link
+                to="/forgot-password"
+                className="text-sm text-yellow-400/70 hover:text-yellow-400 transition-colors"
+              >
+                Forgot password?
+              </Link>
             </div>
 
             <button
@@ -139,11 +178,20 @@ const Login = ({ onLoginSuccess, onShowSignup }) => {
                          shadow-[0_0_25px_rgba(212,175,55,0.4)]
                          hover:scale-[1.02] hover:shadow-[0_0_35px_rgba(212,175,55,0.6)]
                          transition duration-300
-                         disabled:opacity-60"
+                         disabled:opacity-60 disabled:cursor-not-allowed"
             >
-              {isSubmitting ? "Logging in..." : "Login"}
+              {isSubmitting ? (
+                <span className="flex items-center justify-center gap-2">
+                  <svg className="animate-spin h-5 w-5 text-black" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  Logging in...
+                </span>
+              ) : "Login"}
             </button>
 
+            {/* Sign up link */}
             <p className="text-center text-sm mt-6 text-zinc-400">
               Don't have an account?{" "}
               <Link
@@ -156,6 +204,23 @@ const Login = ({ onLoginSuccess, onShowSignup }) => {
           </form>
         </div>
       </div>
+
+      {/* Add animation keyframes */}
+      <style>{`
+        @keyframes fadeIn {
+          from {
+            opacity: 0;
+            transform: translateY(20px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+        .animate-fadeIn {
+          animation: fadeIn 0.6s ease-out;
+        }
+      `}</style>
     </div>
   );
 };

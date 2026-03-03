@@ -25,9 +25,9 @@ const BusAssignment = () => {
 
   const [form, setForm] = useState({
     id: "",
-    bus_id: "",
+    bus_no: "",           // 🔴 Changed from bus_id
     user_id: "",
-    route_id: "",
+    route_no: "",         // 🔴 Changed from route_id
     assigned_place: "",
     assigned_date: "",
     assigned_time: "",
@@ -40,6 +40,7 @@ const BusAssignment = () => {
   const [assignments, setAssignments] = useState([]);
   const [showResults, setShowResults] = useState(false);
   const [editLoaded, setEditLoaded] = useState(false);
+  const [error, setError] = useState("");
 
   const [buses, setBuses] = useState([]);
   const [routes, setRoutes] = useState([]);
@@ -52,12 +53,12 @@ const BusAssignment = () => {
         const routeRes = await routeAPI.getAllRoutes();
         const userRes = await userAPI.getAllUsers();
 
-        setBuses(busRes.data.data);
-        setRoutes(routeRes.data.data);
-        setUsers(userRes.data.data);
+        setBuses(busRes.data?.data || []);
+        setRoutes(routeRes.data?.data || []);
+        setUsers(userRes.data?.data || []);
 
-      } catch {
-        console.log("Failed loading FK data");
+      } catch (err) {
+        console.log("Failed loading FK data", err);
       }
     };
     loadData();
@@ -70,12 +71,13 @@ const BusAssignment = () => {
     setSearchType("id");
     setShowResults(false);
     setEditLoaded(false);
+    setError("");
 
     setForm({
       id: "",
-      bus_id: "",
+      bus_no: "",
       user_id: "",
-      route_id: "",
+      route_no: "",
       assigned_place: "",
       assigned_date: "",
       assigned_time: "",
@@ -88,13 +90,24 @@ const BusAssignment = () => {
   };
 
   const createAssignment = async () => {
+    // Validation
+    if (!form.bus_no || !form.user_id || !form.route_no || !form.assigned_place || !form.assigned_date || !form.assigned_time) {
+      alert("Please fill all fields");
+      return;
+    }
+
     try {
       setLoading(true);
+      setError("");
+
       await busAssignmentAPI.createAssignment(form);
       alert("✅ Assignment created");
       resetAll();
-    } catch {
-      alert("❌ Create failed");
+    } catch (err) {
+      console.error("Create failed:", err);
+      const errorMsg = err.response?.data?.msg || err.response?.data?.message || "Create failed";
+      setError(errorMsg);
+      alert("❌ " + errorMsg);
     } finally {
       setLoading(false);
     }
@@ -105,28 +118,53 @@ const BusAssignment = () => {
       setLoading(true);
       setAssignments([]);
       setShowResults(false);
+      setError("");
 
       if (searchType === "id") {
-        if (!form.id) return alert("Enter Assignment ID");
+        if (!form.id) {
+          alert("Enter Assignment ID");
+          setLoading(false);
+          return;
+        }
         const res = await busAssignmentAPI.getAssignmentById(form.id);
-        setAssignments([res.data.data]);
+        if (res.data?.success && res.data?.data) {
+          setAssignments([res.data.data]);
+          setShowResults(true);
+        } else {
+          alert("Assignment not found");
+        }
       }
 
       if (searchType === "all") {
         const res = await busAssignmentAPI.getAllAssignments();
-        setAssignments(res.data.data);
+        if (res.data?.success && res.data?.data) {
+          setAssignments(res.data.data);
+          setShowResults(true);
+        } else {
+          setAssignments(res.data?.data || []);
+          setShowResults(true);
+        }
       }
 
       if (searchType === "text") {
-        if (!searchText.trim()) return alert("Enter search text");
+        if (!searchText.trim()) {
+          alert("Enter search text");
+          setLoading(false);
+          return;
+        }
         const res = await busAssignmentAPI.getAssignmentByText(searchText);
-        setAssignments(res.data.data || []);
-        setShowResults(true);
+        if (res.data?.success && res.data?.data) {
+          setAssignments(res.data.data);
+          setShowResults(true);
+        } else {
+          setAssignments(res.data?.data || []);
+          setShowResults(true);
+        }
       }
 
-      setShowResults(true);
-
-    } catch {
+    } catch (err) {
+      console.error("Find failed:", err);
+      setError("Assignment not found");
       alert("❌ Not found");
     } finally {
       setLoading(false);
@@ -134,29 +172,40 @@ const BusAssignment = () => {
   };
 
   const loadForEdit = async () => {
-    if (!form.id) return alert("Enter Assignment ID");
+    if (!form.id) {
+      alert("Enter Assignment ID");
+      return;
+    }
 
     try {
       setLoading(true);
+      setError("");
       const res = await busAssignmentAPI.getAssignmentById(form.id);
-      const a = res.data.data;
+      
+      if (res.data?.success && res.data?.data) {
+        const a = res.data.data;
 
-      setForm({
-        id: a.assignment_id,
-        bus_id: a.bus_id,
-        user_id: a.user_id,
-        route_id: a.route_id,
-        assigned_place: a.assigned_place,
-        assigned_date: a.assigned_date?.split("T")[0],
-        assigned_time: a.assigned_time,
-        status: a.status
-      });
+        setForm({
+          id: a.assignment_id,
+          bus_no: a.bus_number,        // 🔴 Use bus_number
+          user_id: a.user_id,
+          route_no: a.route_no,        // 🔴 Use route_no
+          assigned_place: a.assigned_place,
+          assigned_date: a.assigned_date?.split("T")[0],
+          assigned_time: a.assigned_time,
+          status: a.status
+        });
 
-      setAssignments([a]);
-      setShowResults(true);
-      setEditLoaded(true);
+        setAssignments([a]);
+        setShowResults(true);
+        setEditLoaded(true);
+      } else {
+        alert("Assignment not found");
+      }
 
-    } catch {
+    } catch (err) {
+      console.error("Load failed:", err);
+      setError("Assignment not found");
       alert("❌ Assignment not found");
     } finally {
       setLoading(false);
@@ -166,27 +215,56 @@ const BusAssignment = () => {
   const updateAssignment = async () => {
     try {
       setLoading(true);
+      setError("");
+
       await busAssignmentAPI.updateAssignment(form.id, form);
       alert("✅ Updated");
+      
       const res = await busAssignmentAPI.getAssignmentById(form.id);
-      setAssignments([res.data.data]);
-      setShowResults(true);
-    } catch {
-      alert("❌ Update failed");
+      if (res.data?.success && res.data?.data) {
+        setAssignments([res.data.data]);
+        setShowResults(true);
+      }
+    } catch (err) {
+      console.error("Update failed:", err);
+      const errorMsg = err.response?.data?.msg || err.response?.data?.message || "Update failed";
+      setError(errorMsg);
+      alert("❌ " + errorMsg);
     } finally {
       setLoading(false);
     }
   };
 
   const deleteAssignment = async () => {
+    if (!form.id) {
+      alert("Enter Assignment ID");
+      return;
+    }
+
+    if (!window.confirm("Are you sure you want to delete this assignment?")) {
+      return;
+    }
+
     try {
       setLoading(true);
+      setError("");
       await busAssignmentAPI.deleteAssignment(form.id);
       alert("✅ Deleted");
-      const res = await busAssignmentAPI.getAllAssignments();
-      setAssignments(res.data.data);
-      setShowResults(true);
-    } catch {
+      
+      if (searchType === "all") {
+        const res = await busAssignmentAPI.getAllAssignments();
+        setAssignments(res.data?.data || []);
+        setShowResults(true);
+      } else {
+        setAssignments([]);
+        setShowResults(false);
+      }
+      
+      setForm({ ...form, id: "" });
+
+    } catch (err) {
+      console.error("Delete failed:", err);
+      setError("Delete failed");
       alert("❌ Delete failed");
     } finally {
       setLoading(false);
@@ -195,18 +273,25 @@ const BusAssignment = () => {
 
   const handleSubmit = () => {
     if (mode === "add") createAssignment();
-    if (mode === "find") findAssignment();
-    if (mode === "edit" && !editLoaded) loadForEdit();
-    else if (mode === "edit") updateAssignment();
-    if (mode === "delete") deleteAssignment();
+    else if (mode === "find") findAssignment();
+    else if (mode === "edit" && !editLoaded) loadForEdit();
+    else if (mode === "edit" && editLoaded) updateAssignment();
+    else if (mode === "delete") deleteAssignment();
   };
 
   return (
     <ThemeLayout pageTitle="Bus Assignment Management">
 
+      {/* Error Display */}
+      {error && (
+        <div className="mt-20 max-w-xl mx-auto bg-red-900/50 border border-red-500 text-red-200 p-4 rounded-xl">
+          Error: {error}
+        </div>
+      )}
+
       <button
         type="button"
-        onClick={() => mode ? setMode(null) : navigate("/admin")}
+        onClick={() => mode ? resetAll() : navigate("/admin")}
         className="fixed top-6 left-6 z-50 flex items-center gap-2 mt-15
         bg-black/60 backdrop-blur-md text-yellow-400 px-4 py-2 rounded-full 
         shadow-[0_0_20px_rgba(255,215,0,0.25)]
@@ -240,53 +325,65 @@ const BusAssignment = () => {
                 onChange={handleChange}
                 placeholder="Enter Assignment ID"
                 className="w-full p-3 mb-3 bg-black/60 border border-yellow-600 rounded-xl text-white focus:ring-2 focus:ring-yellow-500 outline-none"
+                disabled={loading}
               />
             )}
 
             {(mode === "add" || (mode === "edit" && editLoaded)) && (
               <>
-                <select name="bus_id" value={form.bus_id} onChange={handleChange}
-                  className="w-full p-3 mb-3 bg-black/60 border border-yellow-600 rounded-xl text-white focus:ring-2 focus:ring-yellow-500 outline-none">
-                  <option value="">Select Bus</option>
+                {/* 🔴 Changed from bus_id to bus_no */}
+                <select name="bus_no" value={form.bus_no} onChange={handleChange}
+                  className="w-full p-3 mb-3 bg-black/60 border border-yellow-600 rounded-xl text-white focus:ring-2 focus:ring-yellow-500 outline-none"
+                  disabled={loading}>
+                  <option value="">Select Bus Number</option>
                   {buses.map(b => (
-                    <option key={b.bus_id} value={b.bus_id}>{b.bus_number}</option>
+                    <option key={b.bus_id} value={b.bus_number}>{b.bus_number}</option>
                   ))}
                 </select>
 
                 <select name="user_id" value={form.user_id} onChange={handleChange}
-                  className="w-full p-3 mb-3 bg-black/60 border border-yellow-600 rounded-xl text-white focus:ring-2 focus:ring-yellow-500 outline-none">
+                  className="w-full p-3 mb-3 bg-black/60 border border-yellow-600 rounded-xl text-white focus:ring-2 focus:ring-yellow-500 outline-none"
+                  disabled={loading}>
                   <option value="">Select User</option>
                   {users.map(u => (
                     <option key={u.user_id} value={u.user_id}>{u.name}</option>
                   ))}
                 </select>
 
-                <select name="route_id" value={form.route_id} onChange={handleChange}
-                  className="w-full p-3 mb-3 bg-black/60 border border-yellow-600 rounded-xl text-white focus:ring-2 focus:ring-yellow-500 outline-none">
-                  <option value="">Select Route</option>
+                {/* 🔴 Changed from route_id to route_no */}
+                <select name="route_no" value={form.route_no} onChange={handleChange}
+                  className="w-full p-3 mb-3 bg-black/60 border border-yellow-600 rounded-xl text-white focus:ring-2 focus:ring-yellow-500 outline-none"
+                  disabled={loading}>
+                  <option value="">Select Route Number</option>
                   {routes.map(r => (
-                    <option key={r.route_id} value={r.route_id}>{r.route_name}</option>
+                    <option key={r.route_id} value={r.route_no}>
+                      {r.route_no} - {r.route_name}
+                    </option>
                   ))}
                 </select>
 
                 <input name="assigned_place" value={form.assigned_place} onChange={handleChange}
                   placeholder="Assigned Place"
-                  className="w-full p-3 mb-3 bg-black/60 border border-yellow-600 rounded-xl text-white focus:ring-2 focus:ring-yellow-500 outline-none"/>
+                  className="w-full p-3 mb-3 bg-black/60 border border-yellow-600 rounded-xl text-white focus:ring-2 focus:ring-yellow-500 outline-none"
+                  disabled={loading}/>
 
                 <input type="date" name="assigned_date" value={form.assigned_date}
                   onChange={handleChange}
-                  className="w-full p-3 mb-3 bg-black/60 border border-yellow-600 rounded-xl text-white focus:ring-2 focus:ring-yellow-500 outline-none"/>
+                  className="w-full p-3 mb-3 bg-black/60 border border-yellow-600 rounded-xl text-white focus:ring-2 focus:ring-yellow-500 outline-none"
+                  disabled={loading}/>
 
                 <input type="time" name="assigned_time" value={form.assigned_time}
                   onChange={handleChange}
-                  className="w-full p-3 mb-3 bg-black/60 border border-yellow-600 rounded-xl text-white focus:ring-2 focus:ring-yellow-500 outline-none"/>
+                  className="w-full p-3 mb-3 bg-black/60 border border-yellow-600 rounded-xl text-white focus:ring-2 focus:ring-yellow-500 outline-none"
+                  disabled={loading}/>
               </>
             )}
 
             {mode === "find" && (
               <>
                 <select value={searchType} onChange={(e) => setSearchType(e.target.value)}
-                  className="w-full p-3 mb-3 bg-black/60 border border-yellow-600 rounded-xl text-white focus:ring-2 focus:ring-yellow-500 outline-none">
+                  className="w-full p-3 mb-3 bg-black/60 border border-yellow-600 rounded-xl text-white focus:ring-2 focus:ring-yellow-500 outline-none"
+                  disabled={loading}>
                   <option value="id">Find by ID</option>
                   <option value="all">Get All</option>
                   <option value="text">Search by Text</option>
@@ -295,13 +392,15 @@ const BusAssignment = () => {
                 {searchType === "id" && (
                   <input name="id" value={form.id} onChange={handleChange}
                     placeholder="Assignment ID"
-                    className="w-full p-3 mb-3 bg-black/60 border border-yellow-600 rounded-xl text-white focus:ring-2 focus:ring-yellow-500 outline-none"/>
+                    className="w-full p-3 mb-3 bg-black/60 border border-yellow-600 rounded-xl text-white focus:ring-2 focus:ring-yellow-500 outline-none"
+                    disabled={loading}/>
                 )}
 
                 {searchType === "text" && (
                   <input value={searchText} onChange={(e) => setSearchText(e.target.value)}
-                    placeholder="Search..."
-                    className="w-full p-3 mb-3 bg-black/60 border border-yellow-600 rounded-xl text-white focus:ring-2 focus:ring-yellow-500 outline-none"/>
+                    placeholder="Search by bus number, route, place..."
+                    className="w-full p-3 mb-3 bg-black/60 border border-yellow-600 rounded-xl text-white focus:ring-2 focus:ring-yellow-500 outline-none"
+                    disabled={loading}/>
                 )}
               </>
             )}
@@ -309,17 +408,21 @@ const BusAssignment = () => {
             {mode === "delete" && (
               <input name="id" value={form.id} onChange={handleChange}
                 placeholder="Assignment ID"
-                className="w-full p-3 mb-3 bg-black/60 border border-yellow-600 rounded-xl text-white focus:ring-2 focus:ring-yellow-500 outline-none"/>
+                className="w-full p-3 mb-3 bg-black/60 border border-yellow-600 rounded-xl text-white focus:ring-2 focus:ring-yellow-500 outline-none"
+                disabled={loading}/>
             )}
 
             <div className="flex gap-3">
               <button onClick={handleSubmit} disabled={loading}
-                className="bg-yellow-500 hover:bg-yellow-600 text-black px-6 py-2 rounded-xl font-semibold transition shadow-[0_0_15px_rgba(255,215,0,0.3)]">
-                {loading ? "Please wait..." : "Submit"}
+                className="bg-yellow-500 hover:bg-yellow-600 text-black px-6 py-2 rounded-xl font-semibold transition shadow-[0_0_15px_rgba(255,215,0,0.3)] disabled:opacity-50">
+                {loading ? "Please wait..." : 
+                  mode === "edit" && !editLoaded ? "Load" : 
+                  mode === "edit" && editLoaded ? "Update" :
+                  mode === "delete" ? "Delete" : "Submit"}
               </button>
 
-              <button onClick={resetAll}
-                className="bg-gray-800 hover:bg-gray-700 text-white px-6 py-2 rounded-xl transition">
+              <button onClick={resetAll} disabled={loading}
+                className="bg-gray-800 hover:bg-gray-700 text-white px-6 py-2 rounded-xl transition disabled:opacity-50">
                 Cancel
               </button>
             </div>
@@ -330,7 +433,7 @@ const BusAssignment = () => {
       {showResults && assignments.length > 0 && (
         <div className="bg-black/70 border border-yellow-600/40 rounded-2xl shadow-[0_0_25px_rgba(255,215,0,0.15)] p-6 mt-10 backdrop-blur-md">
           <h2 className="text-xl font-bold mb-6 text-yellow-400">
-            🔍 Results
+            🔍 Results ({assignments.length})
           </h2>
 
           <div className="space-y-4">
@@ -339,9 +442,9 @@ const BusAssignment = () => {
                 className="flex justify-between p-4 rounded-xl border border-yellow-600/30 bg-black/60 hover:bg-black/50 transition-all duration-200">
                 <div>
                   <p className="font-semibold text-white">
-                    {a.bus_number} → {a.route_name}
+                    Bus {a.bus_number} → Route {a.route_no} ({a.route_name})
                   </p>
-                  <p className="text-yellow-300">User ID: {a.user_id}</p>
+                  <p className="text-yellow-300">User: {a.user_name || a.user_id}</p>
                   <p className="text-yellow-300">Place: {a.assigned_place}</p>
                   <p className="text-yellow-300">
                     Date: {a.assigned_date

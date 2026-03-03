@@ -14,6 +14,7 @@ import {
 } from "react-icons/fa";
 import ThemeLayout from "../../components/Layout/ThemeLayout";
 import ActionBtn from "../../components/Layout/ActionBtn";
+import { routeAPI } from "../../services/api";
 
 const Route = () => {
   const navigate = useNavigate();
@@ -84,7 +85,7 @@ const Route = () => {
       setError("");
 
       const requestData = {
-        route_no: form.route_no,  // Send route_no to backend
+        route_no: form.route_no,
         route_name: form.route_name,
         start_point: form.start_point,
         end_point: form.end_point,
@@ -96,22 +97,13 @@ const Route = () => {
 
       console.log("Sending data:", requestData);
 
-      const response = await fetch('http://localhost:5000/api/v1/route/create', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(requestData)
-      });
+      const response = await routeAPI.createRoute(requestData);
 
-      const data = await response.json();
-      console.log("Response:", data);
-      
-      if (response.ok) {
+      if (response.data?.success) {
         alert("✅ Route added successfully");
         resetAll();
       } else {
-        throw new Error(data.msg || data.message || "Failed to add");
+        throw new Error(response.data?.msg || "Failed to add");
       }
 
     } catch (error) {
@@ -140,43 +132,31 @@ const Route = () => {
 
         console.log("Finding by Route Number:", form.route_no);
         
-        // Get all routes and filter by route_no (since backend might not have direct search by route_no)
-        const response = await fetch('http://localhost:5000/api/v1/route/all');
-        const data = await response.json();
+        // 🔴 Use the new API method
+        const response = await routeAPI.getRouteByNumber(form.route_no);
         
-        if (response.ok && data.data) {
-          const filteredRoutes = data.data.filter(route => 
-            route.route_no && route.route_no.toString() === form.route_no.toString()
-          );
-          
-          if (filteredRoutes.length > 0) {
-            setRoutes(filteredRoutes);
-            setShowResults(true);
-          } else {
-            alert("No route found with this Route Number");
-          }
+        if (response.data?.success && response.data?.data) {
+          setRoutes([response.data.data]);
+          setShowResults(true);
         } else {
-          throw new Error(data.msg || "Failed to find route");
+          alert("No route found with this Route Number");
         }
       }
 
       if (searchType === "all") {
         console.log("Getting all routes");
-        const response = await fetch('http://localhost:5000/api/v1/route/all');
-        const data = await response.json();
+        const response = await routeAPI.getAllRoutes();
         
-        if (response.ok) {
-          if (data.data && data.data.length > 0) {
-            setRoutes(data.data);
+        if (response.data?.success && response.data?.data) {
+          if (response.data.data.length > 0) {
+            setRoutes(response.data.data);
             setShowResults(true);
-          } else if (data.msg === "No data found") {
-            alert("No routes found");
           } else {
-            setRoutes(data.data || []);
-            setShowResults(true);
+            alert("No routes found");
           }
         } else {
-          throw new Error(data.msg || "Failed to get routes");
+          setRoutes(response.data?.data || []);
+          setShowResults(true);
         }
       }
 
@@ -188,21 +168,18 @@ const Route = () => {
         }
 
         console.log("Searching by text:", searchText);
-        const response = await fetch(`http://localhost:5000/api/v1/route/search/${encodeURIComponent(searchText)}`);
-        const data = await response.json();
+        const response = await routeAPI.getRouteByText(searchText);
         
-        if (response.ok) {
-          if (data.data && data.data.length > 0) {
-            setRoutes(data.data);
+        if (response.data?.success && response.data?.data) {
+          if (response.data.data.length > 0) {
+            setRoutes(response.data.data);
             setShowResults(true);
-          } else if (data.msg === "Route not found") {
-            alert("No routes found matching your search");
           } else {
-            setRoutes(data.data || []);
-            setShowResults(true);
+            alert("No routes found matching your search");
           }
         } else {
-          throw new Error(data.msg || "Failed to search routes");
+          setRoutes(response.data?.data || []);
+          setShowResults(true);
         }
       }
 
@@ -226,33 +203,28 @@ const Route = () => {
       setLoading(true);
       setError("");
 
-      // Get all routes and find by route_no
-      const response = await fetch('http://localhost:5000/api/v1/route/all');
-      const data = await response.json();
+      // 🔴 Use the new API method
+      const response = await routeAPI.getRouteByNumber(form.route_no);
 
-      if (response.ok && data.data) {
-        const route = data.data.find(r => r.route_no && r.route_no.toString() === form.route_no.toString());
+      if (response.data?.success && response.data?.data) {
+        const route = response.data.data;
         
-        if (route) {
-          // Convert status number to string for the radio buttons
-          const statusValue = route.status !== undefined ? route.status.toString() : "1";
-          
-          setForm({
-            route_no: route.route_no,
-            route_name: route.route_name,
-            start_point: route.start_point,
-            end_point: route.end_point,
-            total_stops: route.total_stops,
-            distance: route.distance,
-            status: statusValue
-          });
-          
-          setEditLoaded(true);
-          setRoutes([route]);
-          setShowResults(true);
-        } else {
-          alert("Route not found");
-        }
+        // Convert status number to string for the radio buttons
+        const statusValue = route.status !== undefined ? route.status.toString() : "1";
+        
+        setForm({
+          route_no: route.route_no,
+          route_name: route.route_name,
+          start_point: route.start_point,
+          end_point: route.end_point,
+          total_stops: route.total_stops,
+          distance: route.distance,
+          status: statusValue
+        });
+        
+        setEditLoaded(true);
+        setRoutes([route]);
+        setShowResults(true);
       } else {
         alert("Route not found");
       }
@@ -272,65 +244,32 @@ const Route = () => {
       setLoading(true);
       setError("");
 
-      // First get the route_id for this route_no
-      const allRoutesResponse = await fetch('http://localhost:5000/api/v1/route/all');
-      const allRoutesData = await allRoutesResponse.json();
-      
-      if (!allRoutesResponse.ok || !allRoutesData.data) {
-        throw new Error("Failed to fetch route data");
-      }
-      
-      const routeToUpdate = allRoutesData.data.find(r => 
-        r.route_no && r.route_no.toString() === form.route_no.toString()
-      );
-      
-      if (!routeToUpdate) {
-        alert("Route not found");
-        setLoading(false);
-        return;
-      }
-
       const requestData = {
         route_name: form.route_name,
         start_point: form.start_point,
         end_point: form.end_point,
         total_stops: parseInt(form.total_stops),
         distance: parseFloat(form.distance),
-        status: parseInt(form.status),
-        route_no: form.route_no // Include route_no in update
+        status: parseInt(form.status)
       };
 
-      console.log("Updating route with ID:", routeToUpdate.route_id, "Data:", requestData);
+      console.log("Updating route:", form.route_no, "Data:", requestData);
 
-      const response = await fetch(`http://localhost:5000/api/v1/route/update/${routeToUpdate.route_id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(requestData)
-      });
+      // 🔴 Use the new API method for update by route_no
+      const response = await routeAPI.updateRouteByNumber(form.route_no, requestData);
 
-      const data = await response.json();
-      console.log("Update response:", data);
-
-      if (response.ok) {
+      if (response.data?.success) {
         alert("✅ Route updated successfully");
 
-        // Fetch updated route by route_no
-        const updatedResponse = await fetch('http://localhost:5000/api/v1/route/all');
-        const updatedData = await updatedResponse.json();
+        // Fetch updated route
+        const updatedResponse = await routeAPI.getRouteByNumber(form.route_no);
         
-        if (updatedResponse.ok && updatedData.data) {
-          const updatedRoute = updatedData.data.find(r => 
-            r.route_no && r.route_no.toString() === form.route_no.toString()
-          );
-          if (updatedRoute) {
-            setRoutes([updatedRoute]);
-            setShowResults(true);
-          }
+        if (updatedResponse.data?.success && updatedResponse.data?.data) {
+          setRoutes([updatedResponse.data.data]);
+          setShowResults(true);
         }
       } else {
-        throw new Error(data.msg || data.message || "Update failed");
+        throw new Error(response.data?.msg || "Update failed");
       }
 
     } catch (error) {
@@ -357,46 +296,24 @@ const Route = () => {
       setLoading(true);
       setError("");
 
-      // First get the route_id for this route_no
-      const allRoutesResponse = await fetch('http://localhost:5000/api/v1/route/all');
-      const allRoutesData = await allRoutesResponse.json();
-      
-      if (!allRoutesResponse.ok || !allRoutesData.data) {
-        throw new Error("Failed to fetch route data");
-      }
-      
-      const routeToDelete = allRoutesData.data.find(r => 
-        r.route_no && r.route_no.toString() === form.route_no.toString()
-      );
-      
-      if (!routeToDelete) {
-        alert("Route not found");
-        setLoading(false);
-        return;
-      }
+      // 🔴 Use the new API method for delete by route_no
+      const response = await routeAPI.deleteRouteByNumber(form.route_no);
 
-      const response = await fetch(`http://localhost:5000/api/v1/route/delete/${routeToDelete.route_id}`, {
-        method: 'DELETE'
-      });
-
-      const data = await response.json();
-
-      if (response.ok) {
+      if (response.data?.success) {
         alert("✅ Route deleted successfully");
         
         setForm({ ...form, route_no: "" });
         
         if (searchType === "all") {
-          const allResponse = await fetch('http://localhost:5000/api/v1/route/all');
-          const allData = await allResponse.json();
-          setRoutes(allData.data || []);
+          const allResponse = await routeAPI.getAllRoutes();
+          setRoutes(allResponse.data?.data || []);
           setShowResults(true);
         } else {
           setRoutes([]);
           setShowResults(false);
         }
       } else {
-        throw new Error(data.msg || data.message || "Delete failed");
+        throw new Error(response.data?.msg || "Delete failed");
       }
 
     } catch (error) {

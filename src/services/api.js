@@ -9,10 +9,18 @@ const api = axios.create(
     }
 );
 
-// Auth API
+// authAPI.js or in your api/index.js
 export const authAPI = {
-    login: (user) => api.post("auth/login", user)
-}
+    login: (credentials) => api.post('/auth/login', credentials),
+    logout: () => api.post('/auth/logout'),
+    refreshToken: () => api.post('/auth/refresh'),
+    
+    forgotPassword: (data) => api.post('/auth/forgot-password', data),
+    resetPassword: (data) => api.post('/auth/reset-password', data),
+    verifyResetToken: (token) => api.get(`/auth/verify-reset-token/${token}`),
+
+    updatePassword: (data) => api.post('/auth/update-password', data)
+};
 
 //Dashboard API 
 export const dashboardAPI = {
@@ -32,25 +40,44 @@ export const userAPI = {
     deleteUser: (userId) => api.delete(`/user/delete/${userId}`),  // DELETE
 }
 
-//BusAssignment API
+// BusAssignment API - No comments as requested
 export const busAssignmentAPI = {
-    createAssignment: (assignment) => api.post('/busAssignment/create', assignment),  // Add assignment
-    getAllAssignments: () => api.get(`/busAssignment/all`),  // FIND
-    getAssignmentById: (id) => api.get(`/busAssignment/find/${id}`),  // FIND
-    getAssignmentByText: (text) => api.get(`/busAssignment/search/${encodeURIComponent(text)}`),  // FIND
-    updateAssignment: (id, assignment) => api.put(`/busAssignment/update/${id}`, assignment), // UPDATE
-    deleteAssignment: (assignmentID) => api.delete(`/busAssignment/delete/${assignmentID}`),  // DELETE
-}
+    createAssignment: (assignment) => api.post('/busAssignment/create', assignment),
+    getAllAssignments: () => api.get('/busAssignment/all'),
+    getAssignmentById: (id) => api.get(`/busAssignment/find/${id}`),
+    getAssignmentByText: (text) => api.get(`/busAssignment/search/${encodeURIComponent(text)}`),
+    updateAssignment: (id, assignment) => api.put(`/busAssignment/update/${id}`, assignment),
+    deleteAssignment: (assignmentID) => api.delete(`/busAssignment/delete/${assignmentID}`),
+};
 
-//Bus API
+// Bus API - Updated to use route_no
 export const busAPI = {
-    createBus: (bus) => api.post('/bus/create', bus),  // Add bus
-    getAllBuses: () => api.get(`/bus/all`),  // FIND
-    getBusById: (id) => api.get(`/bus/find/${id}`),  // FIND
-    getBusByText: (text) => api.get(`/bus/search/${encodeURIComponent(text)}`),  // FIND
-    updateBus: (id, bus) => api.put(`/bus/update/${id}`, bus), // UPDATE
-    deleteBus: (busId) => api.delete(`/bus/delete/${busId}`),  // DELETE
-}
+    // Create bus (sends route_no instead of route_id)
+    createBus: (bus) => api.post('/bus/create', bus),
+    
+    // Get all buses
+    getAllBuses: () => api.get('/bus/all'),
+    
+    // Get bus by ID (internal)
+    getBusById: (id) => api.get(`/bus/find/${id}`),
+    
+    // 🔴 NEW: Get buses by route number
+    getBusesByRouteNo: (route_no) => 
+        api.get(`/bus/findByRouteNo/${encodeURIComponent(route_no)}`),
+    
+    // Search buses by text
+    getBusByText: (text) => 
+        api.get(`/bus/search/${encodeURIComponent(text)}`),
+    
+    // Update bus (sends route_no instead of route_id)
+    updateBus: (id, bus) => api.put(`/bus/update/${id}`, bus),
+    
+    // Delete bus
+    deleteBus: (busId) => api.delete(`/bus/delete/${busId}`),
+    
+    // Get bus count
+    getBusCount: () => api.get('/bus/count')
+};
 
 //BusType API
 export const busTypeAPI = {
@@ -62,24 +89,34 @@ export const busTypeAPI = {
     deleteBusType: (busTypeId) => api.delete(`/busType/delete/${busTypeId}`),  // DELETE
 }
 
-//CrowdReport API
+//CrowdReport API - No comments as requested
 export const crowdReportAPI = {
-    createCrowdReport: (crowdReport) => api.post('/crowdReport/create', crowdReport),  // Add crowdReport
-    getAllCrowdReports: () => api.get(`/crowdReport/all`),  // FIND
-    getCrowdReportById: (id) => api.get(`/crowdReport/find/${id}`),  // FIND
-    getCrowdReportByText: (text) => api.get(`/crowdReport/search/${encodeURIComponent(text)}`),  // FIND
-    updateCrowdReport: (id, crowdReport) => api.put(`/crowdReport/update/${id}`, crowdReport), // UPDATE
-    deleteCrowdReport: (crowdReportId) => api.delete(`/crowdReport/delete/${crowdReportId}`),  // DELETE
-}
+    createCrowdReport: (crowdReport) => api.post('/crowdReport/create', crowdReport),
+    getAllCrowdReports: () => api.get('/crowdReport/all'),
+    getCrowdReportById: (id) => api.get(`/crowdReport/find/${id}`),
+    getCrowdReportByText: (text) => api.get(`/crowdReport/search/${encodeURIComponent(text)}`),
+    updateCrowdReport: (id, crowdReport) => api.put(`/crowdReport/update/${id}`, crowdReport),
+    deleteCrowdReport: (crowdReportId) => api.delete(`/crowdReport/delete/${crowdReportId}`),
+    
+    // Get buses by route number
+    getBusesByRouteNo: (route_no) => api.get(`/crowdReport/buses-by-route/${encodeURIComponent(route_no)}`),
+    
+    // Add this to your crowdReportAPI object
+    getTripsInDateRange: (bus_no, route_no, from_date, to_date) => 
+    api.get(`/crowdReport/trips-in-range/${encodeURIComponent(bus_no)}/${encodeURIComponent(route_no)}/${from_date}/${to_date}`),
+
+    getTripsInDateRange: (bus_no, route_no, from_date, to_date) => 
+    api.get(`/crowdReport/trips-in-range/${encodeURIComponent(bus_no)}/${encodeURIComponent(route_no)}/${from_date}/${to_date}`)
+};
 
 //favouriteRoute API
 export const favouriteRouteAPI = {
-    create: (favouriteRoute) => api.post('/favouriteRoute/create', favouriteRoute),  // Add favouriteRoute 
-    getAllFavouriteRoutes: () => api.get(`/favouriteRoute/all`),  // FIND
-    getFavouriteRouteById: (id) => api.get(`/favouriteRoute/find/${id}`),  // FIND
-    getFavouriteRouteByText: (text) => api.get(`/favouriteRoute/search/${encodeURIComponent(text)}`),  // FIND
-    updateFavouriteRoute: (id, favouriteRoute) => api.put(`/favouriteRoute/update/${id}`, favouriteRoute), // UPDATE
-    deleteFavouriteRoute: (favouriteRouteId) => api.delete(`/favouriteRoute/delete/${favouriteRouteId}`),  // DELETE
+    create: (favouriteRoute) => api.post('/favouriteRoute/create', favouriteRoute),
+    getAllFavouriteRoutes: () => api.get('/favouriteRoute/all'),
+    getFavouriteRouteById: (id) => api.get(`/favouriteRoute/find/${id}`),
+    getFavouriteRouteByText: (text) => api.get(`/favouriteRoute/search/${encodeURIComponent(text)}`),
+    updateFavouriteRoute: (id, favouriteRoute) => api.put(`/favouriteRoute/update/${id}`, favouriteRoute),
+    deleteFavouriteRoute: (favouriteRouteId) => api.delete(`/favouriteRoute/delete/${favouriteRouteId}`),
 }
 
 //Alert API
@@ -102,25 +139,53 @@ export const feedbackAPI = {
     deleteFeedback: (feedbackId) => api.delete(`/feedback/delete/${feedbackId}`),  // DELETE
 }
 
-//Trip API
+// Trip API
 export const tripAPI = {
-    getAllTrips: () => api.get("/trip/all")
-}
+    createTrip: (trip) => api.post('/trip/create', trip),
+    getAllTrips: () => api.get('/trip/all'),
+    getTripById: (id) => api.get(`/trip/find/${id}`),
+    getTripByText: (text) => api.get(`/trip/search/${encodeURIComponent(text)}`),
+    updateTrip: (id, trip) => api.put(`/trip/update/${id}`, trip),
+    deleteTrip: (id) => api.delete(`/trip/delete/${id}`),
+    getTripCount: () => api.get('/trip/count')
+};
 
 //Role API
 export const roleAPI = {
     getAllRoles: () => api.get("/role/all")
 }
 
-//Route API
+// Route API - All methods now support route_no
 export const routeAPI = {
+    // Get all routes
     getAllRoutes: () => api.get("/route/all"),
+    
+    // Get route by ID (internal use only, keep for compatibility)
     getRouteById: (id) => api.get(`/route/find/${id}`),
+    
+    // 🔴 NEW: Get route by route_no (for frontend)
+    getRouteByNumber: (route_no) => api.get(`/route/findByRouteNo/${encodeURIComponent(route_no)}`),
+    
+    // Search routes by text
     getRouteByText: (text) => api.get(`/route/search/${encodeURIComponent(text)}`),
+    
+    // Create new route (sends route_no)
     createRoute: (data) => api.post("/route/create", data),
+    
+    // Update route by ID (internal use only, keep for compatibility)
     updateRoute: (id, data) => api.put(`/route/update/${id}`, data),
-    deleteRoute: (id) => api.delete(`/route/delete/${id}`)
-}
+    
+    // 🔴 NEW: Update route by route_no (for frontend)
+    updateRouteByNumber: (route_no, data) => 
+        api.put(`/route/updateByRouteNo/${encodeURIComponent(route_no)}`, data),
+    
+    // Delete route by ID (internal use only, keep for compatibility)
+    deleteRoute: (id) => api.delete(`/route/delete/${id}`),
+    
+    // 🔴 NEW: Delete route by route_no (for frontend)
+    deleteRouteByNumber: (route_no) => 
+        api.delete(`/route/deleteByRouteNo/${encodeURIComponent(route_no)}`)
+};
 
 //CurrentSituation API 
 export const currentSituationAPI = {
@@ -136,15 +201,15 @@ export const routeStopAPI = {
     // Create single route stop
     createRouteStop: (data) => api.post('/routeStop/create', data),
 
-    // Bulk create
+    // Bulk create - sends route_no
     bulkCreate: (data) => api.post('/routeStop/bulk', data),
 
     // Get all route stops
     getAllRouteStops: () => api.get('/routeStop/all'),
 
-    // Get stops by route ID (FIXED)
-    getByRouteId: (routeId) => 
-        api.get(`/routeStop/byRoute/${routeId}`),
+    // Get stops by route number (FIXED)
+    getByRouteNo: (routeNo) => 
+        api.get(`/routeStop/byRouteNo/${encodeURIComponent(routeNo)}`),
 
     // Get route stop by ID
     getByIdRouteStop: (id) => 
@@ -158,15 +223,15 @@ export const routeStopAPI = {
     updateRouteStop: (id, data) => 
         api.put(`/routeStop/update/${id}`, data),
 
-    // Bulk update
+    // Bulk update - sends route_no
     bulkUpdate: (data) => 
         api.put('/routeStop/bulk-update', data),
 
-    // Delete
+    // Delete single stop
     deleteRouteStop: (id) => 
         api.delete(`/routeStop/delete/${id}`),
 
-    // Delete all stops by route ID 
-    deleteRouteStopsByRouteId: (routeId) =>
-        api.delete(`/routeStop/deleteByRoute/${routeId}`)
+    // Delete all stops by route number
+    deleteRouteStopsByRouteNo: (routeNo) =>
+        api.delete(`/routeStop/deleteByRouteNo/${encodeURIComponent(routeNo)}`)
 };

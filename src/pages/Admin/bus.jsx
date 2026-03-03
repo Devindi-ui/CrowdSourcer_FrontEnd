@@ -24,7 +24,7 @@ const Bus = () => {
     id: "",
     bus_number: "",
     seat_capacity: "",
-    route_id: "",
+    route_no: "",        // 🔴 Changed from route_id to route_no
     status: "active"
   });
 
@@ -34,13 +34,14 @@ const Bus = () => {
   const [routes, setRoutes] = useState([]);
   const [showResults, setShowResults] = useState(false);
   const [editLoaded, setEditLoaded] = useState(false);
+  const [error, setError] = useState("");
 
   /* LOAD ROUTES */
   useEffect(() => {
     const loadRoutes = async () => {
       try {
         const res = await routeAPI.getAllRoutes();
-        setRoutes(res.data.data);
+        setRoutes(res.data.data || []);
       } catch (err) {
         console.error("Failed to load routes");
       }
@@ -57,11 +58,12 @@ const Bus = () => {
     setSearchType("id");
     setShowResults(false);
     setEditLoaded(false);
+    setError("");
     setForm({
       id: "",
       bus_number: "",
       seat_capacity: "",
-      route_id: "",
+      route_no: "",
       status: "active"
     });
   };
@@ -75,7 +77,7 @@ const Bus = () => {
       id: b.bus_id,
       bus_number: b.bus_number,
       seat_capacity: b.seat_capacity,
-      route_id: b.route_id,
+      route_no: b.route_no || "",  // 🔴 Use route_no
       status: b.status
     });
     setEditLoaded(true);
@@ -84,19 +86,30 @@ const Bus = () => {
   /* API ACTIONS */
 
   const addBus = async () => {
+    // Validation
+    if (!form.bus_number || !form.seat_capacity || !form.route_no || !form.status) {
+      alert("Please fill all fields");
+      return;
+    }
+
     try {
       setLoading(true);
+      setError("");
+
       await busAPI.createBus({
         bus_number: form.bus_number,
-        seat_capacity: form.seat_capacity,
-        route_id: form.route_id,
+        seat_capacity: parseInt(form.seat_capacity),
+        route_no: form.route_no,  // 🔴 Send route_no
         status: form.status
       });
+
       alert("✅ Bus added successfully");
       resetAll();
     } catch (err) {
       console.error(err);
-      alert("❌ Failed to add bus");
+      const errorMsg = err.response?.data?.msg || err.response?.data?.message || "Failed to add bus";
+      setError(errorMsg);
+      alert("❌ " + errorMsg);
     } finally {
       setLoading(false);
     }
@@ -107,29 +120,69 @@ const Bus = () => {
       setLoading(true);
       setBuses([]);
       setShowResults(false);
+      setError("");
 
       if (searchType === "id") {
-        if (!form.id) return alert("Enter Bus ID");
+        if (!form.id) {
+          alert("Enter Bus ID");
+          setLoading(false);
+          return;
+        }
         const res = await busAPI.getBusById(form.id);
-        setBuses([res.data.data]);
+        if (res.data?.success && res.data?.data) {
+          setBuses([res.data.data]);
+          setShowResults(true);
+        } else {
+          alert("Bus not found");
+        }
       }
 
       if (searchType === "all") {
         const res = await busAPI.getAllBuses();
-        setBuses(res.data.data);
+        if (res.data?.success && res.data?.data) {
+          setBuses(res.data.data);
+          setShowResults(true);
+        } else {
+          setBuses(res.data?.data || []);
+          setShowResults(true);
+        }
+      }
+
+      if (searchType === "route") {  // 🔴 NEW search by route number
+        if (!form.route_no) {
+          alert("Enter Route Number");
+          setLoading(false);
+          return;
+        }
+        const res = await busAPI.getBusesByRouteNo(form.route_no);
+        if (res.data?.success && res.data?.data) {
+          setBuses(res.data.data);
+          setShowResults(true);
+        } else {
+          alert("No buses found for this route");
+        }
       }
 
       if (searchType === "text") {
-        if (!searchText.trim()) 
-          return alert("Enter text to search");
+        if (!searchText.trim()) {
+          alert("Enter text to search");
+          setLoading(false);
+          return;
+        }
         
         const res = await busAPI.getBusByText(searchText);
-        setBuses(res.data.data || []);
+        if (res.data?.success && res.data?.data) {
+          setBuses(res.data.data);
+          setShowResults(true);
+        } else {
+          setBuses(res.data?.data || []);
+          setShowResults(true);
+        }
       }
 
-      setShowResults(true);
-
     } catch (err) {
+      console.error("Find failed:", err);
+      setError(err.message);
       alert("❌ Bus not found");
     } finally {
       setLoading(false);
@@ -137,14 +190,25 @@ const Bus = () => {
   };
 
   const loadBusForEdit = async () => {
-    if (!form.id) return alert("Enter Bus ID");
+    if (!form.id) {
+      alert("Enter Bus ID");
+      return;
+    }
+
     try {
       setLoading(true);
+      setError("");
       const res = await busAPI.getBusById(form.id);
-      populateFormFromBus(res.data.data);
-      setBuses([res.data.data]);
-      setShowResults(true);
+      
+      if (res.data?.success && res.data?.data) {
+        populateFormFromBus(res.data.data);
+        setBuses([res.data.data]);
+        setShowResults(true);
+      } else {
+        alert("Bus not found");
+      }
     } catch {
+      setError("Bus not found");
       alert("❌ Bus not found");
     } finally {
       setLoading(false);
@@ -154,38 +218,63 @@ const Bus = () => {
   const updateBus = async () => {
     try {
       setLoading(true);
+      setError("");
 
       await busAPI.updateBus(form.id, {
         bus_number: form.bus_number,
-        seat_capacity: form.seat_capacity,
-        route_id: form.route_id,
+        seat_capacity: parseInt(form.seat_capacity),
+        route_no: form.route_no,  // 🔴 Send route_no
         status: form.status
       });
 
       alert("✅ Bus updated");
 
       const res = await busAPI.getBusById(form.id);
-      setBuses([res.data.data]);
-      setShowResults(true);
+      if (res.data?.success && res.data?.data) {
+        setBuses([res.data.data]);
+        setShowResults(true);
+      }
 
-    } catch {
-      alert("❌ Update failed");
+    } catch (err) {
+      console.error("Update failed:", err);
+      const errorMsg = err.response?.data?.msg || err.response?.data?.message || "Update failed";
+      setError(errorMsg);
+      alert("❌ " + errorMsg);
     } finally {
       setLoading(false);
     }
   };
 
   const deleteBus = async () => {
+    if (!form.id) {
+      alert("Enter Bus ID");
+      return;
+    }
+
+    if (!window.confirm(`Are you sure you want to delete bus ${form.bus_number || form.id}?`)) {
+      return;
+    }
+
     try {
       setLoading(true);
+      setError("");
       await busAPI.deleteBus(form.id);
       alert("✅ Bus deleted");
 
-      const res = await busAPI.getAllBuses();
-      setBuses(res.data.data);
-      setShowResults(true);
+      if (searchType === "all") {
+        const res = await busAPI.getAllBuses();
+        setBuses(res.data?.data || []);
+        setShowResults(true);
+      } else {
+        setBuses([]);
+        setShowResults(false);
+      }
+      
+      setForm({ ...form, id: "" });
 
-    } catch {
+    } catch (err) {
+      console.error("Delete failed:", err);
+      setError("Delete failed");
       alert("❌ Delete failed");
     } finally {
       setLoading(false);
@@ -194,16 +283,23 @@ const Bus = () => {
 
   const handleSubmit = () => {
     if (mode === "add") addBus();
-    if (mode === "find") findBus();
-    if (mode === "edit" && !editLoaded) loadBusForEdit();
-    else if (mode === "edit") updateBus();
-    if (mode === "delete") deleteBus();
+    else if (mode === "find") findBus();
+    else if (mode === "edit" && !editLoaded) loadBusForEdit();
+    else if (mode === "edit" && editLoaded) updateBus();
+    else if (mode === "delete") deleteBus();
   };
 
   return (
     <ThemeLayout pageTitle="Bus Management">
+      {/* Error Display */}
+      {error && (
+        <div className="mt-20 max-w-xl mx-auto bg-red-900/50 border border-red-500 text-red-200 p-4 rounded-xl">
+          Error: {error}
+        </div>
+      )}
+
       <button
-        onClick={() => mode ? setMode(null) : navigate("/admin")}
+        onClick={() => mode ? resetAll() : navigate("/admin")}
         className="fixed top-6 left-6 z-50 flex items-center gap-2 mt-15
         bg-black/60 backdrop-blur-md text-yellow-400 px-4 py-2 rounded-full 
         shadow-[0_0_20px_rgba(255,215,0,0.25)]
@@ -235,6 +331,7 @@ const Bus = () => {
                 onChange={handleChange}
                 placeholder="Enter Bus ID"
                 className="w-full p-3 mb-3 bg-black/60 border border-yellow-600 rounded-xl text-white focus:ring-2 focus:ring-yellow-500 outline-none"
+                disabled={loading}
               />
             )}
 
@@ -246,26 +343,32 @@ const Bus = () => {
                   onChange={handleChange}
                   placeholder="Bus Number"
                   className="w-full p-3 mb-3 bg-black/60 border border-yellow-600 rounded-xl text-white focus:ring-2 focus:ring-yellow-500 outline-none"
+                  disabled={loading}
                 />
 
                 <input
                   name="seat_capacity"
+                  type="number"
                   value={form.seat_capacity}
                   onChange={handleChange}
                   placeholder="Seat Capacity"
                   className="w-full p-3 mb-3 bg-black/60 border border-yellow-600 rounded-xl text-white focus:ring-2 focus:ring-yellow-500 outline-none"
+                  disabled={loading}
+                  min="0"
                 />
 
+                {/* 🔴 Changed from route_id to route_no */}
                 <select
-                  name="route_id"
-                  value={form.route_id}
+                  name="route_no"
+                  value={form.route_no}
                   onChange={handleChange}
                   className="w-full p-3 mb-3 bg-black/60 border border-yellow-600 rounded-xl text-white focus:ring-2 focus:ring-yellow-500 outline-none"
+                  disabled={loading}
                 >
-                  <option value="">Select Route</option>
+                  <option value="">Select Route Number</option>
                   {routes.map(r => (
-                    <option key={r.route_id} value={r.route_id}>
-                      {r.route_name}
+                    <option key={r.route_id} value={r.route_no}>
+                      {r.route_no} - {r.route_name}
                     </option>
                   ))}
                 </select>
@@ -279,6 +382,7 @@ const Bus = () => {
                       checked={form.status === "active"}
                       onChange={handleChange}
                       className="accent-yellow-500"
+                      disabled={loading}
                     />
                     Active
                   </label>
@@ -291,6 +395,7 @@ const Bus = () => {
                       checked={form.status === "inactive"}
                       onChange={handleChange}
                       className="accent-yellow-500"
+                      disabled={loading}
                     />
                     Inactive
                   </label>
@@ -304,9 +409,11 @@ const Bus = () => {
                   value={searchType}
                   onChange={(e) => setSearchType(e.target.value)}
                   className="w-full p-3 mb-3 bg-black/60 border border-yellow-600 rounded-xl text-white focus:ring-2 focus:ring-yellow-500 outline-none"
+                  disabled={loading}
                 >
                   <option value="id">Find by ID</option>
                   <option value="all">Get All Buses</option>
+                  <option value="route">Find by Route Number</option> {/* 🔴 NEW */}
                   <option value="text">Search by Text</option>
                 </select>
 
@@ -317,6 +424,18 @@ const Bus = () => {
                     onChange={handleChange}
                     placeholder="Bus ID"
                     className="w-full p-3 mb-3 bg-black/60 border border-yellow-600 rounded-xl text-white focus:ring-2 focus:ring-yellow-500 outline-none"
+                    disabled={loading}
+                  />
+                )}
+
+                {searchType === "route" && (  // 🔴 NEW
+                  <input
+                    name="route_no"
+                    value={form.route_no}
+                    onChange={handleChange}
+                    placeholder="Route Number"
+                    className="w-full p-3 mb-3 bg-black/60 border border-yellow-600 rounded-xl text-white focus:ring-2 focus:ring-yellow-500 outline-none"
+                    disabled={loading}
                   />
                 )}
 
@@ -326,6 +445,7 @@ const Bus = () => {
                     onChange={(e) => setSearchText(e.target.value)}
                     placeholder="Search bus number / route"
                     className="w-full p-3 mb-3 bg-black/60 border border-yellow-600 rounded-xl text-white focus:ring-2 focus:ring-yellow-500 outline-none"
+                    disabled={loading}
                   />
                 )}
               </>
@@ -338,6 +458,7 @@ const Bus = () => {
                 onChange={handleChange}
                 placeholder="Bus ID"
                 className="w-full p-3 mb-3 bg-black/60 border border-yellow-600 rounded-xl text-white focus:ring-2 focus:ring-yellow-500 outline-none"
+                disabled={loading}
               />
             )}
 
@@ -345,14 +466,18 @@ const Bus = () => {
               <button
                 onClick={handleSubmit}
                 disabled={loading}
-                className="bg-yellow-500 hover:bg-yellow-600 text-black px-6 py-2 rounded-xl font-semibold transition shadow-[0_0_15px_rgba(255,215,0,0.3)]"
+                className="bg-yellow-500 hover:bg-yellow-600 text-black px-6 py-2 rounded-xl font-semibold transition shadow-[0_0_15px_rgba(255,215,0,0.3)] disabled:opacity-50"
               >
-                {loading ? "Please wait..." : "Submit"}
+                {loading ? "Please wait..." : 
+                  mode === "edit" && !editLoaded ? "Load" : 
+                  mode === "edit" && editLoaded ? "Update" :
+                  mode === "delete" ? "Delete" : "Submit"}
               </button>
 
               <button
                 onClick={resetAll}
-                className="bg-gray-800 hover:bg-gray-700 text-white px-6 py-2 rounded-xl transition"
+                disabled={loading}
+                className="bg-gray-800 hover:bg-gray-700 text-white px-6 py-2 rounded-xl transition disabled:opacity-50"
               >
                 Cancel
               </button>
@@ -366,7 +491,7 @@ const Bus = () => {
         <div className="bg-black/70 border border-yellow-600/40 rounded-2xl shadow-[0_0_25px_rgba(255,215,0,0.15)] p-6 mt-10 backdrop-blur-md">
 
           <h2 className="text-xl font-bold mb-6 text-yellow-400 drop-shadow-[0_0_6px_rgba(255,215,0,0.4)]">
-            🚌 Bus Results
+            🚌 Bus Results ({buses.length})
           </h2>
 
           <div className="space-y-4">
@@ -378,7 +503,9 @@ const Bus = () => {
                 <div>
                   <p className="font-semibold text-lg text-white">{b.bus_number}</p>
                   <p className="text-sm text-yellow-300">Seats: {b.seat_capacity}</p>
-                  <p className="text-sm text-yellow-300">Route: {b.route_name}</p>
+                  <p className="text-sm text-yellow-300">
+                    Route: {b.route_name} {b.route_no && `(${b.route_no})`}
+                  </p>
                 </div>
 
                 <div className="text-right">

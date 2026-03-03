@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Toaster } from "react-hot-toast";
 import { Navigate } from "react-router-dom";
 import Login from "./components/Auth/Login";
+import ForgotPassword from "./components/Auth/ForgotPassword";
 import Register from "./components/Auth/Register";
 import Navbar from "./components/Layout/Navbar";
 import MainDashboard from "./components/MainDashboard";
@@ -21,6 +22,7 @@ import Feedback from "./pages/Admin/feedback";
 import CurrentSituation from "./pages/Admin/currentSituation";
 import RouteStop from "./pages/Admin/routeStop";
 import BusRoute from "./pages/Admin/route";
+import Trip from "./pages/Admin/trip";
 
 function App() {
     const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -86,6 +88,7 @@ function App() {
 
                             <Route path="/register" element={<Register/>} />
                             <Route path="/login" element={<Login/>}/>
+                            <Route path="/forgotPassword" element={<ForgotPassword/>}/>
                             <Route path="/passenger" element={<PassengerDashboard/>}/>
                             <Route path="/admin" element={<AdminDashboard/>}/>
                             <Route path="/owner" element={<OwnerDashboard/>}/>
@@ -101,6 +104,7 @@ function App() {
                             <Route path="/currentSituation" element={<CurrentSituation/>}/>
                             <Route path="/routeStop" element={<RouteStop/>}/>
                             <Route path="/route" element={<BusRoute/>}/>
+                            <Route path="/trip" element={<Trip/>}/>
 
                         </Routes>
                     </>

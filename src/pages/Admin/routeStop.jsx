@@ -7,7 +7,8 @@ import {
   FaTrash,
   FaArrowLeft,
   FaArrowUp,
-  FaArrowDown
+  FaArrowDown,
+  FaRoute
 } from "react-icons/fa";
 import { routeAPI, routeStopAPI } from "../../services/api";
 import ThemeLayout from "../../components/Layout/ThemeLayout";
@@ -19,12 +20,12 @@ const RouteStop = () => {
 
   const [form, setForm] = useState({
     id: "",
-    route_id: "",
+    route_no: "",        // 🔴 Changed from route_id
     route_name: "",
     stop_name: ""
   });
 
-  const [searchType, setSearchType] = useState("routeId");
+  const [searchType, setSearchType] = useState("routeNo"); // 🔴 Changed default
   const [searchText, setSearchText] = useState("");
   const [routes, setRoutes] = useState([]);
   const [results, setResults] = useState([]);
@@ -37,6 +38,7 @@ const RouteStop = () => {
   const [editLoaded, setEditLoaded] = useState(false);
   const [editStops, setEditStops] = useState([]);
   const [routeName, setRouteName] = useState("");
+  const [routeId, setRouteId] = useState(""); // Internal use only
 
   useEffect(() => {
     loadRoutes();
@@ -57,14 +59,15 @@ const RouteStop = () => {
     setEditStops([]);
     setEditLoaded(false);
     setRouteName("");
+    setRouteId("");
     setResults([]);
     setShowResults(false);
     setSearchText("");
-    setSearchType("routeId");
+    setSearchType("routeNo");
     setError("");
     setForm({
       id: "",
-      route_id: "",
+      route_no: "",
       route_name: "",
       stop_name: ""
     });
@@ -92,8 +95,8 @@ const RouteStop = () => {
   };
 
   const saveBulkStops = async () => {
-    if (!form.route_id) {
-      alert("Select a route");
+    if (!form.route_no) {
+      alert("Select a route number");
       return;
     }
     if (localStops.length === 0) {
@@ -106,7 +109,7 @@ const RouteStop = () => {
       setError("");
 
       await routeStopAPI.bulkCreate({
-        route_id: form.route_id,
+        route_no: form.route_no, // 🔴 Send route_no
         stops: localStops
       });
 
@@ -130,26 +133,20 @@ const RouteStop = () => {
       setShowResults(false);
       setError("");
 
-      if (searchType === "routeId") {
-        if (!form.route_id) {
-          alert("Enter Route ID");
+      if (searchType === "routeNo") {
+        if (!form.route_no) {
+          alert("Enter Route Number");
           setLoading(false);
           return;
         }
 
-        console.log("Finding by Route ID:", form.route_id);
+        console.log("Finding by Route Number:", form.route_no);
         
-        // First get all stops
-        const res = await routeStopAPI.getAllRouteStops();
-        const allStops = res?.data?.data || [];
+        // Use the new API endpoint for route number
+        const res = await routeStopAPI.getByRouteNo(form.route_no);
         
-        // Filter by route_id
-        const filtered = allStops.filter(
-          stop => String(stop.route_id) === String(form.route_id)
-        );
-
-        if (filtered.length > 0) {
-          setResults(filtered);
+        if (res?.data?.success && res.data?.data) {
+          setResults(res.data.data);
           setShowResults(true);
         } else {
           alert("No stops found for this route");
@@ -211,8 +208,8 @@ const RouteStop = () => {
 
   // ==================== LOAD FOR UPDATE ====================
   const loadRouteForEdit = async () => {
-    if (!form.route_id) {
-      alert("Enter Route ID");
+    if (!form.route_no) {
+      alert("Enter Route Number");
       return;
     }
 
@@ -220,21 +217,21 @@ const RouteStop = () => {
       setLoading(true);
       setError("");
 
-      const res = await routeStopAPI.getAllRouteStops();
-      const allStops = res?.data?.data || [];
-      
-      const filtered = allStops.filter(
-        stop => String(stop.route_id) === String(form.route_id)
-      );
+      // Use the new API endpoint for route number
+      const res = await routeStopAPI.getByRouteNo(form.route_no);
+      const stops = res?.data?.data || [];
 
-      if (filtered.length === 0) {
+      if (stops.length === 0) {
         alert("No stops found for this route");
         return;
       }
 
-      const sorted = filtered.sort((a, b) => a.stop_order - b.stop_order);
+      // Get route name from first stop
+      const firstStop = stops[0];
+      setRouteName(firstStop.route_name);
+      setRouteId(firstStop.route_id);
       
-      setRouteName(sorted[0].route_name);
+      const sorted = stops.sort((a, b) => a.stop_order - b.stop_order);
       setEditStops(sorted);
       setEditLoaded(true);
       
@@ -271,20 +268,17 @@ const RouteStop = () => {
     setEditStops(updated);
   };
 
-  // 🔴 FIXED: Add new stop with proper structure
   const addEditStop = () => {
     if (!form.stop_name.trim()) {
       alert("Enter stop name");
       return;
     }
 
-    // Create new stop object - WITHOUT stop_order_id for new stops
+    // Create new stop object
     const newStop = {
-      // Don't include stop_order_id for new stops - backend will create it
-      route_id: form.route_id,
+      route_id: routeId,
       route_name: routeName,
       stop_name: form.stop_name.trim(),
-      // stop_order will be set by backend based on position
       status: 1
     };
 
@@ -298,7 +292,6 @@ const RouteStop = () => {
     setEditStops(updated);
   };
 
-  // 🔴 FIXED: Update now properly handles new stops
   const saveUpdatedRoute = async () => {
     try {
       setLoading(true);
@@ -306,16 +299,15 @@ const RouteStop = () => {
 
       // Prepare stops with updated order
       const stopsToUpdate = editStops.map((stop, index) => ({
-        // Only include stop_order_id if it exists (existing stops)
         ...(stop.stop_order_id && { stop_order_id: stop.stop_order_id }),
         stop_name: stop.stop_name,
         stop_order: index + 1
       }));
 
-      console.log("Sending update:", { route_id: form.route_id, stops: stopsToUpdate });
+      console.log("Sending update:", { route_no: form.route_no, stops: stopsToUpdate });
 
       const response = await routeStopAPI.bulkUpdate({
-        route_id: form.route_id,
+        route_no: form.route_no, // 🔴 Send route_no
         stops: stopsToUpdate
       });
 
@@ -327,17 +319,6 @@ const RouteStop = () => {
       if (response?.data?.data) {
         const updatedStops = response.data.data;
         const sorted = updatedStops.sort((a, b) => a.stop_order - b.stop_order);
-        setResults(sorted);
-        setEditStops(sorted);
-        setShowResults(true);
-      } else {
-        // Fallback: reload the data
-        const res = await routeStopAPI.getAllRouteStops();
-        const allStops = res?.data?.data || [];
-        const filtered = allStops.filter(
-          stop => String(stop.route_id) === String(form.route_id)
-        );
-        const sorted = filtered.sort((a, b) => a.stop_order - b.stop_order);
         setResults(sorted);
         setEditStops(sorted);
         setShowResults(true);
@@ -353,15 +334,14 @@ const RouteStop = () => {
     }
   };
 
-  // ==================== DELETE BY ROUTE ID ONLY ====================
-  // 🔴 FIXED: Delete entire route (status=0) - no single stop deletion
+  // ==================== DELETE BY ROUTE NUMBER ====================
   const deleteRoute = async () => {
-    if (!form.route_id) {
-      alert("Enter Route ID (e.g., 200,8)");
+    if (!form.route_no) {
+      alert("Enter Route Number (e.g., 200,8)");
       return;
     }
 
-    if (!window.confirm(`Are you sure you want to delete ALL stops for route ${form.route_id}?`)) {
+    if (!window.confirm(`Are you sure you want to delete ALL stops for route ${form.route_no}?`)) {
       return;
     }
 
@@ -369,13 +349,13 @@ const RouteStop = () => {
       setLoading(true);
       setError("");
 
-      // 🔴 Using the deleteByRoute endpoint
-      const response = await routeStopAPI.deleteRouteStopsByRouteId(form.route_id);
+      // Using the deleteByRouteNo endpoint
+      const response = await routeStopAPI.deleteRouteStopsByRouteNo(form.route_no);
       console.log("Delete response:", response);
       
-      alert(`All stops for route ${form.route_id} deleted successfully`);
+      alert(`All stops for route ${form.route_no} deleted successfully`);
       
-      setForm({ ...form, route_id: "" });
+      setForm({ ...form, route_no: "" });
       setResults([]);
       setShowResults(false);
       
@@ -394,7 +374,7 @@ const RouteStop = () => {
     else if (mode === "find") findStops();
     else if (mode === "update" && !editLoaded) loadRouteForEdit();
     else if (mode === "update" && editLoaded) saveUpdatedRoute();
-    else if (mode === "delete") deleteRoute(); // 🔴 Only delete route now
+    else if (mode === "delete") deleteRoute();
   };
 
   // Group results by route for display
@@ -402,6 +382,7 @@ const RouteStop = () => {
     if (!acc[stop.route_id]) {
       acc[stop.route_id] = {
         route_id: stop.route_id,
+        route_no: stop.route_no,
         route_name: stop.route_name,
         stops: []
       };
@@ -461,16 +442,16 @@ const RouteStop = () => {
             {mode === "add" && (
               <>
                 <select
-                  name="route_id"
-                  value={form.route_id}
+                  name="route_no"
+                  value={form.route_no}
                   onChange={handleChange}
                   className="w-full p-3 mb-3 bg-black border border-yellow-600 rounded-xl text-white"
                   disabled={loading}
                 >
-                  <option value="">Select Route</option>
+                  <option value="">Select Route Number</option>
                   {routes.map(r => (
-                    <option key={r.route_id} value={r.route_id}>
-                      {r.route_name}
+                    <option key={r.route_id} value={r.route_no}>
+                      {r.route_no} - {r.route_name}
                     </option>
                   ))}
                 </select>
@@ -517,17 +498,17 @@ const RouteStop = () => {
                   className="w-full p-3 mb-3 bg-black border border-yellow-600 rounded-xl text-white"
                   disabled={loading}
                 >
-                  <option value="routeId">Find by Route ID</option>
+                  <option value="routeNo">Find by Route Number</option>
                   <option value="routeName">Find by Route Name</option>
                   <option value="all">Get All Stops</option>
                 </select>
 
-                {searchType === "routeId" && (
+                {searchType === "routeNo" && (
                   <input
-                    name="route_id"
-                    value={form.route_id}
+                    name="route_no"
+                    value={form.route_no}
                     onChange={handleChange}
-                    placeholder="Enter Route ID"
+                    placeholder="Enter Route Number"
                     className="w-full p-3 mb-3 bg-black border border-yellow-600 rounded-xl text-white"
                     disabled={loading}
                   />
@@ -549,10 +530,10 @@ const RouteStop = () => {
             {mode === "update" && !editLoaded && (
               <>
                 <input
-                  name="route_id"
-                  value={form.route_id}
+                  name="route_no"
+                  value={form.route_no}
                   onChange={handleChange}
-                  placeholder="Enter Route ID"
+                  placeholder="Enter Route Number"
                   className="w-full p-3 mb-3 bg-black border border-yellow-600 rounded-xl text-white"
                   disabled={loading}
                 />
@@ -563,7 +544,7 @@ const RouteStop = () => {
             {mode === "update" && editLoaded && (
               <>
                 <div className="text-yellow-400 mb-4 font-semibold">
-                  Route: {routeName} (ID: {form.route_id})
+                  Route: {routeName} (No: {form.route_no})
                 </div>
 
                 <div className="flex gap-2 mb-3">
@@ -587,7 +568,7 @@ const RouteStop = () => {
                 <div className="max-h-60 overflow-y-auto mb-3">
                   {editStops.map((stop, index) => (
                     <div
-                      key={stop.stop_order_id}
+                      key={stop.stop_order_id || index}
                       className="flex items-center gap-2 mb-2 p-2 bg-black/60 border border-yellow-600/30 rounded-xl"
                     >
                       <button onClick={() => moveUp(index)} disabled={index === 0} className="text-yellow-400 hover:text-yellow-300 disabled:opacity-30">
@@ -611,13 +592,13 @@ const RouteStop = () => {
               </>
             )}
 
-            {/* 🔴 NEW: DELETE MODE - Only route deletion */}
+            {/* DELETE MODE - Only route deletion by number */}
             {mode === "delete" && (
               <input
-                name="route_id"
-                value={form.route_id}
+                name="route_no"
+                value={form.route_no}
                 onChange={handleChange}
-                placeholder="Enter Route ID (e.g., 200,8)"
+                placeholder="Enter Route Number (e.g., 200,8)"
                 className="w-full p-3 mb-3 bg-black border border-yellow-600 rounded-xl text-white"
                 disabled={loading}
               />
@@ -657,8 +638,9 @@ const RouteStop = () => {
 
           {Object.values(groupedResults).map(route => (
             <div key={route.route_id} className="mb-6 last:mb-0">
-              <h3 className="text-yellow-400 text-lg font-semibold mb-2">
-                Route {route.route_id}: {route.route_name}
+              <h3 className="text-yellow-400 text-lg font-semibold mb-2 flex items-center gap-2">
+                <FaRoute className="text-yellow-400" />
+                Route {route.route_no}: {route.route_name}
               </h3>
               <div className="bg-black/40 border border-yellow-600/20 rounded-xl p-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
