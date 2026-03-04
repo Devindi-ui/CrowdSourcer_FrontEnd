@@ -23,6 +23,7 @@ import CurrentSituation from "./pages/Admin/currentSituation";
 import RouteStop from "./pages/Admin/routeStop";
 import BusRoute from "./pages/Admin/route";
 import Trip from "./pages/Admin/trip";
+import Role from "./pages/Admin/role";
 
 function App() {
     const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -105,6 +106,7 @@ function App() {
                             <Route path="/routeStop" element={<RouteStop/>}/>
                             <Route path="/route" element={<BusRoute/>}/>
                             <Route path="/trip" element={<Trip/>}/>
+                            <Route path="/role" element={<Role/>}/>
 
                         </Routes>
                     </>

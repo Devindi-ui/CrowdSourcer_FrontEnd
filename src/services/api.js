@@ -150,10 +150,26 @@ export const tripAPI = {
     getTripCount: () => api.get('/trip/count')
 };
 
-//Role API
+// Role API - Complete with all CRUD operations
 export const roleAPI = {
-    getAllRoles: () => api.get("/role/all")
-}
+    // Get all roles
+    getAllRoles: () => api.get("/role/all"),
+    
+    // Get role by ID
+    getRoleById: (id) => api.get(`/role/find/${id}`),
+    
+    // Search roles by text
+    getRoleByText: (text) => api.get(`/role/search/${encodeURIComponent(text)}`),
+    
+    // Create new role
+    createRole: (data) => api.post("/role/create", data),
+    
+    // Update role
+    updateRole: (id, data) => api.put(`/role/update/${id}`, data),
+    
+    // Delete role (soft delete - sets status to 0)
+    deleteRole: (id) => api.delete(`/role/delete/${id}`)
+};
 
 // Route API - All methods now support route_no
 export const routeAPI = {
