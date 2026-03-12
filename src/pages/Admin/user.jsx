@@ -8,7 +8,7 @@ import {
   FaArrowLeft
 } from "react-icons/fa";
 import { userAPI, roleAPI } from "../../services/api";
-import ThemeLayout from "../../components/Layout/ThemeLayout";
+import ThemeLayout from "../../components/common/Layout/ThemeLayout";
 
 const User = () => {
   const navigate = useNavigate();

@@ -7,7 +7,12 @@ const Navbar = ({onLogout}) => {
     const navigate = useNavigate();
 
     const handleLogout = () => {
-        onLogout();
+        // ✅ Check if onLogout exists and is a function before calling
+        if (onLogout && typeof onLogout === 'function') {
+            onLogout();
+        } else {
+            console.log("No logout function provided, just navigating");
+        }
         navigate("/login");
     };
 

@@ -12,23 +12,23 @@ import {
   FaRuler,
   FaGlobeAsia
 } from "react-icons/fa";
-import ThemeLayout from "../../components/Layout/ThemeLayout";
-import ActionBtn from "../../components/Layout/ActionBtn";
+import ThemeLayout from "../../components/common/Layout/ThemeLayout";
+import ActionBtn from "../../components/common/Layout/ActionBtn";
 import { routeAPI } from "../../services/api";
 
-const Route = () => {
+const RoutePage = () => {
   const navigate = useNavigate();
   const [mode, setMode] = useState(null);
   const [loading, setLoading] = useState(false);
 
   const [form, setForm] = useState({
-    route_no: "",        // User-facing route number (e.g., "900/1")
+    route_no: "",       
     route_name: "",
     start_point: "",
     end_point: "",
     total_stops: "",
     distance: "",
-    status: "1" // Default to longitude (1)
+    status: "1" 
   });
 
   const [searchType, setSearchType] = useState("route_no");
@@ -72,7 +72,6 @@ const Route = () => {
     return isNaN(num) ? distance : num.toFixed(1) + " Km";
   };
 
-  // ==================== ADD ROUTE ====================
   const addRoute = async () => {
     // Validation
     if (!form.route_no || !form.route_name || !form.start_point || !form.end_point || !form.total_stops || !form.distance) {
@@ -115,7 +114,6 @@ const Route = () => {
     }
   };
 
-  // ==================== FIND ROUTES ====================
   const findRoutes = async () => {
     try {
       setLoading(true);
@@ -132,7 +130,6 @@ const Route = () => {
 
         console.log("Finding by Route Number:", form.route_no);
         
-        // 🔴 Use the new API method
         const response = await routeAPI.getRouteByNumber(form.route_no);
         
         if (response.data?.success && response.data?.data) {
@@ -192,7 +189,6 @@ const Route = () => {
     }
   };
 
-  // ==================== LOAD FOR EDIT ====================
   const loadRouteForEdit = async () => {
     if (!form.route_no) {
       alert("Enter Route Number");
@@ -203,7 +199,7 @@ const Route = () => {
       setLoading(true);
       setError("");
 
-      // 🔴 Use the new API method
+      // Use the new API method
       const response = await routeAPI.getRouteByNumber(form.route_no);
 
       if (response.data?.success && response.data?.data) {
@@ -238,7 +234,6 @@ const Route = () => {
     }
   };
 
-  // ==================== UPDATE ROUTE ====================
   const updateRoute = async () => {
     try {
       setLoading(true);
@@ -255,7 +250,6 @@ const Route = () => {
 
       console.log("Updating route:", form.route_no, "Data:", requestData);
 
-      // 🔴 Use the new API method for update by route_no
       const response = await routeAPI.updateRouteByNumber(form.route_no, requestData);
 
       if (response.data?.success) {
@@ -281,7 +275,6 @@ const Route = () => {
     }
   };
 
-  // ==================== DELETE ROUTE ====================
   const deleteRoute = async () => {
     if (!form.route_no) {
       alert("Enter Route Number");
@@ -296,7 +289,6 @@ const Route = () => {
       setLoading(true);
       setError("");
 
-      // 🔴 Use the new API method for delete by route_no
       const response = await routeAPI.deleteRouteByNumber(form.route_no);
 
       if (response.data?.success) {
@@ -515,7 +507,6 @@ const Route = () => {
                   </div>
                 </div>
 
-                {/* Radio buttons for status */}
                 <div className="mt-4 mb-2">
                   <label className="text-yellow-400 block mb-3 font-medium">
                     Select Route Type:
@@ -625,4 +616,4 @@ const Route = () => {
   );
 };
 
-export default Route;
+export default RoutePage;

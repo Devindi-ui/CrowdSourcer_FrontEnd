@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { FaPlusCircle, FaSearch, FaEdit, FaTrash, FaArrowLeft } from "react-icons/fa";
-import ThemeLayout from "../../components/Layout/ThemeLayout";
+import ThemeLayout from "../../components/common/Layout/ThemeLayout";
 import { alertAPI, busAPI, userAPI } from "../../services/api";
 
 const Alert = () => {

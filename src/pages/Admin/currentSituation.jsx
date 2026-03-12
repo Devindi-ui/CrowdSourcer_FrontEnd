@@ -7,7 +7,7 @@ import {
   FaArrowLeft
 } from "react-icons/fa";
 import { currentSituationAPI, busAPI, routeAPI, routeStopAPI } from "../../services/api";
-import ThemeLayout from "../../components/Layout/ThemeLayout";
+import ThemeLayout from "../../components/common/Layout/ThemeLayout";
 
 const CurrentSituation = () => {
   const navigate = useNavigate();
@@ -84,7 +84,7 @@ const CurrentSituation = () => {
     loadBusesForRoute();
   }, [form.route_no, routes, buses]);
 
-  // 🔴 FIXED: Load stops using route number
+  // Load stops using route number
   const loadStopsByRouteNo = async (routeNo) => {
     try {
       console.log("Loading stops for route number:", routeNo);
@@ -117,7 +117,6 @@ const CurrentSituation = () => {
       current_stop: "" // Reset stop when bus changes
     });
 
-    // Load stops using the route number (which we already have)
     if (form.route_no) {
       await loadStopsByRouteNo(form.route_no);
     } else {
@@ -256,7 +255,6 @@ const CurrentSituation = () => {
       
       setForm({ ...form, cr_id: "" });
       
-      // Refresh the list if we're in "all" mode
       if (searchType === "all") {
         const res = await currentSituationAPI.getAll();
         setResults(res?.data?.data || []);
@@ -321,7 +319,6 @@ const CurrentSituation = () => {
               {mode} Current Situation
             </h2>
 
-            {/* Show CR ID input for delete mode only */}
             {mode === "delete" && (
               <input
                 value={form.cr_id}
@@ -332,7 +329,7 @@ const CurrentSituation = () => {
               />
             )}
 
-            {/* Find mode with dropdown for ID/All */}
+            {/* Find mode*/}
             {mode === "find" && (
               <>
                 <select

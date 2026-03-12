@@ -9,8 +9,8 @@ import {
   FaUserTag
 } from "react-icons/fa";
 import { roleAPI } from "../../services/api";
-import ThemeLayout from "../../components/Layout/ThemeLayout";
-import ActionBtn from "../../components/Layout/ActionBtn";
+import ThemeLayout from "../../components/common/Layout/ThemeLayout";
+import ActionBtn from "../../components/common/Layout/ActionBtn";
 
 const Role = () => {
   const navigate = useNavigate();
@@ -28,7 +28,6 @@ const Role = () => {
   const [error, setError] = useState("");
 
   useEffect(() => {
-    // No initial load needed
   }, []);
 
   const resetAll = () => {
@@ -55,7 +54,7 @@ const Role = () => {
     setEditLoaded(true);
   };
 
-  // ==================== ADD ROLE ====================
+  // add
   const addRole = async () => {
     if (!form.role_name.trim()) {
       alert("Please enter role name");
@@ -82,7 +81,7 @@ const Role = () => {
     }
   };
 
-  // ==================== GET ALL ROLES ====================
+  //get all
   const getAllRoles = async () => {
     try {
       setLoading(true);
@@ -112,7 +111,7 @@ const Role = () => {
     }
   };
 
-  // ==================== LOAD FOR EDIT ====================
+  // load for edit
   const loadRoleForEdit = async () => {
     if (!form.id) {
       alert("Enter Role ID");
@@ -141,7 +140,7 @@ const Role = () => {
     }
   };
 
-  // ==================== UPDATE ROLE ====================
+  // update
   const updateRole = async () => {
     if (!form.role_name.trim()) {
       alert("Please enter role name");
@@ -174,7 +173,7 @@ const Role = () => {
     }
   };
 
-  // ==================== DELETE ROLE ====================
+  // delete
   const deleteRole = async () => {
     if (!form.id) {
       alert("Enter Role ID");

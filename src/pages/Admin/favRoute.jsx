@@ -10,7 +10,7 @@ import {
   FaUser
 } from "react-icons/fa";
 import { favouriteRouteAPI, routeAPI, userAPI } from "../../services/api";
-import ThemeLayout from "../../components/Layout/ThemeLayout";
+import ThemeLayout from "../../components/common/Layout/ThemeLayout";
 
 const FavouriteRoute = () => {
   const navigate = useNavigate();
@@ -20,7 +20,7 @@ const FavouriteRoute = () => {
   const [form, setForm] = useState({
     favourite_route_id: "",
     user_id: "",
-    route_no: "", // 🔴 Changed from route_id to route_no
+    route_no: "", 
   });
 
   const [searchType, setSearchType] = useState("id");
@@ -88,7 +88,7 @@ const FavouriteRoute = () => {
 
       await favouriteRouteAPI.create({
         user_id: form.user_id,
-        route_no: form.route_no, // 🔴 Send route_no
+        route_no: form.route_no, // Send route_no
         status: 1,
       });
 
@@ -197,7 +197,7 @@ const FavouriteRoute = () => {
 
       await favouriteRouteAPI.updateFavouriteRoute(form.favourite_route_id, {
         user_id: form.user_id,
-        route_no: form.route_no, // 🔴 Send route_no
+        route_no: form.route_no, // Send route_no
       });
 
       alert("✅ Favourite Route updated");
@@ -318,7 +318,7 @@ const FavouriteRoute = () => {
 
             {(mode === "add" || (mode === "edit" && editLoaded)) && (
               <>
-                {/* 🔴 User Selection */}
+                {/* User Selection */}
                 <div className="mb-3">
                   <label className="text-yellow-400 block mb-1 text-sm">Select User</label>
                   <select
@@ -337,7 +337,7 @@ const FavouriteRoute = () => {
                   </select>
                 </div>
 
-                {/* 🔴 Route Number Selection */}
+                {/* Route Number Selection */}
                 <div className="mb-3">
                   <label className="text-yellow-400 block mb-1 text-sm">Select Route Number</label>
                   <select

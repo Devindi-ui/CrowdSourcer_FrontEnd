@@ -16,8 +16,8 @@ import {
   FaTimesCircle
 } from "react-icons/fa";
 import { tripAPI, busAPI, routeAPI } from "../../services/api";
-import ThemeLayout from "../../components/Layout/ThemeLayout";
-import ActionBtn from "../../components/Layout/ActionBtn";
+import ThemeLayout from "../../components/common/Layout/ThemeLayout";
+import ActionBtn from "../../components/common/Layout/ActionBtn";
 
 const Trip = () => {
   const navigate = useNavigate();
@@ -42,7 +42,7 @@ const Trip = () => {
   const [editLoaded, setEditLoaded] = useState(false);
   const [error, setError] = useState("");
 
-  // Status options for radio buttons (ENUM values)
+  // Status options for radio buttons
   const statusOptions = [
     { value: "ongoing", label: "Ongoing", icon: <FaPlayCircle />, color: "blue", bgClass: "bg-blue-500/20 text-blue-400 border-blue-500/30" },
     { value: "completed", label: "Completed", icon: <FaCheckCircle />, color: "green", bgClass: "bg-green-500/20 text-green-400 border-green-500/30" },
@@ -125,7 +125,6 @@ const Trip = () => {
     return option;
   };
 
-  // ==================== ADD TRIP ====================
   const addTrip = async () => {
     if (!form.bus_no || !form.route_no || !form.start_time || !form.end_time || !form.date || !form.status) {
       alert("Please fill all fields");
@@ -157,7 +156,6 @@ const Trip = () => {
     }
   };
 
-  // ==================== FIND TRIPS ====================
   const findTrip = async () => {
     try {
       setLoading(true);
@@ -220,7 +218,6 @@ const Trip = () => {
     }
   };
 
-  // ==================== LOAD FOR EDIT ====================
   const loadTripForEdit = async () => {
     if (!form.id) {
       alert("Enter Trip ID");
@@ -248,7 +245,6 @@ const Trip = () => {
     }
   };
 
-  // ==================== UPDATE TRIP ====================
   const updateTrip = async () => {
     try {
       setLoading(true);
@@ -281,7 +277,6 @@ const Trip = () => {
     }
   };
 
-  // ==================== DELETE TRIP ====================
   const deleteTrip = async () => {
     if (!form.id) {
       alert("Enter Trip ID");
@@ -554,7 +549,7 @@ const Trip = () => {
         </div>
       )}
 
-      {/* Results Display - Beautiful User-Friendly Design */}
+      {/* Results Display */}
       {showResults && trips.length > 0 && (
         <div className="max-w-6xl mx-auto bg-black/70 border border-yellow-600/40 rounded-2xl shadow-[0_0_25px_rgba(255,215,0,0.15)] p-6 mt-10 backdrop-blur-md">
           <h2 className="text-xl font-bold mb-6 text-yellow-400 drop-shadow-[0_0_6px_rgba(255,215,0,0.4)]">
@@ -570,7 +565,6 @@ const Trip = () => {
                   key={trip.trip_id}
                   className="bg-gradient-to-br from-black/80 to-black/60 border border-yellow-600/30 rounded-xl p-4 hover:border-yellow-500 transition-all duration-300 hover:scale-[1.02]"
                 >
-                  {/* Header with Trip ID and Status */}
                   <div className="flex justify-between items-start mb-3">
                     <div className="flex items-center gap-2">
                       <span className="text-xs font-mono bg-yellow-400/10 text-yellow-400 px-2 py-1 rounded">

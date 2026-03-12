@@ -15,7 +15,7 @@ import {
   userAPI
 } from "../../services/api";
 
-import ThemeLayout from "../../components/Layout/ThemeLayout";
+import ThemeLayout from "../../components/common/Layout/ThemeLayout";
 
 const BusAssignment = () => {
 
@@ -25,9 +25,9 @@ const BusAssignment = () => {
 
   const [form, setForm] = useState({
     id: "",
-    bus_no: "",           // 🔴 Changed from bus_id
+    bus_no: "",          
     user_id: "",
-    route_no: "",         // 🔴 Changed from route_id
+    route_no: "",       
     assigned_place: "",
     assigned_date: "",
     assigned_time: "",
@@ -187,9 +187,9 @@ const BusAssignment = () => {
 
         setForm({
           id: a.assignment_id,
-          bus_no: a.bus_number,        // 🔴 Use bus_number
+          bus_no: a.bus_number,        
           user_id: a.user_id,
-          route_no: a.route_no,        // 🔴 Use route_no
+          route_no: a.route_no,        
           assigned_place: a.assigned_place,
           assigned_date: a.assigned_date?.split("T")[0],
           assigned_time: a.assigned_time,
@@ -331,7 +331,6 @@ const BusAssignment = () => {
 
             {(mode === "add" || (mode === "edit" && editLoaded)) && (
               <>
-                {/* 🔴 Changed from bus_id to bus_no */}
                 <select name="bus_no" value={form.bus_no} onChange={handleChange}
                   className="w-full p-3 mb-3 bg-black/60 border border-yellow-600 rounded-xl text-white focus:ring-2 focus:ring-yellow-500 outline-none"
                   disabled={loading}>
@@ -350,7 +349,6 @@ const BusAssignment = () => {
                   ))}
                 </select>
 
-                {/* 🔴 Changed from route_id to route_no */}
                 <select name="route_no" value={form.route_no} onChange={handleChange}
                   className="w-full p-3 mb-3 bg-black/60 border border-yellow-600 rounded-xl text-white focus:ring-2 focus:ring-yellow-500 outline-none"
                   disabled={loading}>

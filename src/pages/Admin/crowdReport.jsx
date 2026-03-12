@@ -36,7 +36,7 @@ const CrowdReport = () => {
     crowd_status: "Medium"
   });
 
-  // 🔴 NEW: Date range state
+  // Date range state
   const [dateRange, setDateRange] = useState({
     from_date: "",
     to_date: "",
@@ -84,7 +84,6 @@ const CrowdReport = () => {
     { value: "Full", label: "Full", color: "red", icon: "😫", bgClass: "bg-red-500/20 text-red-400 border-red-500/30" }
   ];
 
-  // 🔴 UPDATED: Date preset options with "All"
   const datePresets = [
     { value: "all", label: "All Time", icon: <FaHistory className="mr-1" /> },
     { value: "week", label: "This Week", icon: <FaCalendarWeek className="mr-1" /> },
@@ -106,14 +105,12 @@ const CrowdReport = () => {
     }
   };
 
-  // 🔴 UPDATED: Set date range based on preset (including "all")
   const setDatePreset = (preset) => {
     const today = new Date();
     const to_date = today.toISOString().split('T')[0];
     let from_date = "";
 
     if (preset === "all") {
-      // For "all", we'll use a very old date (2000-01-01) to get all records
       from_date = "2000-01-01";
     } else if (preset === "week") {
       const weekAgo = new Date(today);
@@ -165,7 +162,6 @@ const CrowdReport = () => {
     loadBusesForRoute();
   }, [form.route_no]);
 
-  // 🔴 UPDATED: Load trips with date range when bus is selected and dates are set
   useEffect(() => {
     const loadTripsWithDateRange = async () => {
       if (form.route_no && form.bus_no && dateRange.from_date && dateRange.to_date) {
@@ -593,14 +589,12 @@ const CrowdReport = () => {
                   </div>
                 )}
 
-                {/* 🔴 UPDATED: Date Range Selection with "All" option */}
                 {form.bus_no && (
                   <div className="mb-4 p-4 bg-black/40 border border-yellow-600/20 rounded-xl">
                     <label className="text-yellow-400 block mb-3 text-sm font-medium">
                       <FaCalendarAlt className="inline mr-2" /> Select Date Range
                     </label>
                     
-                    {/* Date Presets with All option */}
                     <div className="grid grid-cols-2 md:grid-cols-5 gap-2 mb-3">
                       {datePresets.map((preset) => (
                         <button
@@ -619,7 +613,7 @@ const CrowdReport = () => {
                       ))}
                     </div>
 
-                    {/* Custom Date Range (shown only for custom or when dates are manually set) */}
+                    {/* Custom Date Range */}
                     {(dateRange.preset === "custom" || dateRange.preset === "all") && (
                       <div className="grid grid-cols-2 gap-3 mt-2">
                         <div>
@@ -649,7 +643,7 @@ const CrowdReport = () => {
                   </div>
                 )}
 
-                {/* Trip Details Box with Summary */}
+                {/* Trip Details Box */}
                 {showTripBox && (
                   <div className="mb-6 p-4 bg-gradient-to-br from-yellow-900/20 to-black/60 border-2 border-yellow-500/30 rounded-xl">
                     <div className="flex items-center gap-2 mb-4">
@@ -751,7 +745,6 @@ const CrowdReport = () => {
                   />
                 </div>
 
-                {/* Crowd Status Radio Buttons */}
                 <div className="mb-4">
                   <label className="text-yellow-400 block mb-3 text-sm font-medium">
                     Crowd Status

@@ -9,7 +9,7 @@ import {
 } from "react-icons/fa";
 
 import { busTypeAPI } from "../../services/api";
-import ThemeLayout from "../../components/Layout/ThemeLayout";
+import ThemeLayout from "../../components/common/Layout/ThemeLayout";
 
 const BusType = () => {
 

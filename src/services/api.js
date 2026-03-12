@@ -102,8 +102,6 @@ export const crowdReportAPI = {
     getBusesByRouteNo: (route_no) => api.get(`/crowdReport/buses-by-route/${encodeURIComponent(route_no)}`),
     getTripsInDateRange: (bus_no, route_no, from_date, to_date) => 
     api.get(`/crowdReport/trips-in-range/${encodeURIComponent(bus_no)}/${encodeURIComponent(route_no)}/${from_date}/${to_date}`),
-    getTripsInDateRange: (bus_no, route_no, from_date, to_date) => 
-    api.get(`/crowdReport/trips-in-range/${encodeURIComponent(bus_no)}/${encodeURIComponent(route_no)}/${from_date}/${to_date}`)
 };
 
 //favouriteRoute API
@@ -130,7 +128,13 @@ export const alertAPI = {
 export const feedbackAPI = {
     create: (feedback) => api.post('/feedback/create', feedback),  // Add feedback 
     getAllFeedbacks: () => api.get(`/feedback/all`),  // FIND
-    getFeedbackById: (id) => api.get(`/feedback/find/${id}`),  // FIND
+    getFeedbackByText: (text) => {
+    // If no text provided, don't make the request
+    if (!text) {
+        return Promise.reject(new Error("Search text is required"));
+    }
+    return api.get(`/feedback/search/${text}`);
+    },
     getFeedbackByText: (text) => api.get(`/feedback/search/${encodeURIComponent(text)}`),  // FIND
     updateFeedback: (id, feedback) => api.put(`/feedback/update/${id}`, feedback), // UPDATE
     deleteFeedback: (feedbackId) => api.delete(`/feedback/delete/${feedbackId}`),  // DELETE
@@ -230,4 +234,25 @@ export const routeStopAPI = {
         api.delete(`/routeStop/delete/${id}`),
     deleteRouteStopsByRouteNo: (routeNo) =>
         api.delete(`/routeStop/deleteByRouteNo/${encodeURIComponent(routeNo)}`)
+};
+
+// Profile API
+export const profileAPI = {
+    // Get user profile
+    getProfile: () => api.get('/profile'),
+    
+    // Update profile (name and phone)
+    updateProfile: (data) => api.put('/profile', data),
+    
+    // Upload profile picture
+    uploadPicture: (file) => {
+        const formData = new FormData();
+        formData.append('profile_picture', file);
+        return api.post('/profile/picture', formData, {
+            headers: { 'Content-Type': 'multipart/form-data' }
+        });
+    },
+    
+    // Delete profile picture
+    deletePicture: () => api.delete('/profile/picture')
 };

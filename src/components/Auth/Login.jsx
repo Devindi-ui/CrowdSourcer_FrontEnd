@@ -26,27 +26,33 @@ const Login = ({ onLoginSuccess }) => {
 
       // Check if login was successful
       if (res.data?.success) {
-        // Check if user account is deactivated
-        if (res.data.data?.user?.status_d === 0) {
-          toast.error(
-            <b className="text-red-500">
-              Your account has been deactivated. Please contact admin.
-            </b>
-          );
-          setIsSubmitting(false);
-          return;
-        }
+      // Check if user account is deactivated
+      if (res.data.data?.user?.status_d === 0) {
+        toast.error(<b className="text-red-500">Your account has been deactivated. Please contact admin.</b>);
+        setIsSubmitting(false);
+        return;
+      }
 
-        // Store user data in localStorage
-        localStorage.setItem("user", JSON.stringify(res.data.data.user));
+      if (res.data?.success) {
+        // Get the user object
+        const user = res.data.data.user;
         
-        // Store token if available (for future JWT implementation)
+        console.log("User data from login:", user); // {id: 43, name: 'Nithya Devindi', ...}
+        
+        // ✅ FIX: Use the CORRECT property name - it's "id", not "user_id"!
+        sessionStorage.setItem("userId", user?.id);      // ← Changed from user_id to id
+        sessionStorage.setItem("userName", user?.name);  // ← This is correct (property is "name")
+        
+        // Store user data in localStorage
+        localStorage.setItem("user", JSON.stringify(user));
+        
+        // Store token if available
         if (res.data.data?.token) {
           localStorage.setItem("token", res.data.data.token);
         }
 
-        // Store user role for role-based routing
-        localStorage.setItem("role", res.data.data.user?.role || res.data.data.user?.role_name);
+        // Store user role
+        localStorage.setItem("role", user?.role || user?.role_name);
 
         toast.success("Login successful!");
 
@@ -57,8 +63,7 @@ const Login = ({ onLoginSuccess }) => {
 
         // Navigate to main dashboard
         navigate("/");
-      } else {
-        toast.error(res.data?.message || "Invalid email or password");
+      }
       }
     } catch (err) {
       console.error("Login error:", err);

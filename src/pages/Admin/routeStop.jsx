@@ -11,7 +11,7 @@ import {
   FaRoute
 } from "react-icons/fa";
 import { routeAPI, routeStopAPI } from "../../services/api";
-import ThemeLayout from "../../components/Layout/ThemeLayout";
+import ThemeLayout from "../../components/common/Layout/ThemeLayout";
 
 const RouteStop = () => {
   const navigate = useNavigate();
@@ -20,12 +20,12 @@ const RouteStop = () => {
 
   const [form, setForm] = useState({
     id: "",
-    route_no: "",        // 🔴 Changed from route_id
+    route_no: "",        
     route_name: "",
     stop_name: ""
   });
 
-  const [searchType, setSearchType] = useState("routeNo"); // 🔴 Changed default
+  const [searchType, setSearchType] = useState("routeNo"); 
   const [searchText, setSearchText] = useState("");
   const [routes, setRoutes] = useState([]);
   const [results, setResults] = useState([]);
@@ -38,7 +38,7 @@ const RouteStop = () => {
   const [editLoaded, setEditLoaded] = useState(false);
   const [editStops, setEditStops] = useState([]);
   const [routeName, setRouteName] = useState("");
-  const [routeId, setRouteId] = useState(""); // Internal use only
+  const [routeId, setRouteId] = useState(""); 
 
   useEffect(() => {
     loadRoutes();
@@ -79,7 +79,7 @@ const RouteStop = () => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  // ==================== ADD MULTIPLE STOPS ====================
+  // Add Multiple Stops
   const addLocalStop = () => {
     if (!form.stop_name.trim()) {
       alert("Enter stop name");
@@ -109,7 +109,7 @@ const RouteStop = () => {
       setError("");
 
       await routeStopAPI.bulkCreate({
-        route_no: form.route_no, // 🔴 Send route_no
+        route_no: form.route_no, 
         stops: localStops
       });
 
@@ -125,7 +125,6 @@ const RouteStop = () => {
     }
   };
 
-  // ==================== FIND STOPS ====================
   const findStops = async () => {
     try {
       setLoading(true);
@@ -206,7 +205,6 @@ const RouteStop = () => {
     }
   };
 
-  // ==================== LOAD FOR UPDATE ====================
   const loadRouteForEdit = async () => {
     if (!form.route_no) {
       alert("Enter Route Number");
@@ -247,7 +245,6 @@ const RouteStop = () => {
     }
   };
 
-  // ==================== UPDATE HELPERS ====================
   const changeStopName = (index, value) => {
     const updated = [...editStops];
     updated[index].stop_name = value;
@@ -307,7 +304,7 @@ const RouteStop = () => {
       console.log("Sending update:", { route_no: form.route_no, stops: stopsToUpdate });
 
       const response = await routeStopAPI.bulkUpdate({
-        route_no: form.route_no, // 🔴 Send route_no
+        route_no: form.route_no,
         stops: stopsToUpdate
       });
 
@@ -334,7 +331,6 @@ const RouteStop = () => {
     }
   };
 
-  // ==================== DELETE BY ROUTE NUMBER ====================
   const deleteRoute = async () => {
     if (!form.route_no) {
       alert("Enter Route Number (e.g., 200,8)");

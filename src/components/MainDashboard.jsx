@@ -5,13 +5,23 @@ const MainDashboard = ({ onSelectRole, onLogout }) => {
   const navigate = useNavigate();
 
   const handleSelect = (role, path) => {
-    onSelectRole(role);
+    // Call onSelectRole only if it's provided
+    if (onSelectRole && typeof onSelectRole === 'function') {
+      onSelectRole(role);
+    }
     localStorage.setItem("role", role);
     navigate(path);
   };
 
   const handleLogout = () => {
-    onLogout();
+    // Call onLogout only if it's provided
+    if (onLogout && typeof onLogout === 'function') {
+      onLogout();
+    }
+    // Always clear localStorage and navigate
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    localStorage.removeItem("role");
     navigate("/login");
   };
 
