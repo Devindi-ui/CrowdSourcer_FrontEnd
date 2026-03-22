@@ -6,21 +6,29 @@ const PassengerBus = () => {
     const navigate = useNavigate();
 
     const handleBusSelect = (bus) => {
-        console.log("Selected bus:", bus); // Debug log
-        
-        // Store the COMPLETE bus data
+        console.log("1️⃣ Bus selected in PassengerBus:", bus); 
+
+        // Clear old data first
+        sessionStorage.removeItem('selectedBus');
+        sessionStorage.removeItem('selectedBusData');
+
+        // Store new bus data
+        sessionStorage.setItem('selectedBus', bus.bus_number);
         sessionStorage.setItem('selectedBusData', JSON.stringify({
             bus_id: bus.bus_id,
             bus_number: bus.bus_number,
-            route_name: bus.route_name,
+            route_id: bus.route_id,
             route_no: bus.route_no,
+            route_name: bus.route_name,
             seat_capacity: bus.seat_capacity
         }));
-        
-        // Also store just the bus ID separately if needed
-        sessionStorage.setItem('busId', bus.bus_id);
-        
-        navigate('/passenger/feedback');
+
+        // Verify it was stored
+        const stored = sessionStorage.getItem('selectedBusData');
+        console.log("2️⃣ Data stored in sessionStorage:", JSON.parse(stored)); 
+
+        // Navigate
+        navigate('/passenger/currentSituation');
     };
 
     return (

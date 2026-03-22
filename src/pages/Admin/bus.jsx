@@ -10,7 +10,7 @@ import {
   FaRoute,
   FaMapMarkerAlt
 } from "react-icons/fa";
-import { busAPI, routeAPI } from "../../services/api";
+import { busAPI, busTypeAPI, routeAPI } from "../../services/api";
 import ThemeLayout from "../../components/common/Layout/ThemeLayout";
 import ActionBtn from "../../components/common/Layout/ActionBtn";
 import usePermissions from "../../hooks/usePermissions";
@@ -30,6 +30,7 @@ const Bus = (passengerView, onBusSelect) => {
     bus_number: "",
     seat_capacity: "",
     route_no: "",
+    bus_type_id: "",
     status: "active"
   });
   const [searchType, setSearchType] = useState("id");
@@ -40,8 +41,20 @@ const Bus = (passengerView, onBusSelect) => {
   const [editLoaded, setEditLoaded] = useState(false);
   const [error, setError] = useState("");
 
+  const [busTypes, setBusTypes] = useState([]);
+
+  const loadBusTypes = async () => {
+    try {
+      const res = await busTypeAPI.getAllBusTypes();
+      setBusTypes(res.data?.data || []);
+    } catch (err) {
+      console.error("Failed to load bus types");
+    }
+  };
+
   useEffect(() => {
     loadRoutes();
+    loadBusTypes();
     if (role !== 'admin') {
       // For non-admin roles, just show all buses
       findBus('all');
@@ -120,6 +133,7 @@ const Bus = (passengerView, onBusSelect) => {
       bus_number: "",
       seat_capacity: "",
       route_no: "",
+      bus_type_id: "",
       status: "active"
     });
   };
@@ -140,10 +154,12 @@ const Bus = (passengerView, onBusSelect) => {
         bus_number: form.bus_number,
         seat_capacity: parseInt(form.seat_capacity),
         route_no: form.route_no,
+        bus_type_id: form.bus_type_id || null,
         status: form.status
       });
       alert("✅ Bus added successfully");
       resetAll();
+      findBus('all'); // Refresh the list
     } catch (err) {
       console.error(err);
       alert("❌ Failed to add bus");
@@ -163,6 +179,7 @@ const Bus = (passengerView, onBusSelect) => {
         bus_number: bus.bus_number,
         seat_capacity: bus.seat_capacity,
         route_no: bus.route_no,
+        bus_type_id: bus.bus_type_id || "",
         status: bus.status
       });
       setEditLoaded(true);
@@ -182,6 +199,7 @@ const Bus = (passengerView, onBusSelect) => {
         bus_number: form.bus_number,
         seat_capacity: parseInt(form.seat_capacity),
         route_no: form.route_no,
+        bus_type_id: form.bus_type_id || null,
         status: form.status
       });
       alert("✅ Bus updated");
@@ -223,9 +241,15 @@ const Bus = (passengerView, onBusSelect) => {
     else if (mode === "delete") deleteBus();
   };
 
+  // Helper function to get bus type name from ID
+  const getBusTypeName = (typeId) => {
+    const type = busTypes.find(t => t.bus_type_id === typeId);
+    return type ? type.type_name : 'N/A';
+  };
+
   // Handle bus click for passenger
   const handleBusCardClick = (bus) => {
-    if (passengerView && onBusClick){
+    if (passengerView && onBusSelect) {
       onBusSelect(bus);
     } else if (role === 'passenger' && onBusClick) {
       // Create bus object with required fields for the map
@@ -233,10 +257,11 @@ const Bus = (passengerView, onBusSelect) => {
         bus_number: bus.bus_number,
         route: bus.route_name,
         route_no: bus.route_no,
+        bus_type: bus.type_name || getBusTypeName(bus.bus_type_id),
         current_stop: bus.current_stop || 'Unknown',
         passengers: bus.passengers || Math.floor(Math.random() * 50) + 10,
         last_updated: new Date().toISOString(),
-        position: [6.9271 + (Math.random() - 0.5) * 0.1, 79.8612 + (Math.random() - 0.5) * 0.1] // Simulated coordinates
+        position: [6.9271 + (Math.random() - 0.5) * 0.1, 79.8612 + (Math.random() - 0.5) * 0.1]
       };
       onBusClick(busForMap);
     }
@@ -313,6 +338,12 @@ const Bus = (passengerView, onBusSelect) => {
                     <FaBusIcon className="text-yellow-400 text-xl" />
                     <h3 className="text-lg font-semibold">{bus.bus_number}</h3>
                   </div>
+                  
+                  {/* ✅ FIXED: Show bus type name, not ID */}
+                  <p className="text-gray-300">
+                    Type: {bus.type_name || getBusTypeName(bus.bus_type_id) || 'N/A'}
+                  </p>
+                  
                   <p className="text-sm text-yellow-300">
                     <FaRoute className="inline mr-1" /> {bus.route_name || 'No route'}
                   </p>
@@ -398,6 +429,23 @@ const Bus = (passengerView, onBusSelect) => {
                   placeholder="Seat Capacity"
                   className="w-full p-3 mb-3 bg-black/60 border border-yellow-600 rounded-xl text-white"
                 />
+
+                {/* Bus Type Selection */}
+                <div className="mb-3">
+                  <select
+                    name="bus_type_id"
+                    value={form.bus_type_id}
+                    onChange={handleChange}
+                    className="w-full p-3 bg-black/60 border border-yellow-600 rounded-xl text-white"
+                  >
+                    <option value="">Select Bus Type</option>
+                    {busTypes.map(type => (
+                      <option key={type.bus_type_id} value={type.bus_type_id}>
+                        {type.type_name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
 
                 <select
                   name="route_no"
@@ -513,6 +561,8 @@ const Bus = (passengerView, onBusSelect) => {
               <div key={b.bus_id} className="p-4 bg-black/60 border border-yellow-600/30 rounded-xl">
                 <p className="text-yellow-400">Bus: {b.bus_number}</p>
                 <p className="text-gray-300">Route: {b.route_name}</p>
+                {/* ✅ FIXED: Show type name, not ID */}
+                <p className="text-gray-300">Type: {b.type_name || getBusTypeName(b.bus_type_id) || 'N/A'}</p>
                 <p className="text-gray-300">Capacity: {b.seat_capacity}</p>
                 <p className="text-gray-300">Status: {b.status}</p>
               </div>

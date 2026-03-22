@@ -4,8 +4,6 @@ import Navbar from "./components/layout/Navbar";
 import AdminLayout from "./components/layout/AdminLayout";
 import DriverLayout from "./components/layout/DriverLayout";
 import OwnerLayout from "./components/layout/OwnerLayout";
-import PassengerLayout from "./components/layout/PassengerLayout";
-
 import MainDashboard from "./components/MainDashboard";
 
 import Register from "./components/Auth/Register";
@@ -74,7 +72,7 @@ const App = () => {
       </Route>
 
       {/* Passenger Routes */}
-      <Route path="/passenger" element={<PassengerLayout />}>
+      <Route path="/passenger" element={<PassengerDashboard />}>
           <Route index element={<PassengerHome />} />
           <Route path="home" element={<PassengerHome />} />
           <Route path="dashboard" element={<PassengerHome />} />

@@ -12,15 +12,15 @@ const AdminLayout = () => {
     { path: "/admin/bus", icon: <FaBus />, label: "Buses" },
     { path: "/admin/route", icon: <FaRoute />, label: "Routes" },
     { path: "/admin/trip", icon: <FaRoad />, label: "Trips" },
-    { path: "/admin/crowd-report", icon: <FaClipboardList />, label: "Crowd Reports" },
+    { path: "/admin/crowdReport", icon: <FaClipboardList />, label: "Crowd Reports" },
     { path: "/admin/alert", icon: <FaExclamationTriangle />, label: "Alerts" },
-    { path: "/admin/bus-assignment", icon: <FaBusAlt />, label: "Bus Assignments" },
-    { path: "/admin/bus-type", icon: <FaBusType />, label: "Bus Types" },
-    { path: "/admin/current-situation", icon: <FaClock />, label: "Current Situation" },
-    { path: "/admin/favourite-route", icon: <FaHeart />, label: "Favourite Routes" },
+    { path: "/admin/busAssignment", icon: <FaBusAlt />, label: "Bus Assignments" },
+    { path: "/admin/busType", icon: <FaBusType />, label: "Bus Types" },
+    { path: "/admin/currentSituation", icon: <FaClock />, label: "Current Situation" },
+    { path: "/admin/favouriteRoute", icon: <FaHeart />, label: "Favourite Routes" },
     { path: "/admin/feedback", icon: <FaComment />, label: "Feedback" },
     { path: "/admin/role", icon: <FaUserShield />, label: "Roles" },
-    { path: "/admin/route-stop", icon: <FaMapSigns />, label: "Route Stops" }
+    { path: "/admin/routeStop", icon: <FaMapSigns />, label: "Route Stops" }
   ];
 
   const handleLogout = () => {
