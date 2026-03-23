@@ -392,7 +392,7 @@ const RouteStop = () => {
   }, {});
 
   return (
-    <ThemeLayout pageTitle="Route Stop Management">
+    <ThemeLayout>
       {/* Back Button */}
       <button
         type="button"
@@ -400,7 +400,7 @@ const RouteStop = () => {
           if (mode) resetAll();
           else navigate("/admin");
         }}
-        className="fixed top-6 left-6 z-50 flex items-center gap-2 mt-15
+        className="fixed top-6 z-50 flex items-center gap-2 mt-15
           bg-black/60 backdrop-blur-md border border-yellow-600
           text-yellow-400 px-4 py-2 rounded-full
           shadow hover:bg-yellow-500 hover:text-black transition"

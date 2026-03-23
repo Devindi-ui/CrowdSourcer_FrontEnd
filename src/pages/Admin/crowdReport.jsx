@@ -502,7 +502,7 @@ const CrowdReport = () => {
           if (mode) resetAll();
           else navigate("/admin");
         }}
-        className="fixed top-6 left-6 z-50 flex items-center gap-2 mt-15
+        className="fixed top-6 z-50 flex items-center gap-2 mt-15
         bg-black/60 backdrop-blur-xl text-yellow-400 px-4 py-2 rounded-full
         shadow-[0_0_20px_rgba(255,215,0,0.25)] border border-yellow-600/40
         hover:bg-yellow-500 hover:text-black transition duration-300"
@@ -510,10 +510,6 @@ const CrowdReport = () => {
         <FaArrowLeft className="text-yellow-400" />
         <span className="text-sm font-semibold">Back</span>
       </button>
-
-      <h1 className="text-3xl font-bold text-yellow-400 mb-8 tracking-wide drop-shadow-[0_0_8px_rgba(255,215,0,0.4)]">
-        Crowd Report Management
-      </h1>
 
       {!mode && (
         <div className="mt-25 flex flex-col items-center gap-5 mb-10 [&>button]:w-72">

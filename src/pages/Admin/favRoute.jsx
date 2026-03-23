@@ -267,7 +267,7 @@ const FavouriteRoute = () => {
   };
 
   return (
-    <ThemeLayout pageTitle="Favourite Routes Management">
+    <ThemeLayout>
       {/* Error Display */}
       {error && (
         <div className="mt-20 max-w-xl mx-auto bg-red-900/50 border border-red-500 text-red-200 p-4 rounded-xl">
@@ -281,7 +281,7 @@ const FavouriteRoute = () => {
           if (mode) resetAll();
           else navigate("/admin");
         }}
-        className="fixed top-6 left-6 z-50 flex items-center gap-2 mt-15
+        className="fixed top-6 z-50 flex items-center gap-2 mt-15
           bg-black/60 backdrop-blur-md border border-yellow-600
           text-yellow-400 px-4 py-2 rounded-full 
           shadow-[0_0_20px_rgba(255,215,0,0.25)]

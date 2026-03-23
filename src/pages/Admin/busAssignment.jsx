@@ -280,7 +280,7 @@ const BusAssignment = () => {
   };
 
   return (
-    <ThemeLayout pageTitle="Bus Assignment Management">
+    <ThemeLayout>
 
       {/* Error Display */}
       {error && (
@@ -292,7 +292,7 @@ const BusAssignment = () => {
       <button
         type="button"
         onClick={() => mode ? resetAll() : navigate("/admin")}
-        className="fixed top-6 left-6 z-50 flex items-center gap-2 mt-15
+        className="fixed top-6 z-50 flex items-center gap-2 mt-15
         bg-black/60 backdrop-blur-md text-yellow-400 px-4 py-2 rounded-full 
         shadow-[0_0_20px_rgba(255,215,0,0.25)]
         hover:bg-yellow-500 hover:text-black transition duration-300"
