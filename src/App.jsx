@@ -37,6 +37,7 @@ import PassengerBus from "./pages/Passenger/PassengerBus";
 import PassengerCurrentSituation from "./pages/Passenger/PassengerCurrentSituation";
 import PassengerFavRoute from "./pages/Passenger/PassengerFavRoute";
 import PassengerFeedback from "./pages/Passenger/PassengerFeedback";
+import PassengerAlert from "./pages/Passenger/PassengerAlert";
 import PassengerDashboard from "./pages/Passenger/PassengerDashboard";
 
 
@@ -87,6 +88,7 @@ const App = () => {
           <Route path="passenger/currentSituation" element={<PassengerCurrentSituation />} />
           <Route path="passenger/favouriteRoute" element={<PassengerFavRoute />} />
           <Route path="passenger/feedback" element={<PassengerFeedback />} />
+          <Route path="passenger/alert" element={<PassengerAlert />} />
     </Routes>
   );
 }

@@ -4,12 +4,14 @@ import {
     FaBus, FaHeart, FaCommentDots, FaExclamationTriangle,
     FaMapMarkerAlt, FaUser, FaStar, FaRoute, FaClock, 
     FaUsers, FaPlus, FaMapMarkedAlt, FaEye, 
-    FaCalendarAlt, FaFilter
+    FaCalendarAlt, FaFilter, FaBell
 } from "react-icons/fa";
 import { 
     busAPI, currentSituationAPI, favouriteRouteAPI, feedbackAPI,
-    tripAPI, busTypeAPI, routeStopAPI, routeAPI
+    tripAPI, busTypeAPI, routeStopAPI, routeAPI, alertAPI
 } from "../../services/api";
+import PassengerAlert from "./PassengerAlert";
+import PassengerFeedback from "./PassengerFeedback";
 
 const PassengerDashboard = () => {
     const navigate = useNavigate();
@@ -501,6 +503,16 @@ const PassengerDashboard = () => {
                                                 className="flex-1 py-2 bg-gray-800/50 text-gray-300 rounded-lg text-sm hover:bg-gray-700 hover:text-white transition-all duration-300 border border-gray-700"
                                             >
                                                 Give Feedback
+                                            </button>
+                                            <button
+                                                onClick={() => {
+                                                    const encodedRouteName = encodeURIComponent(bus.route_name || '');
+                                                    const url = `/passenger/alert?busId=${bus.bus_id}&busNumber=${bus.bus_number}&routeNo=${bus.route_no || ''}&routeName=${encodedRouteName}`;
+                                                    navigate(url);
+                                                }}
+                                                className="flex-1 py-2 bg-purple-500/10 text-purple-400 rounded-lg text-xs hover:bg-purple-500/20 transition"
+                                            >
+                                                Report Alert
                                             </button>
                                         </div>
                                     </div>

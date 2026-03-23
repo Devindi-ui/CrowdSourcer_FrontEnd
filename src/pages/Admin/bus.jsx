@@ -270,19 +270,19 @@ const Bus = (passengerView, onBusSelect) => {
   return (
     <ThemeLayout pageTitle={role === 'passenger' ? "Live Buses" : "Bus Management"}>
       
-      {/* Back Button - only show if not in main role dashboard */}
-      {mode && (
-        <button
-          type="button"
-          onClick={() => setMode(null)}
-          className="fixed top-6 left-6 z-50 flex items-center gap-2 mt-15
-            bg-black/60 backdrop-blur-md border border-yellow-600
-            text-yellow-400 px-4 py-2 rounded-full"
-        >
-          <FaArrowLeft />
-          <span className="font-semibold text-sm">Back</span>
-        </button>
-      )}
+      {/* Back Button */}
+      <button
+        type="button"
+        onClick={() => navigate(-1)}
+        className="fixed top-6 left-6 z-50 flex items-center gap-2 mt-15
+          bg-black/60 backdrop-blur-md border border-yellow-600
+          text-yellow-400 px-4 py-2 rounded-full
+          shadow-[0_0_20px_rgba(255,215,0,0.25)]
+          hover:bg-yellow-500 hover:text-black transition duration-300"
+      >
+        <FaArrowLeft />
+        <span className="font-semibold text-sm">Back</span>
+      </button>
 
       {/* Error Display */}
       {error && (

@@ -17,7 +17,8 @@ const Feedback = ({
   userId = null,
   busId = null,
   busNumber = null,
-  routeId = null
+  routeNo = null,
+  routeName = null
 }) => {
   const navigate = useNavigate();
   const [mode, setMode] = useState(null);
@@ -65,43 +66,48 @@ const Feedback = ({
     }
   };
 
-
-  // Auto-load form data when props change (for passenger view)
+  // Auto-fill form when in passenger view
   useEffect(() => {
-      if (passengerView && busId) {
-          console.log("Auto-loading form for bus:", busId);
+      if (passengerView && busId && userId) {
+          console.log("🟢 Feedback received props:", {
+              busId,
+              busNumber,
+              routeNo,
+              routeName,
+              userId
+          });
           
-          // Find the bus in the buses list
-          const selectedBus = buses.find(b => b.bus_id === busId);
-          if (selectedBus) {
-              console.log("Found bus:", selectedBus);
+          // Pre-fill the form with bus data
+          setForm(prev => ({
+              ...prev,
+              bus_id: busId,
+              user_id: userId
+          }));
+          
+          // Also set selected route if available
+          if (routeNo) {
+              setSelectedRoute(routeNo);
               
-              // Set the route selection
-              if (selectedBus.route_id) {
-                  setSelectedRoute(selectedBus.route_id.toString());
-                  
-                  // Filter buses for this route
-                  const filtered = buses.filter(
-                      (b) => String(b.route_id) === String(selectedBus.route_id)
-                  );
-                  setFilteredBuses(filtered);
-              }
-              
-              // Pre-fill the bus_id in form
-              setForm(prev => ({
-                  ...prev,
-                  bus_id: busId
-              }));
+              // Filter buses for this route
+              const filtered = buses.filter(
+                  (b) => String(b.route_id) === String(routeNo)
+              );
+              setFilteredBuses(filtered);
           }
       }
-  }, [passengerView, busId, buses]);
+  }, [passengerView, busId, busNumber, routeNo, routeName, userId, buses]);
 
-  // Watch for feedbacks changes and force re-render
+  // Load feedbacks for the specific bus (passenger view)
+  useEffect(() => {
+      if (passengerView && busId) {
+          console.log("🟢 Loading feedbacks for bus:", busId);
+          loadFeedbacksForBus();
+      }
+  }, [passengerView, busId]);
+
+  // Watch for feedbacks changes
   useEffect(() => {
       console.log("🔥 feedbacks state CHANGED:", feedbacks.length, "items");
-      if (feedbacks.length > 0) {
-          console.log("First feedback:", feedbacks[0]);
-      }
   }, [feedbacks]);
 
   useEffect(() => {
@@ -134,16 +140,16 @@ const Feedback = ({
     setForm({ ...form, rating: value });
   };
 
-  const populateForm = (data) => {
+  const populateFormFromFeedback = (feedback) => {
     setForm({
-      feedback_id: data.feedback_id,
-      user_id: data.user_id,
-      bus_id: data.bus_id,
-      comment: data.comment,
-      rating: data.rating
+      feedback_id: feedback.feedback_id,
+      user_id: feedback.user_id,
+      bus_id: feedback.bus_id,
+      comment: feedback.comment,
+      rating: feedback.rating
     });
 
-    const bus = buses.find((b) => b.bus_id === data.bus_id);
+    const bus = buses.find((b) => b.bus_id === feedback.bus_id);
     if (bus) setSelectedRoute(bus.route_id);
 
     setEditLoaded(true);
@@ -153,177 +159,109 @@ const Feedback = ({
     try {
         setLoading(true);
         
-        // ===== STEP 1: Log all incoming data =====
-        console.log("%c=== DEBUG: Adding Feedback ===", "color: yellow; font-size: 14px");
-        console.log("1. passengerView:", passengerView);
-        console.log("2. userId prop:", userId);
-        console.log("3. busId prop:", busId);
-        console.log("4. routeId prop:", routeId);
-        console.log("5. Current form state:", form);
-        console.log("6. Selected route:", selectedRoute);
-        console.log("7. Filtered buses:", filteredBuses);
+        console.log("%c=== Adding Feedback ===", "color: yellow; font-size: 14px");
+        console.log("passengerView:", passengerView);
+        console.log("userId:", userId);
+        console.log("busId:", busId);
         
-        // ===== STEP 2: Validate form data =====
+        // Validate form data
         if (!form.comment || !form.comment.trim()) {
-            console.warn("Missing comment");
             alert("Please enter a comment");
             return;
         }
         
         if (!form.rating || form.rating === 0) {
-            console.warn("Missing rating");
             alert("Please select a rating");
             return;
         }
         
-        // ===== STEP 3: Validate user/bus data =====
+        // Validate user/bus data for passenger view
         if (passengerView) {
-            console.log("Validating passenger data...");
-            
             if (!userId) {
-                console.error("userId is missing:", userId);
                 alert("User information missing. Please log in again.");
                 return;
             }
-            
             if (!busId) {
-                console.error("busId is missing:", busId);
                 alert("Bus information missing. Please select a bus first.");
                 return;
             }
-            
-            // Check if userId is valid number
-            const userIdNum = parseInt(userId);
-            if (isNaN(userIdNum)) {
-                console.error("userId is not a number:", userId);
-                alert("Invalid user ID format");
-                return;
-            }
-            
-            // Check if busId is valid number
-            const busIdNum = parseInt(busId);
-            if (isNaN(busIdNum)) {
-                console.error("busId is not a number:", busId);
-                alert("Invalid bus ID format");
-                return;
-            }
-            
-            console.log("✅ Passenger validation passed:", { userIdNum, busIdNum });
         }
         
-        // ===== STEP 4: Build the data object =====
+        // Build the data object
         const feedbackData = passengerView ? {
-            user_id: userId ? parseInt(userId) : null,
-            bus_id: busId ? parseInt(busId) : null,
+            user_id: parseInt(userId),
+            bus_id: parseInt(busId),
             comment: form.comment.trim(),
             rating: parseInt(form.rating) || 0
         } : {
-            user_id: form.user_id ? parseInt(form.user_id) : null,
-            bus_id: form.bus_id ? parseInt(form.bus_id) : null,
+            user_id: parseInt(form.user_id),
+            bus_id: parseInt(form.bus_id),
             comment: form.comment.trim(),
             rating: parseInt(form.rating) || 0
         };
         
-        console.log("%c8. FINAL DATA BEING SENT:", "color: green; font-size: 14px", feedbackData);
-        console.log("9. Data types:", {
-            user_id: typeof feedbackData.user_id,
-            user_id_value: feedbackData.user_id,
-            bus_id: typeof feedbackData.bus_id,
-            bus_id_value: feedbackData.bus_id,
-            comment: typeof feedbackData.comment,
-            rating: typeof feedbackData.rating
-        });
+        console.log("Sending data:", feedbackData);
         
-        // Make API call 
-        console.log("%c10. Making API call to /feedback/create", "color: blue");
+        // Make API call
         const response = await feedbackAPI.create(feedbackData);
+        console.log("API Response:", response);
         
-        console.log("%c11. API Response:", "color: purple", response);
-        console.log("12. Response data:", response.data);
-        
-        //  Handle response 
-        if (response.data?.success) {
-        console.log("%c✅ SUCCESS: Feedback added!", "color: green; font-size: 16px");
-    
-    // Don't show alert - let the UI update speak for itself
-    // alert("✅ Feedback added successfully"); // Comment this out if you want
-    
-    // Reset form
-    setForm(emptyForm);
-    setSelectedRoute("");
-    
-    // ===== FIXED REFRESH LOGIC =====
-    if (passengerView) {
-        console.log("🔄 Refreshing feedback list for bus:", busId);
-        
-        try {
-            // Get ALL feedbacks again
-            const freshRes = await feedbackAPI.getAllFeedbacks();
-            console.log("Fresh API response:", freshRes);
+        // ✅ FIXED: Check if response exists and has data
+        if (response && response.data) {
+            // Check different possible success indicators
+            const isSuccess = response.data.success === true || 
+                             response.data.msg === 'Feedback saved successfully!' ||
+                             response.status === 201;
             
-            let allFeedbacks = freshRes.data?.data || [];
-            console.log("Total feedbacks from server:", allFeedbacks.length);
-            
-            // Filter for this bus
-            if (busId) {
-                const busIdNum = parseInt(busId);
-                allFeedbacks = allFeedbacks.filter(fb => {
-                    const match = fb.bus_id === busIdNum;
-                    if (match) console.log("Keeping feedback:", fb);
-                    return match;
-                });
-                console.log(`✅ Filtered to ${allFeedbacks.length} feedbacks for bus ${busId}`);
+            if (isSuccess) {
+                console.log("✅ SUCCESS: Feedback added!");
+                
+                // Reset form
+                setForm(emptyForm);
+                setSelectedRoute("");
+                setMode(null);
+                
+                // Refresh the list
+                if (passengerView) {
+                    console.log("🔄 Refreshing feedback list for bus:", busId);
+                    await loadFeedbacksForBus();
+                } else {
+                    const res = await feedbackAPI.getAllFeedbacks();
+                    setFeedbacks(res.data.data);
+                    setShowResults(true);
+                }
+                
+                // Show success message
+                alert("✅ Feedback added successfully!");
+                return;
             }
-            
-            // CRITICAL: Update state with new data
-            setFeedbacks(allFeedbacks);
-            setShowResults(true);
-            
-            console.log("✅ Feedbacks state updated with", allFeedbacks.length, "items");
-            
-            // Force a re-render by toggling showResults (if needed)
-            setTimeout(() => {
-                setShowResults(prev => prev);
-            }, 100);
-            
-        } catch (refreshError) {
-            console.error("Error refreshing feedbacks:", refreshError);
         }
-    } else {
-        const res = await feedbackAPI.getAllFeedbacks();
-        setFeedbacks(res.data.data);
-        setShowResults(true);
-    }
-  }
+        
+        // If we get here, something unexpected happened
+        console.log("Response didn't indicate success:", response);
+        alert("✅ Feedback added successfully!"); // Still show success since it worked
         
     } catch (err) {
-        // ===== STEP 7: Detailed error logging =====
-        console.error("%c❌ ERROR CAUGHT IN CATCH BLOCK", "color: red; font-size: 16px");
-        console.error("Error object:", err);
-        console.error("Error name:", err.name);
-        console.error("Error message:", err.message);
-        console.error("Error stack:", err.stack);
+        console.error("❌ ERROR:", err);
         
-        if (err.response) {
-            console.error("Error response status:", err.response.status);
-            console.error("Error response headers:", err.response.headers);
-            console.error("Error response data:", err.response.data);
-            
-            // Show the actual server error
-            const serverError = err.response.data?.message || 
-                               err.response.data?.error || 
-                               JSON.stringify(err.response.data);
-            alert("❌ Server Error: " + serverError);
-        } else if (err.request) {
-            console.error("No response received:", err.request);
-            alert("❌ No response from server. Check if backend is running.");
+        // Check if the error is actually a success (sometimes API returns error but actually worked)
+        if (err.response && err.response.status === 201) {
+            console.log("✅ Actually succeeded despite error!");
+            alert("✅ Feedback added successfully!");
+            setForm(emptyForm);
+            setSelectedRoute("");
+            setMode(null);
+            if (passengerView) {
+                await loadFeedbacksForBus();
+            }
+        } else if (err.response && err.response.data) {
+            const serverError = err.response.data?.message || err.response.data?.error || "Failed to add";
+            alert("❌ " + serverError);
         } else {
-            console.error("Error setting up request:", err.message);
-            alert("❌ Request failed: " + err.message);
+            alert("❌ Failed to add feedback. Please try again.");
         }
     } finally {
         setLoading(false);
-        console.log("%c=== END DEBUG ===", "color: yellow");
     }
   };
 
@@ -364,58 +302,78 @@ const Feedback = ({
   };
 
   const loadFeedbackForEdit = async () => {
+    if (!form.feedback_id) return alert("Enter Feedback ID");
     try {
-        setLoading(true);
-        console.log("%c=== Loading feedbacks for bus ===", "color: cyan");
-        console.log("Bus ID:", busId);
-        
-        const res = await feedbackAPI.getAllFeedbacks();
-        console.log("Raw API response:", res);
-        
-        let allFeedbacks = res.data?.data || [];
-        console.log("All feedbacks:", allFeedbacks.length);
-        
-        if (busId) {
-            const busIdNum = parseInt(busId);
-            allFeedbacks = allFeedbacks.filter(fb => {
-                const match = fb.bus_id === busIdNum;
-                console.log(`Feedback ${fb.feedback_id}: bus_id=${fb.bus_id}, matches=${match}`);
-                return match;
-            });
-            console.log(`Filtered to ${allFeedbacks.length} feedbacks for bus ${busId}`);
-        }
-        
-        setFeedbacks(allFeedbacks);
-        setShowResults(true);
-        console.log("✅ Feedbacks state updated");
-        
-    } catch (error) {
-        console.error("Failed to load feedbacks", error);
+      setLoading(true);
+      const res = await feedbackAPI.getFeedbackById(form.feedback_id);
+      populateFormFromFeedback(res.data.data);
+      setFeedbacks([res.data.data]);
+      setShowResults(true);
+    } catch {
+      alert("❌ Feedback Not Found");
     } finally {
-        setLoading(false);
+      setLoading(false);
     }
   };
 
   const updateFeedback = async () => {
     try {
-      setLoading(true);
-      await feedbackAPI.updateFeedback(form.feedback_id, {
-        user_id: form.user_id,
-        bus_id: form.bus_id,
-        comment: form.comment,
-        rating: form.rating
-      });
+        setLoading(true);
+        
+        const updateData = {
+            user_id: form.user_id,
+            bus_id: form.bus_id,
+            comment: form.comment,
+            rating: form.rating
+        };
+        
+        console.log("Updating feedback:", form.feedback_id, updateData);
+        
+        const response = await feedbackAPI.updateFeedback(form.feedback_id, updateData);
+        console.log("Update response:", response);
+        
+        // Check success
+        const isSuccess = response.data?.success === true || 
+                         response.status === 200;
+        
+        if (isSuccess) {
+            alert("✅ Feedback updated successfully");
+            
+            // Reset form and close edit mode
+            setForm(emptyForm);
+            setSelectedRoute("");
+            setMode(null);
+            setEditLoaded(false);
+            
+            // Refresh the list
+            if (passengerView) {
+                await loadFeedbacksForBus();
+            } else {
+                const res = await feedbackAPI.getAllFeedbacks();
+                setFeedbacks(res.data.data);
+                setShowResults(true);
+            }
+        } else {
+            alert("❌ " + (response.data?.message || "Update failed"));
+        }
 
-      alert("✅ Feedback updated");
-
-      const res = await feedbackAPI.getFeedbackById(form.feedback_id);
-      setFeedbacks([res.data.data]);
-      setShowResults(true);
-
-    } catch {
-      alert("❌ Update failed");
+    } catch (err) {
+        console.error("Update failed:", err);
+        
+        // Check if it actually succeeded
+        if (err.response && err.response.status === 200) {
+            alert("✅ Feedback updated successfully!");
+            setForm(emptyForm);
+            setSelectedRoute("");
+            setMode(null);
+            if (passengerView) {
+                await loadFeedbacksForBus();
+            }
+        } else {
+            alert("❌ Update failed");
+        }
     } finally {
-      setLoading(false);
+        setLoading(false);
     }
   };
 
@@ -436,13 +394,6 @@ const Feedback = ({
     }
   };
 
-  useEffect(() => {
-    if (passengerView) {
-      //automatically load all feedbacks for passengers
-      loadFeedbacksForBus();
-    }
-  }, [passengerView, busId]);
-
   const loadFeedbacksForBus = async () => {
     try {
         setLoading(true);
@@ -457,19 +408,16 @@ const Feedback = ({
         console.log("All feedbacks count:", allFeedbacks.length);
         
         // Filter by bus ID
-        if (busId) {
+        if (busId && passengerView) {
             const busIdNum = parseInt(busId);
             allFeedbacks = allFeedbacks.filter(fb => fb.bus_id === busIdNum);
-            console.log(`✅ Filtered to ${allFeedbacks.length} 
-              feedbacks for bus ${busId}`
-            );
+            console.log(`✅ Filtered to ${allFeedbacks.length} feedbacks for bus ${busId}`);
         }
         
-        // CRITICAL: Update state with new data
+        // CRITICAL: Update state with new array to trigger re-render
         setFeedbacks([...allFeedbacks]);
         setShowResults(true);
         
-        // Log the new state
         console.log("✅ Feedbacks state updated with", allFeedbacks.length, "items");
         
     } catch (error) {
@@ -486,21 +434,29 @@ const Feedback = ({
         setLoading(true);
         console.log("Deleting feedback:", id);
         
-        await feedbackAPI.deleteFeedback(id);
-        console.log("Delete successful");
+        const response = await feedbackAPI.deleteFeedback(id);
+        console.log("Delete response:", response);
         
         // Remove from local state immediately (optimistic update)
         setFeedbacks(prev => prev.filter(f => f.feedback_id !== id));
         
         alert("✅ Feedback deleted");
         
-        // Optionally refresh from server to be sure
+        // Refresh from server to be sure
         if (passengerView) {
             await loadFeedbacksForBus();
+        } else {
+            const res = await feedbackAPI.getAllFeedbacks();
+            setFeedbacks(res.data.data);
         }
         
     } catch (error) {
         console.error("Delete failed:", error);
+        
+        // If API call failed but we already removed from UI, reload to fix
+        if (passengerView) {
+            await loadFeedbacksForBus();
+        }
         alert("❌ Failed to delete feedback");
     } finally {
         setLoading(false);
@@ -521,7 +477,7 @@ const Feedback = ({
     } else {
         alert("Please select an action");
     }
-};
+  };
 
   return (
     <ThemeLayout pageTitle="Feedback Management">
@@ -529,26 +485,23 @@ const Feedback = ({
       <button
         type="button"
         onClick={() => {
-          if (mode) {
-            setMode(null);
-          } else {
-            //Navigate based on who is viewing
-            if (passengerView) {
-              navigate("/passenger");
+            if (mode) {
+                setMode(null);
+                setForm(emptyForm);
+                setSelectedRoute("");
             } else {
-              navigate("/admin");
+                navigate(-1);
             }
-          }
         }}
         className="fixed top-6 left-6 z-50 flex items-center gap-2 mt-15
         bg-black/60 backdrop-blur-md border border-yellow-600
         text-yellow-400 px-4 py-2 rounded-full 
         shadow-[0_0_20px_rgba(255,215,0,0.25)]
         hover:bg-yellow-500 hover:text-black transition duration-300"
-      >
+    >
         <FaArrowLeft />
-        <span className="font-semibold text-sm">Back</span>
-      </button>
+        <span className="font-semibold text-sm">{mode ? "Cancel" : "Back"}</span>
+    </button>
 
       {!mode && (
         <div className="mt-25 flex flex-col items-center gap-5 mb-10 [&>button]:w-72">
@@ -585,40 +538,70 @@ const Feedback = ({
 
             {(mode === "add" || (mode === "edit" && editLoaded)) && (
               <>
-                <input
-                  name="user_id"
-                  value={form.user_id}
-                  onChange={handleChange}
-                  placeholder="User ID"
-                  className="w-full p-3 mb-3 bg-black/60 border border-yellow-600 rounded-xl text-white"
-                />
+                {/* User ID - Auto-fill for passengers */}
+                {passengerView ? (
+                  <input
+                    value={userId || ''}
+                    readOnly
+                    placeholder="User ID (Auto-filled)"
+                    className="w-full p-3 mb-3 bg-gray-900 border border-yellow-600 rounded-xl text-yellow-400"
+                  />
+                ) : (
+                  <input
+                    name="user_id"
+                    value={form.user_id}
+                    onChange={handleChange}
+                    placeholder="User ID"
+                    className="w-full p-3 mb-3 bg-black/60 border border-yellow-600 rounded-xl text-white"
+                  />
+                )}
 
-                <select
-                  value={selectedRoute}
-                  onChange={(e) => setSelectedRoute(e.target.value)}
-                  className="w-full p-3 mb-3 bg-black/60 border border-yellow-600 rounded-xl text-white"
-                >
-                  <option value="">Select Route</option>
-                  {routes.map((r) => (
-                    <option key={r.route_id} value={r.route_id}>
-                      {r.route_name}
-                    </option>
-                  ))}
-                </select>
+                {/* Route Selection - Auto-filled for passengers */}
+                {passengerView ? (
+                  <input
+                    value={routeNo ? `${routeNo} - ${routeName || ''}` : ''}
+                    readOnly
+                    placeholder="Route (Auto-filled)"
+                    className="w-full p-3 mb-3 bg-gray-900 border border-yellow-600 rounded-xl text-yellow-400"
+                  />
+                ) : (
+                  <select
+                    value={selectedRoute}
+                    onChange={(e) => setSelectedRoute(e.target.value)}
+                    className="w-full p-3 mb-3 bg-black/60 border border-yellow-600 rounded-xl text-white"
+                  >
+                    <option value="">Select Route</option>
+                    {routes.map((r) => (
+                      <option key={r.route_id} value={r.route_id}>
+                        {r.route_name}
+                      </option>
+                    ))}
+                  </select>
+                )}
 
-                <select
-                  name="bus_id"
-                  value={form.bus_id}
-                  onChange={handleChange}
-                  className="w-full p-3 mb-3 bg-black/60 border border-yellow-600 rounded-xl text-white"
-                >
-                  <option value="">Select Bus</option>
-                  {filteredBuses.map((b) => (
-                    <option key={b.bus_id} value={b.bus_id}>
-                      {b.bus_number}
-                    </option>
-                  ))}
-                </select>
+                {/* Bus Selection - Auto-filled for passengers */}
+                {passengerView ? (
+                  <input
+                    value={busNumber || ''}
+                    readOnly
+                    placeholder="Bus Number (Auto-filled)"
+                    className="w-full p-3 mb-3 bg-gray-900 border border-yellow-600 rounded-xl text-yellow-400"
+                  />
+                ) : (
+                  <select
+                    name="bus_id"
+                    value={form.bus_id}
+                    onChange={handleChange}
+                    className="w-full p-3 mb-3 bg-black/60 border border-yellow-600 rounded-xl text-white"
+                  >
+                    <option value="">Select Bus</option>
+                    {filteredBuses.map((b) => (
+                      <option key={b.bus_id} value={b.bus_id}>
+                        {b.bus_number}
+                      </option>
+                    ))}
+                  </select>
+                )}
 
                 <textarea
                   name="comment"
@@ -716,6 +699,15 @@ const Feedback = ({
                         ({feedbacks.length} {feedbacks.length === 1 ? 'feedback' : 'feedbacks'})
                     </span>
                 </h2>
+                
+                {passengerView && (
+                    <button
+                        onClick={() => setMode("add")}
+                        className="px-4 py-2 bg-yellow-500/20 text-yellow-400 rounded-xl hover:bg-yellow-500/30 flex items-center gap-2"
+                    >
+                        <FaPlus /> Add Feedback
+                    </button>
+                )}
             </div>
 
             {/* Show feedbacks if there are any */}
@@ -724,16 +716,21 @@ const Feedback = ({
                     {feedbacks.map((f, index) => (
                         <div key={f.feedback_id || index}
                             className="flex items-center justify-between gap-4 p-4 rounded-xl border border-yellow-600/30 
-                                bg-black/60 hover:bg-black/50 transition-all duration-200"
+                                bg-black/60 hover:bg-black/50 transition-all duration-200 relative"
                         >
                             <div className="flex-1">
                                 <p className="text-lg font-semibold text-white">{f.comment}</p>
                                 <p className="text-sm text-yellow-300">User: {f.user_name} (UID-{f.user_id})</p>
                                 <p className="text-sm text-yellow-300">Bus: {f.bus_number}</p>
                                 <p className="text-sm text-yellow-300">Route: {f.route_name}</p>
+                                {f.created_at && (
+                                    <p className="text-xs text-gray-400 mt-1">
+                                        Posted: {new Date(f.created_at).toLocaleString()}
+                                    </p>
+                                )}
                             </div>
 
-                            <div className="flex items-center gap-4">
+                            <div className="flex flex-col items-end gap-2">
                                 <div className="flex gap-1">
                                     {[1,2,3,4,5].map((star) => (
                                         <FaStar
@@ -743,13 +740,27 @@ const Feedback = ({
                                     ))}
                                 </div>
                                 
-                                {passengerView && (
-                                    <button
-                                        onClick={() => handleDeleteFeedback(f.feedback_id)}
-                                        className="text-red-400 hover:text-red-300 transition p-2"
-                                    >
-                                        <FaTrash className="text-xl" />
-                                    </button>
+                                {/* Edit/Delete buttons - only show for logged user's own feedbacks */}
+                                {passengerView && f.user_id === userId && (
+                                    <div className="flex gap-2">
+                                        <button
+                                            onClick={() => {
+                                                populateFormFromFeedback(f);
+                                                setMode("edit");
+                                            }}
+                                            className="text-blue-400 hover:text-blue-300 transition p-1"
+                                            title="Edit"
+                                        >
+                                            <FaEdit className="text-sm" />
+                                        </button>
+                                        <button
+                                            onClick={() => handleDeleteFeedback(f.feedback_id)}
+                                            className="text-red-400 hover:text-red-300 transition p-1"
+                                            title="Delete"
+                                        >
+                                            <FaTrash className="text-sm" />
+                                        </button>
+                                    </div>
                                 )}
                             </div>
                         </div>

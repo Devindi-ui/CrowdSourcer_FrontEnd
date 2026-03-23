@@ -562,29 +562,24 @@ const CurrentSituation = ({
   return (
     <ThemeLayout pageTitle="Current Situation Management">
 
-          <button
-              type="button"
-              onClick={() => {
+        <button
+            type="button"
+            onClick={() => {
                 if (mode) {
-                  setMode(null);
+                    setMode(null);
                 } else {
-                  //Navigate based on who is viewing
-                  if (passengerView) {
-                    navigate("/passenger");
-                  } else {
-                    navigate("/admin");
-                  }
+                    navigate(-1);  // Go back to previous page
                 }
-              }}
-              className="fixed top-6 left-6 z-50 flex items-center gap-2 mt-15
-              bg-black/60 backdrop-blur-md border border-yellow-600
-              text-yellow-400 px-4 py-2 rounded-full 
-              shadow-[0_0_20px_rgba(255,215,0,0.25)]
-              hover:bg-yellow-500 hover:text-black transition duration-300"
-            >
-              <FaArrowLeft />
-              <span className="font-semibold text-sm">Back</span>
-          </button>
+            }}
+            className="fixed top-6 left-6 z-50 flex items-center gap-2 mt-15
+            bg-black/60 backdrop-blur-md border border-yellow-600
+            text-yellow-400 px-4 py-2 rounded-full 
+            shadow-[0_0_20px_rgba(255,215,0,0.25)]
+            hover:bg-yellow-500 hover:text-black transition duration-300"
+        >
+            <FaArrowLeft />
+            <span className="font-semibold text-sm">{mode ? "Cancel" : "Back"}</span>
+        </button>
 
       {/* Error Display */}
       {error && (
@@ -881,19 +876,6 @@ const CurrentSituation = ({
                     {passengerView ? `Current Situations for Bus ${preselectedBus}` : "Results"} 
                     <span className="ml-2 text-sm text-gray-400">({results.length})</span>
                 </h2>
-                
-                {/* {passengerView && (
-                    <button
-                        onClick={() => {
-                            setMode("add");
-                            // Refresh stops if needed
-                            if (routeNo) loadStopsByRouteNo(routeNo);
-                        }}
-                        className="px-4 py-2 bg-yellow-500/20 text-yellow-400 rounded-xl hover:bg-yellow-500/30 flex items-center gap-2"
-                    >
-                        <FaPlusCircle /> Add New
-                    </button>
-                )} */}
             </div>
 
             <div className="space-y-4">

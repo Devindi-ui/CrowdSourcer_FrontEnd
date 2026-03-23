@@ -1,15 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import Feedback from '../Admin/feedback';
+import Alert from '../Admin/alert';
 
-const PassengerFeedback = () => {
+const PassengerAlert = () => {
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
     const [loading, setLoading] = useState(true);
     const [currentUserId, setCurrentUserId] = useState(null);
     const [busData, setBusData] = useState(null);
     
-    console.log("=== PassengerFeedback Mounted ===");
+    console.log("=== PassengerAlert Mounted ===");
     console.log("📌 Full URL:", window.location.href);
     
     // Get ALL data from URL parameters
@@ -73,7 +73,7 @@ const PassengerFeedback = () => {
         return null;
     }
 
-    console.log("✅ Rendering Feedback with props:", {
+    console.log("✅ Rendering Alert with props:", {
         busNumber: busData.bus_number,
         routeNo: busData.route_no,
         routeName: busData.route_name,
@@ -82,7 +82,7 @@ const PassengerFeedback = () => {
 
     return (
         <div className="min-h-screen bg-black">
-            <Feedback 
+            <Alert 
                 passengerView={true}
                 userId={currentUserId}
                 busId={busData.bus_id}
@@ -94,4 +94,4 @@ const PassengerFeedback = () => {
     );
 };
 
-export default PassengerFeedback;
+export default PassengerAlert;
