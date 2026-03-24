@@ -10,8 +10,6 @@ import {
     busAPI, currentSituationAPI, favouriteRouteAPI, feedbackAPI,
     tripAPI, busTypeAPI, routeStopAPI, routeAPI, alertAPI
 } from "../../services/api";
-import PassengerAlert from "./PassengerAlert";
-import PassengerFeedback from "./PassengerFeedback";
 
 const PassengerDashboard = () => {
     const navigate = useNavigate();
@@ -22,7 +20,10 @@ const PassengerDashboard = () => {
     // User data from sessionStorage
     const [userName, setUserName] = useState("Guest");
     const [userLocation, setUserLocation] = useState("Sri Lanka");
-    const [warnings] = useState(1);
+    const [isEditingLocation, setIsEditingLocation] = useState(false);
+    const [isEditingName, setIsEditingName] = useState(false);
+    const [tempLocation, setTempLocation] = useState("");
+    const [tempName, setTempName] = useState("");
     
     // Data states
     const [allBuses, setAllBuses] = useState([]);
@@ -317,6 +318,32 @@ const PassengerDashboard = () => {
         goToCurrentSituations(bus);
     };
 
+    const startEditLocation = () => {
+        setTempLocation(userLocation);
+        setIsEditingLocation(true);
+    };
+
+    const saveLocation = () => {
+        if (tempLocation.trim()) {
+            setUserLocation(tempLocation);
+            sessionStorage.setItem('userLocation', tempLocation);
+            setIsEditingLocation(false);
+        }
+    };
+
+    const startEditName = () => {
+        setTempName(userName);
+        setIsEditingName(true);
+    };
+
+    const saveName = () => {
+        if (tempName.trim()) {
+            setUserName(tempName);
+            sessionStorage.setItem('userName', tempName);
+            setIsEditingName(false);
+        }
+    };
+
     const findOngoingTrip = (busId) => {
         const todaySriLanka = getTodaySriLanka();
         
@@ -344,16 +371,77 @@ const PassengerDashboard = () => {
                 {/* Location and Status Bar */}
                 <div className="bg-black/40 backdrop-blur-xl border border-yellow-600/20 rounded-xl p-4 mb-6">
                     <div className="flex justify-between items-center">
+                        {/* Location Section - Click to Edit */}
                         <div className="flex items-center gap-2">
                             <FaMapMarkerAlt className="text-yellow-400" />
-                            <span className="text-gray-300">{userLocation}</span>
+                            {isEditingLocation ? (
+                                <div className="flex items-center gap-2">
+                                    <input
+                                        type="text"
+                                        value={tempLocation}
+                                        onChange={(e) => setTempLocation(e.target.value)}
+                                        className="bg-black/60 border border-yellow-600/30 rounded-lg px-2 py-1 text-gray-300 text-sm focus:outline-none focus:border-yellow-500"
+                                        autoFocus
+                                    />
+                                    <button
+                                        onClick={saveLocation}
+                                        className="text-green-400 text-xs hover:text-green-300"
+                                    >
+                                        Save
+                                    </button>
+                                    <button
+                                        onClick={() => setIsEditingLocation(false)}
+                                        className="text-red-400 text-xs hover:text-red-300"
+                                    >
+                                        Cancel
+                                    </button>
+                                </div>
+                            ) : (
+                                <button
+                                    onClick={startEditLocation}
+                                    className="text-gray-300 hover:text-yellow-400 transition-colors flex items-center gap-1"
+                                >
+                                    <span>{userLocation}</span>
+                                    <span className="text-xs text-yellow-500/50">✎</span>
+                                </button>
+                            )}
                         </div>
-                        {warnings > 0 && (
-                            <div className="flex items-center gap-2 px-3 py-1 bg-red-500/20 rounded-full border border-red-500/30">
-                                <FaExclamationTriangle className="text-red-400 text-sm" />
-                                <span className="text-red-400 text-sm">Warned</span>
-                            </div>
-                        )}
+
+                        {/* User Name Section - Click to Edit */}
+                        <div className="flex items-center gap-2">
+                            <FaUser className="text-yellow-400" />
+                            {isEditingName ? (
+                                <div className="flex items-center gap-2">
+                                    <input
+                                        type="text"
+                                        value={tempName}
+                                        onChange={(e) => setTempName(e.target.value)}
+                                        className="bg-black/60 border border-yellow-600/30 rounded-lg px-2 py-1 text-gray-300 text-sm focus:outline-none focus:border-yellow-500"
+                                        autoFocus
+                                    />
+                                    <button
+                                        onClick={saveName}
+                                        className="text-green-400 text-xs hover:text-green-300"
+                                    >
+                                        Save
+                                    </button>
+                                    <button
+                                        onClick={() => setIsEditingName(false)}
+                                        className="text-red-400 text-xs hover:text-red-300"
+                                    >
+                                        Cancel
+                                    </button>
+                                </div>
+                            ) : (
+                                <button
+                                    onClick={startEditName}
+                                    className="text-gray-300 hover:text-yellow-400 transition-colors flex items-center gap-1"
+                                >
+                                    <span>{userName}</span>
+                                    <span className="text-xs text-yellow-500/50">✎</span>
+                                </button>
+                            )}
+                        </div>
                     </div>
                 </div>
 
@@ -370,22 +458,6 @@ const PassengerDashboard = () => {
                         </div>
                     </div>
                 </div>
-
-                {/* Warning Banner */}
-                {warnings > 0 && (
-                    <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-4 mb-6 flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                            <FaExclamationTriangle className="text-red-400" />
-                            <div>
-                                <h4 className="text-white font-semibold">Warned</h4>
-                                <p className="text-sm text-gray-400">You have {warnings} active warning</p>
-                            </div>
-                        </div>
-                        <button className="px-4 py-2 bg-red-500/20 text-red-400 rounded-lg text-sm hover:bg-red-500/30 transition">
-                            View Details
-                        </button>
-                    </div>
-                )}
 
                 {/* City Filter Dropdown */}
                 <div className="flex justify-end mb-6">
@@ -673,13 +745,6 @@ const PassengerDashboard = () => {
                         title="Report Situation"
                     >
                         <FaPlus className="text-xl" />
-                    </button>
-                    <button
-                        onClick={goToBuses}
-                        className="w-14 h-14 rounded-full bg-black/60 backdrop-blur-xl border border-yellow-600/30 text-yellow-400 flex items-center justify-center shadow-lg hover:scale-110 hover:border-yellow-500 hover:shadow-[0_0_30px_rgba(255,215,0,0.2)] transition-all duration-300"
-                        title="View All Buses"
-                    >
-                        <FaBus className="text-xl" />
                     </button>
                 </div>
 
