@@ -9,6 +9,18 @@ const api = axios.create(
     }
 );
 
+// Add interceptor to include token in all requests
+api.interceptors.request.use(
+    (config) => {
+        const token = localStorage.getItem('token');
+        if (token) {
+            config.headers.Authorization = `Bearer ${token}`;
+        }
+        return config;
+    },
+    (error) => Promise.reject(error)
+);
+
 // authAPI.js or in your api/index.js
 export const authAPI = {
     login: (credentials) => api.post('/auth/login', credentials),
@@ -234,6 +246,30 @@ export const routeStopAPI = {
         api.delete(`/routeStop/delete/${id}`),
     deleteRouteStopsByRouteNo: (routeNo) =>
         api.delete(`/routeStop/deleteByRouteNo/${encodeURIComponent(routeNo)}`)
+};
+
+export const ownerAPI = {
+    // Dashboard
+    getDashboardStats: (ownerId) => api.get(`/owner/dashboard/stats?owner_id=${ownerId}`),
+    
+    // Buses
+    getMyBuses: (ownerId) => api.get(`/owner/buses?owner_id=${ownerId}`),
+    createBus: (bus) => api.post('/owner/bus/create', bus),
+    updateBus: (id, bus) => api.put(`/owner/bus/update/${id}`, bus),
+    deleteBus: (id) => api.delete(`/owner/bus/delete/${id}`),
+    
+    // Staff
+    getMyStaff: (roleId, ownerId) => api.get(`/owner/staff/${roleId}?owner_id=${ownerId}`),
+    createStaff: (staff) => api.post('/owner/staff/create', staff),
+    updateStaff: (id, staff) => api.put(`/owner/staff/update/${id}`, staff),
+    deleteStaff: (id, staff) => api.delete(`/owner/staff/delete/${id}`, { data: staff }),
+    
+    // Trips
+    getMyTrips: (ownerId) => api.get(`/owner/trips?owner_id=${ownerId}`),
+    
+    // Reports
+    getMySituations: (ownerId) => api.get(`/owner/situations?owner_id=${ownerId}`),
+    getMyFeedbacks: (ownerId) => api.get(`/owner/feedbacks?owner_id=${ownerId}`),
 };
 
 // Profile API

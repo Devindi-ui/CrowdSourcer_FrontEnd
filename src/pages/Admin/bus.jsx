@@ -8,14 +8,21 @@ import {
   FaArrowLeft,
   FaBus as FaBusIcon,
   FaRoute,
-  FaMapMarkerAlt
+  FaMapMarkerAlt,
+  FaChevronLeft
 } from "react-icons/fa";
 import { busAPI, busTypeAPI, routeAPI } from "../../services/api";
 import ThemeLayout from "../../components/common/Layout/ThemeLayout";
 import ActionBtn from "../../components/common/Layout/ActionBtn";
 import usePermissions from "../../hooks/usePermissions";
 
-const Bus = (passengerView, onBusSelect) => {
+const Bus = ({ 
+    passengerView = false, 
+    onBusSelect = null,
+    ownerView = false,
+    ownerId = null,
+    onSuccess = null
+}) => {
   const navigate = useNavigate();
   const { role, canAdd, canEdit, canDelete } = usePermissions('bus');
   
@@ -91,7 +98,15 @@ const Bus = (passengerView, onBusSelect) => {
 
       if (type === "all") {
         const res = await busAPI.getAllBuses();
-        setBuses(res.data?.data || []);
+        let busesData = res.data?.data || [];
+        
+        // If owner view, filter by owner_id
+        if (ownerView && ownerId) {
+          busesData = busesData.filter(bus => bus.owner_id === ownerId);
+          console.log(`Filtered to ${busesData.length} buses for owner ${ownerId}`);
+        }
+        
+        setBuses(busesData);
         setShowResults(true);
       }
 
@@ -101,7 +116,14 @@ const Bus = (passengerView, onBusSelect) => {
           return;
         }
         const res = await busAPI.getBusByText(searchText);
-        setBuses(res.data?.data || []);
+        let busesData = res.data?.data || [];
+        
+        // If owner view, filter by owner_id
+        if (ownerView && ownerId) {
+          busesData = busesData.filter(bus => bus.owner_id === ownerId);
+        }
+        
+        setBuses(busesData);
         setShowResults(true);
       }
 
@@ -150,16 +172,35 @@ const Bus = (passengerView, onBusSelect) => {
 
     try {
       setLoading(true);
-      await busAPI.createBus({
+      
+      // For owner view, add owner_id to the request
+      const busData = {
         bus_number: form.bus_number,
         seat_capacity: parseInt(form.seat_capacity),
         route_no: form.route_no,
         bus_type_id: form.bus_type_id || null,
         status: form.status
-      });
+      };
+      
+      // If owner view, add owner_id
+      if (ownerView && ownerId) {
+        busData.owner_id = ownerId;
+      }
+      
+      await busAPI.createBus(busData);
       alert("✅ Bus added successfully");
+      
+      // Reset form
       resetAll();
-      findBus('all'); // Refresh the list
+      
+      // Refresh the bus list immediately
+      await findBus('all');
+      
+      // If there's a success callback (for owner view), call it
+      if (onSuccess) {
+        onSuccess();
+      }
+      
     } catch (err) {
       console.error(err);
       alert("❌ Failed to add bus");
@@ -194,23 +235,38 @@ const Bus = (passengerView, onBusSelect) => {
 
   const updateBus = async () => {
     try {
-      setLoading(true);
-      await busAPI.updateBus(form.id, {
-        bus_number: form.bus_number,
-        seat_capacity: parseInt(form.seat_capacity),
-        route_no: form.route_no,
-        bus_type_id: form.bus_type_id || null,
-        status: form.status
-      });
-      alert("✅ Bus updated");
-      const res = await busAPI.getBusById(form.id);
-      setBuses([res.data.data]);
-      setShowResults(true);
-      setEditLoaded(false);
+        setLoading(true);
+        
+        // Ensure all values are properly set (not undefined)
+        const updateData = {
+            bus_number: form.bus_number || null,
+            seat_capacity: parseInt(form.seat_capacity) || null,
+            route_no: form.route_no || null,
+            bus_type_id: form.bus_type_id || null,
+            status: form.status || 'active'
+        };
+        
+        // If owner view, include owner_id
+        if (ownerView && ownerId) {
+            updateData.owner_id = ownerId;
+        }
+        
+        console.log("Updating bus with data:", updateData);
+        
+        await busAPI.updateBus(form.id, updateData);
+        alert("✅ Bus updated");
+        
+        const res = await busAPI.getBusById(form.id);
+        setBuses([res.data.data]);
+        setShowResults(true);
+        setEditLoaded(false);
+        
     } catch (err) {
-      alert("❌ Update failed");
+        console.error("Update failed:", err);
+        const errorMsg = err.response?.data?.message || err.message || "Update failed";
+        alert("❌ " + errorMsg);
     } finally {
-      setLoading(false);
+        setLoading(false);
     }
   };
 
@@ -268,21 +324,25 @@ const Bus = (passengerView, onBusSelect) => {
   };
 
   return (
-    <ThemeLayout>
+    <ThemeLayout >
       
-      {/* Back Button */}
       <button
         type="button"
-        onClick={() => navigate(-1)}
-        className="fixed top-6 z-50 flex items-center gap-2 mt-15
-          bg-black/60 backdrop-blur-md border border-yellow-600
-          text-yellow-400 px-4 py-2 rounded-full
-          shadow-[0_0_20px_rgba(255,215,0,0.25)]
-          hover:bg-yellow-500 hover:text-black transition duration-300"
-      >
-        <FaArrowLeft />
-        <span className="font-semibold text-sm">Back</span>
-      </button>
+        onClick={() => {
+            if (mode) {
+                setMode(null);
+            } else {
+                navigate(-1);
+            }
+        }}
+        className="mx-2 fixed top-6 z-50 flex items-center gap-2 mt-15
+        bg-black/60 backdrop-blur-md border border-yellow-600
+        text-yellow-400 px-4 py-2 rounded-full 
+        shadow-[0_0_20px_rgba(255,215,0,0.25)]
+        hover:bg-yellow-500 hover:text-black transition duration-300"
+    >
+        <FaChevronLeft />
+    </button>
 
       {/* Error Display */}
       {error && (
@@ -291,13 +351,13 @@ const Bus = (passengerView, onBusSelect) => {
         </div>
       )}
 
-      {/* Mode Selection - Only show for admin */}
-      {!mode && role === 'admin' && (
+      {/* Mode Selection - Show for admin OR owner */}
+      {!mode && (role === 'admin' || ownerView) && (
         <div className="mt-25 flex flex-col items-center gap-5 mb-10 [&>button]:w-72">
-          {canAdd && <ActionBtn icon={<FaPlusCircle />} text="Add Bus" onClick={() => setMode("add")} />}
+          {(role === 'admin' || ownerView) && <ActionBtn icon={<FaPlusCircle />} text="Add Bus" onClick={() => setMode("add")} />}
           <ActionBtn icon={<FaSearch />} text="Find Bus" onClick={() => setMode("find")} />
-          {canEdit && <ActionBtn icon={<FaEdit />} text="Update Bus" onClick={() => setMode("edit")} />}
-          {canDelete && <ActionBtn icon={<FaTrash />} text="Delete Bus" onClick={() => setMode("delete")} />}
+          {(role === 'admin' || ownerView) && <ActionBtn icon={<FaEdit />} text="Update Bus" onClick={() => setMode("edit")} />}
+          {(role === 'admin' || ownerView) && <ActionBtn icon={<FaTrash />} text="Delete Bus" onClick={() => setMode("delete")} />}
         </div>
       )}
 
@@ -339,7 +399,7 @@ const Bus = (passengerView, onBusSelect) => {
                     <h3 className="text-lg font-semibold">{bus.bus_number}</h3>
                   </div>
                   
-                  {/* ✅ FIXED: Show bus type name, not ID */}
+                  {/* Show bus type name */}
                   <p className="text-gray-300">
                     Type: {bus.type_name || getBusTypeName(bus.bus_type_id) || 'N/A'}
                   </p>
@@ -394,7 +454,7 @@ const Bus = (passengerView, onBusSelect) => {
       )}
 
       {/* Admin CRUD Forms */}
-      {mode && role === 'admin' && (
+      {mode && (role === 'admin' || ownerView) && (
         <div className="flex justify-center mt-20">
           <div className="max-w-xl w-full bg-black/70 border border-yellow-600/40 rounded-2xl p-6">
             <h2 className="text-xl font-bold mb-4 capitalize text-yellow-400">
@@ -552,19 +612,51 @@ const Bus = (passengerView, onBusSelect) => {
         </div>
       )}
 
-      {/* Results for admin search */}
-      {showResults && role === 'admin' && buses.length > 0 && (
+      {/* Results for admin/owner search - WITH EDIT/DELETE BUTTONS */}
+      {showResults && (role === 'admin' || ownerView) && buses.length > 0 && (
         <div className="bg-black/70 border border-yellow-600/40 rounded-2xl p-6 mt-10">
-          <h2 className="text-xl font-bold mb-6 text-yellow-400">Results ({buses.length})</h2>
-          <div className="space-y-4">
+          <h2 className="text-xl font-bold mb-6 text-yellow-400">
+            {ownerView ? "My Buses" : "Results"} ({buses.length})
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {buses.map(b => (
-              <div key={b.bus_id} className="p-4 bg-black/60 border border-yellow-600/30 rounded-xl">
-                <p className="text-yellow-400">Bus: {b.bus_number}</p>
-                <p className="text-gray-300">Route: {b.route_name}</p>
-                {/* ✅ FIXED: Show type name, not ID */}
-                <p className="text-gray-300">Type: {b.type_name || getBusTypeName(b.bus_type_id) || 'N/A'}</p>
-                <p className="text-gray-300">Capacity: {b.seat_capacity}</p>
-                <p className="text-gray-300">Status: {b.status}</p>
+              <div key={b.bus_id} className="p-4 bg-black/60 border border-yellow-600/30 rounded-xl relative group hover:border-yellow-500 transition">
+                {/* Edit/Delete buttons - visible on hover */}
+                <div className="absolute top-2 right-2 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <button
+                    onClick={() => {
+                      setForm({
+                        id: b.bus_id,
+                        bus_number: b.bus_number,
+                        seat_capacity: b.seat_capacity,
+                        route_no: b.route_no,
+                        bus_type_id: b.bus_type_id || '',
+                        status: b.status
+                      });
+                      setMode("edit");
+                      setEditLoaded(true);
+                    }}
+                    className="text-blue-400 hover:text-blue-300 p-1"
+                    title="Edit"
+                  >
+                    <FaEdit />
+                  </button>
+                  <button
+                    onClick={() => {
+                      setForm({ ...form, id: b.bus_id });
+                      setMode("delete");
+                    }}
+                    className="text-red-400 hover:text-red-300 p-1"
+                    title="Delete"
+                  >
+                    <FaTrash />
+                  </button>
+                </div>
+                <p className="text-yellow-400 font-bold">{b.bus_number}</p>
+                <p className="text-gray-300 text-sm">Route: {b.route_name}</p>
+                <p className="text-gray-300 text-sm">Type: {b.type_name || getBusTypeName(b.bus_type_id) || 'N/A'}</p>
+                <p className="text-gray-300 text-sm">Capacity: {b.seat_capacity} seats</p>
+                <p className="text-gray-300 text-sm">Status: <span className={b.status === 'active' ? 'text-green-400' : 'text-red-400'}>{b.status}</span></p>
               </div>
             ))}
           </div>

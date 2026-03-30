@@ -24,6 +24,8 @@ const PassengerDashboard = () => {
     const [isEditingName, setIsEditingName] = useState(false);
     const [tempLocation, setTempLocation] = useState("");
     const [tempName, setTempName] = useState("");
+
+    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     
     // Data states
     const [allBuses, setAllBuses] = useState([]);
@@ -240,6 +242,31 @@ const PassengerDashboard = () => {
         }
     };
 
+    // Check if screen is mobile and navbar is expanded
+    useEffect(() => {
+        const handleResize = () => {
+            // If screen is larger than md (768px), mobile menu is not visible
+            if (window.innerWidth >= 768) {
+                setIsMobileMenuOpen(false);
+            }
+        };
+        
+        window.addEventListener('resize', handleResize);
+        
+        // You need to listen for navbar menu state - this is a workaround
+        // Add a custom event listener for navbar menu toggle
+        const handleNavbarToggle = (event) => {
+            setIsMobileMenuOpen(event.detail?.isOpen || false);
+        };
+        
+        window.addEventListener('navbarToggle', handleNavbarToggle);
+        
+        return () => {
+            window.removeEventListener('resize', handleResize);
+            window.removeEventListener('navbarToggle', handleNavbarToggle);
+        };
+    }, []);
+
     const handleCityChange = (e) => {
         const city = e.target.value;
         setSelectedCity(city);
@@ -315,7 +342,7 @@ const PassengerDashboard = () => {
 
     const handleBusSelect = (bus) => {
         setShowBusSelector(false);
-        goToCurrentSituations(bus);
+        goToFeedback(bus);
     };
 
     const startEditLocation = () => {
@@ -692,7 +719,6 @@ const PassengerDashboard = () => {
                                                 <p className="text-xs text-gray-400">Route {route.route_no}</p>
                                             </div>
                                         </div>
-                                        <button className="text-yellow-400 text-xs hover:text-yellow-300">Track →</button>
                                     </div>
                                 ))
                             ) : (

@@ -26,33 +26,72 @@ const Login = ({ onLoginSuccess }) => {
 
       // Check if login was successful
       if (res.data?.success) {
-      // Check if user account is deactivated
-      if (res.data.data?.user?.status_d === 0) {
-        toast.error(<b className="text-red-500">Your account has been deactivated. Please contact admin.</b>);
-        setIsSubmitting(false);
-        return;
-      }
+        // Check if user account is deactivated
+        if (res.data.data?.user?.status_d === 0) {
+          toast.error(<b className="text-red-500">Your account has been deactivated. Please contact admin.</b>);
+          setIsSubmitting(false);
+          return;
+        }
 
-      if (res.data?.success) {
         // Get the user object
         const user = res.data.data.user;
         
-        console.log("User data from login:", user); // {id: 43, name: 'Nithya Devindi', ...}
+        console.log("===== DEBUG: User Data =====");
+        console.log("Full user object:", user);
+        console.log("user.role:", user?.role);
+        console.log("user.role_name:", user?.role_name);
+        console.log("user.role_id:", user?.role_id);
         
-        // ✅ FIX: Use the CORRECT property name - it's "id", not "user_id"!
-        sessionStorage.setItem("userId", user?.id);      // ← Changed from user_id to id
-        sessionStorage.setItem("userName", user?.name);  // ← This is correct (property is "name")
+        // ============= STORE USER ID =============
+        // Store user ID - use the correct property name
+        const userId = user?.id || user?.user_id;
+        sessionStorage.setItem("userId", userId);
+        sessionStorage.setItem("userName", user?.name);
+        sessionStorage.setItem("userEmail", user?.email);
         
-        // Store user data in localStorage
+        // ============= STORE ROLE - CRITICAL FOR ACCESS CONTROL =============
+        // Try multiple possible property names for role
+        let userRole = user?.role_name || user?.role || user?.roleName;
+        console.log("Detected user role:", userRole);
+        
+        // TEMPORARY FALLBACK: If role is still null, check if email matches owner
+        // This is for testing only - remove in production
+        if (!userRole && user?.email === "owner@example.com") {
+          userRole = "owner";
+          console.log("⚠️ Using fallback role: owner");
+        }
+        if (!userRole && user?.email === "admin@example.com") {
+          userRole = "admin";
+          console.log("⚠️ Using fallback role: admin");
+        }
+        
+        // Store role in sessionStorage
+        if (userRole) {
+          sessionStorage.setItem("role", userRole);
+          localStorage.setItem("role", userRole);
+          console.log("✅ Role stored in sessionStorage:", sessionStorage.getItem("role"));
+        } else {
+          console.warn("⚠️ No role found in user object. Available keys:", Object.keys(user));
+          console.warn("⚠️ You may need to check your backend response structure");
+          // Set a default role for testing (remove in production)
+          const defaultRole = "passenger";
+          sessionStorage.setItem("role", defaultRole);
+          localStorage.setItem("role", defaultRole);
+          console.log(`⚠️ Using default role: ${defaultRole}`);
+        }
+        
+        // Also store role_id if available
+        if (user?.role_id) {
+          sessionStorage.setItem("roleId", user.role_id);
+        }
+        
+        // ============= STORE FULL USER DATA =============
         localStorage.setItem("user", JSON.stringify(user));
         
         // Store token if available
         if (res.data.data?.token) {
           localStorage.setItem("token", res.data.data.token);
         }
-
-        // Store user role
-        localStorage.setItem("role", user?.role || user?.role_name);
 
         toast.success("Login successful!");
 
@@ -61,9 +100,26 @@ const Login = ({ onLoginSuccess }) => {
           onLoginSuccess(res.data.data);
         }
 
-        // Navigate to main dashboard
-        navigate("/");
-      }
+        // ============= ROLE-BASED REDIRECTION =============
+        // Navigate based on user role
+        const role = userRole?.toLowerCase();
+        
+        console.log("Redirecting based on role:", role);
+        
+        if (role === 'owner') {
+          navigate("/owner");
+        } else if (role === 'admin') {
+          navigate("/admin");
+        } else if (role === 'passenger') {
+          navigate("/passenger");
+        } else if (role === 'driver') {
+          navigate("/driver");
+        } else if (role === 'conductor') {
+          navigate("/conductor");
+        } else {
+          // Default to main dashboard
+          navigate("/");
+        }
       }
     } catch (err) {
       console.error("Login error:", err);

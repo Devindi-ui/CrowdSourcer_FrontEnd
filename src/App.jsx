@@ -40,10 +40,18 @@ import PassengerFeedback from "./pages/Passenger/PassengerFeedback";
 import PassengerAlert from "./pages/Passenger/PassengerAlert";
 import PassengerDashboard from "./pages/Passenger/PassengerDashboard";
 
+//Owner Pages
+import OwnerDashboard from "./pages/Owner/OwnerDashboard";
+import OwnerBus from "./pages/Owner/OwnerBus";
+import OwnerDriverConductor from "./pages/Owner/OwnerDriverConductor";
+import OwnerTrip from "./pages/Owner/OwnerTrip";
+import OwnerRoute from "./pages/Owner/OwnerRoute";
+import OwnerCurrentSituation from "./pages/Owner/OwnerCurrentSituation";
+import OwnerFeedback from "./pages/Owner/OwnerFeedback";
+import OwnerCrowdReport from "./pages/Owner/OwnerCrowdReport";
 
 /* ROLE DASHBOARDS */
 import DriverDashboard from "./pages/Conductor/Dashboard";
-import OwnerDashboard from "./pages/Owner/Dashboard";
 
 const App = () => {
   return (
@@ -83,12 +91,24 @@ const App = () => {
           <Route path="history" element={<PassengerHistory />} />
           <Route path="settings" element={<PassengerSettings />} />
       </Route>
-      {/* StandAlone pages */}
+          {/* StandAlone pages */}
           <Route path="passenger/bus" element={<PassengerBus />} />
           <Route path="passenger/currentSituation" element={<PassengerCurrentSituation />} />
           <Route path="passenger/favouriteRoute" element={<PassengerFavRoute />} />
           <Route path="passenger/feedback" element={<PassengerFeedback />} />
           <Route path="passenger/alert" element={<PassengerAlert />} />
+
+          {/* OWNER ROUTES */}
+          <Route path="/owner" element={<OwnerLayout />}>
+              <Route index element={<OwnerDashboard />} />
+              <Route path="dashboard" element={<OwnerDashboard />} />
+              <Route path="buses" element={<OwnerBus />} />
+              <Route path="staff" element={<OwnerDriverConductor />} />
+              <Route path="trips" element={<OwnerTrip />} />
+              <Route path="routes" element={<OwnerRoute />} />
+              <Route path="feedbacks" element={<OwnerFeedback />} />
+              <Route path="crowdReport" element={<OwnerCrowdReport />} />
+          </Route>
     </Routes>
   );
 }

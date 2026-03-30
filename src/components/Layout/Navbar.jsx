@@ -16,6 +16,28 @@ const Navbar = ({onLogout}) => {
         navigate("/login");
     };
 
+    // Handle mobile menu toggle with event dispatch
+    const handleMenuToggle = (newState) => {
+        setIsOpen(newState);
+        // Dispatch custom event for other components (like PassengerDashboard)
+        window.dispatchEvent(new CustomEvent('navbarToggle', { detail: { isOpen: newState } }));
+    };
+
+    // Close menu on window resize (when screen becomes desktop)
+    useEffect(() => {
+        const handleResize = () => {
+            if (window.innerWidth >= 768 && isOpen) {
+                handleMenuToggle(false);
+            }
+        };
+        
+        window.addEventListener('resize', handleResize);
+        
+        return () => {
+            window.removeEventListener('resize', handleResize);
+        };
+    }, [isOpen]);
+
     return (
         <nav className="fixed top-0 left-0 w-full z-50 
             bg-black/80 backdrop-blur-2xl 
@@ -115,7 +137,7 @@ const Navbar = ({onLogout}) => {
                 <button 
                     className="md:hidden text-yellow-500 text-2xl 
                         hover:text-yellow-400 transition"
-                    onClick={() => setIsOpen(!isOpen)}
+                    onClick={() => handleMenuToggle(!isOpen)}
                 >
                     { isOpen ? <FaTimes/> : <FaBars/> }
                 </button>
@@ -131,7 +153,7 @@ const Navbar = ({onLogout}) => {
                     space-y-4 text-gray-300 font-medium">
 
                         <Link 
-                            onClick={() => setIsOpen(false)} 
+                            onClick={() => handleMenuToggle(false)} 
                             to="/main" 
                             className="block hover:text-yellow-400 transition"
                         >
@@ -139,7 +161,7 @@ const Navbar = ({onLogout}) => {
                         </Link>
 
                         <Link 
-                            onClick={() => setIsOpen(false)} 
+                            onClick={() => handleMenuToggle(false)} 
                             to="/passenger" 
                             className="block hover:text-yellow-400 transition"
                         >
@@ -147,7 +169,7 @@ const Navbar = ({onLogout}) => {
                         </Link>
 
                         <Link 
-                            onClick={() => setIsOpen(false)} 
+                            onClick={() => handleMenuToggle(false)} 
                             to="/cd" 
                             className="block hover:text-yellow-400 transition"
                         >
@@ -155,7 +177,7 @@ const Navbar = ({onLogout}) => {
                         </Link>
 
                         <Link 
-                            onClick={() => setIsOpen(false)} 
+                            onClick={() => handleMenuToggle(false)} 
                             to="/owner" 
                             className="block hover:text-yellow-400 transition"
                         >
@@ -163,7 +185,7 @@ const Navbar = ({onLogout}) => {
                         </Link>
 
                         <Link 
-                            onClick={() => setIsOpen(false)} 
+                            onClick={() => handleMenuToggle(false)} 
                             to="/admin" 
                             className="block hover:text-yellow-400 transition"
                         >
@@ -171,7 +193,10 @@ const Navbar = ({onLogout}) => {
                         </Link>
 
                         <button 
-                            onClick={handleLogout}
+                            onClick={() => {
+                                handleMenuToggle(false);
+                                handleLogout();
+                            }}
                             className="w-full mt-4 px-4 py-2 rounded-xl 
                                 border border-yellow-600/40 
                                 text-yellow-500 font-semibold

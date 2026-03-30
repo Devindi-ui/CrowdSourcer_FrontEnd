@@ -18,7 +18,9 @@ const CurrentSituation = ({
   userId = null,
   busId = null,
   routeNo = null,
-  routeName = null
+  routeName = null,
+  ownerView = false,
+  ownerId = null
 }) => {
   const navigate = useNavigate();
   const [mode, setMode] = useState(null);
@@ -45,6 +47,20 @@ const CurrentSituation = ({
   const [availableBuses, setAvailableBuses] = useState([]);
   const [selectedRouteName, setSelectedRouteName] = useState("");
 
+  // Helper functions for Sri Lanka timezone
+  const toSriLankaDate = (utcDate) => {
+      if (!utcDate) return null;
+      const date = new Date(utcDate);
+      const sriLankaTime = new Date(date.getTime() + (5.5 * 60 * 60 * 1000));
+      return sriLankaTime.toISOString().split('T')[0];
+  };
+
+  const getTodaySriLanka = () => {
+      const now = new Date();
+      const sriLankaTime = new Date(now.getTime() + (5.5 * 60 * 60 * 1000));
+      return sriLankaTime.toISOString().split('T')[0];
+  };
+
   useEffect(() => {
     loadInitialData();
   }, []);
@@ -63,32 +79,94 @@ const CurrentSituation = ({
     }
   };
 
+  // Load situations for owner view (all situations for owner's buses, today's ongoing trips only)
+  useEffect(() => {
+      if (ownerView && ownerId) {
+          console.log("Owner view mode - loading situations for owner:", ownerId);
+          setMode(null);
+          loadSituationsForOwner();
+      }
+  }, [ownerView, ownerId]);
+
+  const loadSituationsForOwner = async () => {
+      try {
+          setLoading(true);
+          console.log("Loading situations for owner:", ownerId);
+          
+          // First get all buses belonging to this owner
+          const busesRes = await busAPI.getAllBuses();
+          const allBuses = busesRes.data?.data || [];
+          const ownerBuses = allBuses.filter(bus => bus.owner_id === parseInt(ownerId));
+          const ownerBusNumbers = ownerBuses.map(bus => bus.bus_number);
+          
+          console.log("Owner's buses:", ownerBusNumbers);
+          
+          // Get all situations
+          const res = await currentSituationAPI.getAll();
+          let allSituations = res?.data?.data || [];
+          console.log("Total situations:", allSituations.length);
+          
+          // Filter by owner's buses
+          let ownerSituations = allSituations.filter(sit => 
+              ownerBusNumbers.includes(sit.bus_number)
+          );
+          console.log(`Filtered to ${ownerSituations.length} situations for owner's buses`);
+          
+          // Further filter for today's ongoing trips only
+          const todaySriLanka = getTodaySriLanka();
+          const ongoingTrips = await getOngoingTripsForBuses(ownerBusNumbers);
+          const ongoingBusNumbers = ongoingTrips.map(trip => trip.bus_number);
+          
+          // Keep only situations for buses that have ongoing trips today
+          ownerSituations = ownerSituations.filter(sit => 
+              ongoingBusNumbers.includes(sit.bus_number)
+          );
+          
+          console.log(`Filtered to ${ownerSituations.length} situations for today's ongoing trips`);
+          
+          setResults(ownerSituations);
+          setShowResults(true);
+          
+      } catch (error) {
+          console.error("Failed to load situations for owner:", error);
+          setError("Failed to load situations");
+      } finally {
+          setLoading(false);
+      }
+  };
+
+  const getOngoingTripsForBuses = async (busNumbers) => {
+      try {
+          const tripsRes = await tripAPI.getAllTrips();
+          const allTrips = tripsRes.data?.data || [];
+          const todaySriLanka = getTodaySriLanka();
+          
+          return allTrips.filter(trip => 
+              busNumbers.includes(trip.bus_number) &&
+              trip.status === 'ongoing' &&
+              toSriLankaDate(trip.date) === todaySriLanka
+          );
+      } catch (error) {
+          console.error("Failed to get ongoing trips:", error);
+          return [];
+      }
+  };
+
   // Load data when component mounts (for passenger view)
   useEffect(() => {
       if (passengerView) {
           console.log("Passenger view mode - loading data for bus:", preselectedBus);
-          
-          // Set mode to view (no action buttons needed)
           setMode(null);
-          
-          // Load all situations for this bus
           loadSituationsForBus();
           
-          // Auto-fill form with bus data if available
           if (preselectedBus && routeNo && routeName) {
               setForm(prev => ({
                   ...prev,
                   bus_no: preselectedBus,
                   route_no: routeNo,
               }));
-              
-              // Load stops for this route
               loadStopsByRouteNo(routeNo);
-              
-              // Find and set route name
               setSelectedRouteName(routeName);
-              
-              // Find available buses for this route
               const route = routes.find(r => r.route_no === routeNo);
               if (route) {
                   const routeBuses = buses.filter(b => b.route_id === route.route_id);
@@ -119,7 +197,6 @@ const CurrentSituation = ({
     const loadBusesForRoute = async () => {
       if (form.route_no) {
         try {
-          // Filter buses that have this route_no
           const route = routes.find(r => r.route_no === form.route_no);
           if (route) {
             const routeBuses = buses.filter(bus => bus.route_id === route.route_id);
@@ -129,7 +206,6 @@ const CurrentSituation = ({
             setAvailableBuses([]);
             setSelectedRouteName("");
           }
-          // Reset bus and stops when route changes
           setForm(prev => ({ ...prev, bus_no: "", current_stop: "" }));
           setStops([]);
         } catch (error) {
@@ -156,7 +232,6 @@ const CurrentSituation = ({
             userId
         });
         
-        // Auto-fill form with bus data
         if (preselectedBus && routeNo && routeName) {
             setForm(prev => ({
                 ...prev,
@@ -165,15 +240,12 @@ const CurrentSituation = ({
                 user_id: userId || ''
             }));
             
-            // Load stops for this route
             if (routeNo) {
                 loadStopsByRouteNo(routeNo);
             }
-            
             setSelectedRouteName(routeName);
         }
         
-        // Load existing situations for this bus
         if (preselectedBus) {
             loadSituationsForBus();
         }
@@ -198,9 +270,7 @@ const CurrentSituation = ({
           
           setStops(stopsData);
           
-          // If there are stops and we're in add mode, optionally set first stop as default
           if (stopsData.length > 0 && mode === "add") {
-              // set first stop as default
                  setForm(prev => ({ ...prev, current_stop: stopsData[0].stop_name }));
           }
 
@@ -210,7 +280,7 @@ const CurrentSituation = ({
       }
   };
 
-  // Load all situations for the selected bus
+  // Load all situations for the selected bus (passenger view)
   const loadSituationsForBus = async () => {
       try {
           setLoading(true);
@@ -222,7 +292,6 @@ const CurrentSituation = ({
           let allSituations = res?.data?.data || [];
           console.log("Total situations:", allSituations.length);
           
-          // Filter by bus number
           if (preselectedBus) {
               allSituations = allSituations.filter(sit => 
                   sit.bus_number === preselectedBus
@@ -248,7 +317,7 @@ const CurrentSituation = ({
     setForm({
       ...form,
       bus_no: selectedBusNo,
-      current_stop: "" // Reset stop when bus changes
+      current_stop: ""
     });
 
     if (form.route_no) {
@@ -296,7 +365,7 @@ const CurrentSituation = ({
             bus_no: preselectedBus,
             route_no: routeNo,
             user_id: userId || '',
-            current_stop: ""  // ← Make sure current_stop is cleared
+            current_stop: ""
         }));
         
         if (routeNo) {
@@ -307,9 +376,7 @@ const CurrentSituation = ({
  };
 
     const addCurrentSituation = async () => {
-        // For passenger view, use props for validation
         if (passengerView) {
-            // Validate using props, not form state
             if (!routeNo || !preselectedBus || !userId || !form.current_stop || !form.avg_passengers) {
                 console.log("Validation failed - passenger view:", {
                     routeNo,
@@ -322,7 +389,6 @@ const CurrentSituation = ({
                 return;
             }
         } else {
-            // For admin, validate using form state
             if (!form.route_no || !form.bus_no || !form.user_id || !form.current_stop || !form.avg_passengers) {
                 console.log("Validation failed - admin view:", form);
                 alert("Please fill all fields");
@@ -348,7 +414,6 @@ const CurrentSituation = ({
             
             alert("✅ Current Situation added successfully");
             
-            // Reset form
             setForm({
                 cr_id: "",
                 bus_no: passengerView ? preselectedBus : "",
@@ -396,7 +461,6 @@ const CurrentSituation = ({
             
             alert("✅ Situation updated successfully");
             
-            // Reset form and close edit mode
             setMode(null);
             setForm({
                 cr_id: "",
@@ -407,7 +471,6 @@ const CurrentSituation = ({
                 avg_passengers: ""
             });
             
-            // Refresh the list
             if (passengerView) {
                 await loadSituationsForBus();
             }
@@ -422,17 +485,6 @@ const CurrentSituation = ({
         }
     };
 
-    <button
-        onClick={handleSubmit}
-        disabled={loading}
-        className="bg-yellow-500 hover:bg-yellow-600 text-black px-6 
-          py-2 rounded-xl font-semibold transition disabled:opacity-50"
-    >
-        {loading ? "Please wait..." : 
-        mode === "delete" ? "Delete" : 
-        mode === "edit" ? "Update" : "Submit"}
-    </button>
-
     // Handle delete situation
     const handleDeleteSituation = async (id) => {
         if (!window.confirm("Are you sure you want to delete this situation?")) return;
@@ -442,11 +494,9 @@ const CurrentSituation = ({
             await currentSituationAPI.delete(id);
             alert("✅ Situation deleted successfully");
             
-            // Refresh the list
             if (passengerView) {
                 await loadSituationsForBus();
             } else {
-                // For admin, refresh based on current search
                 if (searchType === "all") {
                     const res = await currentSituationAPI.getAll();
                     setResults(res?.data?.data || []);
@@ -458,6 +508,20 @@ const CurrentSituation = ({
         } finally {
             setLoading(false);
         }
+    };
+
+    // Handle edit situation (for passenger view)
+    const handleEditSituation = (situation) => {
+        setForm({
+            cr_id: situation.cr_id,
+            bus_no: situation.bus_number,
+            route_no: situation.route_no,
+            user_id: situation.user_id,
+            current_stop: situation.current_stop,
+            avg_passengers: situation.avg_passengers
+        });
+        setMode("edit");
+        loadStopsByRouteNo(situation.route_no);
     };
 
   const findCurrentSituation = async () => {
@@ -560,26 +624,26 @@ const CurrentSituation = ({
   };
 
   return (
-    <ThemeLayout >
+    <ThemeLayout>
 
         <button
-            type="button"
-            onClick={() => {
-                if (mode) {
-                    setMode(null);
-                } else {
-                    navigate(-1);  // Go back to previous page
-                }
-            }}
-            className="fixed top-6 z-50 flex items-center gap-2 mt-15
-            bg-black/60 backdrop-blur-md border border-yellow-600
-            text-yellow-400 px-4 py-2 rounded-full 
-            shadow-[0_0_20px_rgba(255,215,0,0.25)]
-            hover:bg-yellow-500 hover:text-black transition duration-300"
-        >
-            <FaArrowLeft />
-            <span className="font-semibold text-sm">{mode ? "Cancel" : "Back"}</span>
-        </button>
+        type="button"
+        onClick={() => {
+            if (mode) {
+                setMode(null);
+            } else {
+                navigate(-1);
+            }
+        }}
+        className="fixed top-6 z-50 flex items-center gap-2 mt-15
+        bg-black/60 backdrop-blur-md border border-yellow-600
+        text-yellow-400 px-4 py-2 rounded-full 
+        shadow-[0_0_20px_rgba(255,215,0,0.25)]
+        hover:bg-yellow-500 hover:text-black transition duration-300"
+    >
+        <FaArrowLeft />
+        <span className="font-semibold text-sm">{mode ? "Cancel" : "Back"}</span>
+    </button>
 
       {/* Error Display */}
       {error && (
@@ -588,7 +652,8 @@ const CurrentSituation = ({
         </div>
       )}
 
-      {!mode && !passengerView && (
+      {/* Action Buttons - Hide for owners (read-only) */}
+      {!mode && !passengerView && !ownerView && (
         <div className="mt-25 flex flex-col items-center gap-5 mb-10 [&>button]:w-72">
           <ActionBtn icon={<FaPlusCircle />} text="Add Current Situation" onClick={() => setMode("add")} />
           <ActionBtn icon={<FaSearch />} text="Find Current Situation" onClick={() => setMode("find")} />
@@ -597,14 +662,21 @@ const CurrentSituation = ({
       )}
 
       {/* For passengers, show only Add button */}
-      {!mode && passengerView && (
-          <div className="mt-10 mb-6 flex justify-end">
+      {!mode && passengerView && !ownerView && (
+          <div className="mt-35 mb-6 flex justify-center">
               <button
                   onClick={() => setMode("add")}
                   className="flex items-center gap-2 px-6 py-3 bg-yellow-500/20 text-yellow-400 rounded-xl hover:bg-yellow-500/30 transition"
               >
                   <FaPlusCircle /> Report Current Situation
               </button>
+          </div>
+      )}
+
+      {/* For owners - show only results, no action buttons */}
+      {!mode && ownerView && (
+          <div className="mt-10">
+              {/* Results will show below */}
           </div>
       )}
 
@@ -853,6 +925,8 @@ const CurrentSituation = ({
                 onClick={() => {
                     if (passengerView) {
                         navigate('/passenger/dashboard');
+                    } else if (ownerView) {
+                        navigate('/owner');
                     } else {
                         navigate('/admin');
                     }
@@ -868,12 +942,16 @@ const CurrentSituation = ({
         </div>
       )}
 
-      {/* Results */}
+      {/* Results - Owner View (Read-Only, No Edit/Delete) */}
       {showResults && results.length > 0 && (
         <div className="max-w-4xl mx-auto bg-black/70 border border-yellow-600/40 rounded-2xl p-6 mt-10">
             <div className="flex justify-between items-center mb-6">
                 <h2 className="text-xl font-bold text-yellow-400">
-                    {passengerView ? `Current Situations for Bus ${preselectedBus}` : "Results"} 
+                    {ownerView 
+                        ? `Current Situations for My Buses (Today's Ongoing Trips)` 
+                        : passengerView 
+                            ? `Current Situations for Bus ${preselectedBus}` 
+                            : "Results"} 
                     <span className="ml-2 text-sm text-gray-400">({results.length})</span>
                 </h2>
             </div>
@@ -881,8 +959,8 @@ const CurrentSituation = ({
             <div className="space-y-4">
                 {results.map(r => (
                     <div key={r.cr_id} className="p-4 rounded-xl border border-yellow-600/30 bg-black/60 relative">
-                        {/* Edit/Delete buttons - only show for owner */}
-                        {passengerView && r.user_id === userId && (
+                        {/* Edit/Delete buttons - ONLY for passenger's own entries, NOT for owners */}
+                        {passengerView && !ownerView && r.user_id === userId && (
                             <div className="absolute top-4 right-4 flex gap-2">
                                 <button
                                     onClick={() => handleEditSituation(r)}
@@ -924,8 +1002,8 @@ const CurrentSituation = ({
                             </div>
                         )}
                         
-                        {/* Show user badge for own entries */}
-                        {passengerView && r.user_id === userId && (
+                        {/* Show user badge for own entries (passenger only) */}
+                        {passengerView && !ownerView && r.user_id === userId && (
                             <div className="absolute bottom-4 right-4">
                                 <span className="text-xs bg-green-500/20 text-green-400 px-2 py-1 rounded-full">
                                     Your Report
@@ -938,8 +1016,17 @@ const CurrentSituation = ({
         </div>
       )}
 
+    {/* Empty state for owners */}
+    {ownerView && showResults && results.length === 0 && (
+        <div className="max-w-4xl mx-auto bg-black/70 border border-yellow-600/40 rounded-2xl p-12 mt-10 text-center">
+            <FaExclamationTriangle className="text-6xl text-yellow-400/30 mx-auto mb-4" />
+            <h3 className="text-xl text-white mb-2">No Situations Reported</h3>
+            <p className="text-gray-400">No current situations reported for your buses' ongoing trips today.</p>
+        </div>
+    )}
+
     {/* Empty state for passengers */}
-    {passengerView && showResults && results.length === 0 && (
+    {passengerView && !ownerView && showResults && results.length === 0 && (
         <div className="max-w-4xl mx-auto bg-black/70 border border-yellow-600/40 rounded-2xl p-12 mt-10 text-center">
             <FaExclamationTriangle className="text-6xl text-yellow-400/30 mx-auto mb-4" />
             <h3 className="text-xl text-white mb-2">No Situations Reported</h3>

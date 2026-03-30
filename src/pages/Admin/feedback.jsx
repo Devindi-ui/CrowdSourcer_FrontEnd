@@ -7,18 +7,24 @@ import {
   FaTrash,
   FaArrowLeft,
   FaStar,
-  FaCommentDots
+  FaCommentDots,
+  FaChevronLeft
 } from "react-icons/fa";
 import { feedbackAPI, busAPI, routeAPI } from "../../services/api";
 import ThemeLayout from "../../components/common/Layout/ThemeLayout";
 
 const Feedback = ({ 
-  passengerView = false, 
-  userId = null,
-  busId = null,
-  busNumber = null,
-  routeNo = null,
-  routeName = null
+    passengerView = false, 
+    userId = null,
+    busId = null,
+    busNumber = null,
+    routeNo = null,
+    routeName = null,
+    ownerView = false,
+    ownerId = null,
+    readOnly = false,
+    hideAddButton = false,
+    hideEditDelete = false
 }) => {
   const navigate = useNavigate();
   const [mode, setMode] = useState(null);
@@ -66,6 +72,53 @@ const Feedback = ({
     }
   };
 
+  // Load feedbacks for owner view (all feedbacks for owner's buses)
+  useEffect(() => {
+      if (ownerView && ownerId) {
+          console.log("🟢 Loading feedbacks for owner:", ownerId);
+          loadFeedbacksForOwner();
+      } else if (passengerView && busId) {
+          console.log("🟢 Loading feedbacks for bus:", busId);
+          loadFeedbacksForBus();
+      }
+  }, [ownerView, ownerId, passengerView, busId]);
+
+  const loadFeedbacksForOwner = async () => {
+      try {
+          setLoading(true);
+          console.log("Loading feedbacks for owner:", ownerId);
+          
+          // First get all buses
+          const busesRes = await busAPI.getAllBuses();
+          const allBuses = busesRes.data?.data || [];
+          
+          // Filter buses that belong to this owner
+          const ownerBuses = allBuses.filter(bus => bus.owner_id === parseInt(ownerId));
+          const ownerBusNumbers = ownerBuses.map(bus => bus.bus_number);
+          
+          console.log("Owner's buses:", ownerBusNumbers);
+          
+          // Get all feedbacks
+          const res = await feedbackAPI.getAllFeedbacks();
+          let allFeedbacks = res.data?.data || [];
+          
+          // Filter feedbacks for owner's buses only
+          const ownerFeedbacks = allFeedbacks.filter(fb => 
+              ownerBusNumbers.includes(fb.bus_number)
+          );
+          
+          console.log(`Filtered to ${ownerFeedbacks.length} feedbacks for owner's buses`);
+          
+          setFeedbacks(ownerFeedbacks);
+          setShowResults(true);
+          
+      } catch (error) {
+          console.error("Failed to load feedbacks for owner", error);
+      } finally {
+          setLoading(false);
+      }
+  };
+
   // Auto-fill form when in passenger view
   useEffect(() => {
       if (passengerView && busId && userId) {
@@ -96,14 +149,6 @@ const Feedback = ({
           }
       }
   }, [passengerView, busId, busNumber, routeNo, routeName, userId, buses]);
-
-  // Load feedbacks for the specific bus (passenger view)
-  useEffect(() => {
-      if (passengerView && busId) {
-          console.log("🟢 Loading feedbacks for bus:", busId);
-          loadFeedbacksForBus();
-      }
-  }, [passengerView, busId]);
 
   // Watch for feedbacks changes
   useEffect(() => {
@@ -206,9 +251,8 @@ const Feedback = ({
         const response = await feedbackAPI.create(feedbackData);
         console.log("API Response:", response);
         
-        // ✅ FIXED: Check if response exists and has data
+        // Check if response exists and has data
         if (response && response.data) {
-            // Check different possible success indicators
             const isSuccess = response.data.success === true || 
                              response.data.msg === 'Feedback saved successfully!' ||
                              response.status === 201;
@@ -231,20 +275,17 @@ const Feedback = ({
                     setShowResults(true);
                 }
                 
-                // Show success message
                 alert("✅ Feedback added successfully!");
                 return;
             }
         }
         
-        // If we get here, something unexpected happened
         console.log("Response didn't indicate success:", response);
-        alert("✅ Feedback added successfully!"); // Still show success since it worked
+        alert("✅ Feedback added successfully!");
         
     } catch (err) {
         console.error("❌ ERROR:", err);
         
-        // Check if the error is actually a success (sometimes API returns error but actually worked)
         if (err.response && err.response.status === 201) {
             console.log("✅ Actually succeeded despite error!");
             alert("✅ Feedback added successfully!");
@@ -332,20 +373,17 @@ const Feedback = ({
         const response = await feedbackAPI.updateFeedback(form.feedback_id, updateData);
         console.log("Update response:", response);
         
-        // Check success
         const isSuccess = response.data?.success === true || 
                          response.status === 200;
         
         if (isSuccess) {
             alert("✅ Feedback updated successfully");
             
-            // Reset form and close edit mode
             setForm(emptyForm);
             setSelectedRoute("");
             setMode(null);
             setEditLoaded(false);
             
-            // Refresh the list
             if (passengerView) {
                 await loadFeedbacksForBus();
             } else {
@@ -360,7 +398,6 @@ const Feedback = ({
     } catch (err) {
         console.error("Update failed:", err);
         
-        // Check if it actually succeeded
         if (err.response && err.response.status === 200) {
             alert("✅ Feedback updated successfully!");
             setForm(emptyForm);
@@ -400,21 +437,18 @@ const Feedback = ({
         console.log("%c=== Loading feedbacks for bus ===", "color: cyan");
         console.log("Bus ID:", busId);
         
-        // Get all feedbacks
         const res = await feedbackAPI.getAllFeedbacks();
         console.log("Raw API response:", res);
         
         let allFeedbacks = res.data?.data || [];
         console.log("All feedbacks count:", allFeedbacks.length);
         
-        // Filter by bus ID
         if (busId && passengerView) {
             const busIdNum = parseInt(busId);
             allFeedbacks = allFeedbacks.filter(fb => fb.bus_id === busIdNum);
             console.log(`✅ Filtered to ${allFeedbacks.length} feedbacks for bus ${busId}`);
         }
         
-        // CRITICAL: Update state with new array to trigger re-render
         setFeedbacks([...allFeedbacks]);
         setShowResults(true);
         
@@ -437,12 +471,10 @@ const Feedback = ({
         const response = await feedbackAPI.deleteFeedback(id);
         console.log("Delete response:", response);
         
-        // Remove from local state immediately (optimistic update)
         setFeedbacks(prev => prev.filter(f => f.feedback_id !== id));
         
         alert("✅ Feedback deleted");
         
-        // Refresh from server to be sure
         if (passengerView) {
             await loadFeedbacksForBus();
         } else {
@@ -453,7 +485,6 @@ const Feedback = ({
     } catch (error) {
         console.error("Delete failed:", error);
         
-        // If API call failed but we already removed from UI, reload to fix
         if (passengerView) {
             await loadFeedbacksForBus();
         }
@@ -487,35 +518,34 @@ const Feedback = ({
         onClick={() => {
             if (mode) {
                 setMode(null);
-                setForm(emptyForm);
-                setSelectedRoute("");
             } else {
                 navigate(-1);
             }
         }}
-        className="fixed top-6 z-50 flex items-center gap-2 mt-15
+        className="mx-5 fixed top-6 z-50 flex items-center gap-2 mt-15
         bg-black/60 backdrop-blur-md border border-yellow-600
         text-yellow-400 px-4 py-2 rounded-full 
         shadow-[0_0_20px_rgba(255,215,0,0.25)]
         hover:bg-yellow-500 hover:text-black transition duration-300"
     >
-        <FaArrowLeft />
-        <span className="font-semibold text-sm">{mode ? "Cancel" : "Back"}</span>
+        <FaChevronLeft />
     </button>
 
-      {!mode && (
-        <div className="mt-25 flex flex-col items-center gap-5 mb-10 [&>button]:w-72">
-          <ActionBtn icon={<FaPlus />} text="Add Feedback" onClick={() => setMode("add")} />
-
-          {/* Only show these if not passengerView */}
-          {!passengerView && (
-            <>
+      {/* Action Buttons - Hide for owners (read-only) and passengers */}
+      {!mode && !passengerView && !ownerView && (
+          <div className="mt-25 flex flex-col items-center gap-5 mb-10 [&>button]:w-72">
+              <ActionBtn icon={<FaPlus />} text="Add Feedback" onClick={() => setMode("add")} />
               <ActionBtn icon={<FaSearch />} text="Find Feedback" onClick={() => setMode("find")} />
               <ActionBtn icon={<FaEdit />} text="Update Feedback" onClick={() => setMode("edit")} />
               <ActionBtn icon={<FaTrash />} text="Delete Feedback" onClick={() => setMode("delete")} />
-            </>
-          )}
-        </div>
+          </div>
+      )}
+
+      {/* For owners - show only results, no action buttons */}
+      {!mode && ownerView && (
+          <div className="mt-10">
+              {/* Results will show below */}
+          </div>
       )}
 
       {mode && (
@@ -687,20 +717,23 @@ const Feedback = ({
         </div>
       )}
 
-      {/* RESULTS */}
+      {/* RESULTS - Owner View shows all feedbacks for owner's buses (read-only) */}
       {showResults && (
         <div className="bg-black/70 border border-yellow-600/40 rounded-2xl p-6 mt-10">
-            <div className="flex justify-between items-center mb-6">
+            <div className="mt-10 flex justify-between items-center mb-6">
                 <h2 className="text-xl font-bold text-yellow-400">
-                    {passengerView 
-                        ? `Feedbacks for Bus ${busNumber || ''}` 
-                        : `Search Results`} 
+                    {ownerView 
+                        ? `Feedbacks for My Buses` 
+                        : passengerView 
+                            ? `Feedbacks for Bus ${busNumber || ''}` 
+                            : `Search Results`} 
                     <span className="ml-2 text-sm text-gray-400">
                         ({feedbacks.length} {feedbacks.length === 1 ? 'feedback' : 'feedbacks'})
                     </span>
                 </h2>
                 
-                {passengerView && (
+                {/* Only show Add button for passenger view, NOT for owners */}
+                {passengerView && !ownerView && (
                     <button
                         onClick={() => setMode("add")}
                         className="px-4 py-2 bg-yellow-500/20 text-yellow-400 rounded-xl hover:bg-yellow-500/30 flex items-center gap-2"
@@ -740,8 +773,8 @@ const Feedback = ({
                                     ))}
                                 </div>
                                 
-                                {/* Edit/Delete buttons - only show for logged user's own feedbacks */}
-                                {passengerView && f.user_id === userId && (
+                                {/* Edit/Delete buttons - ONLY for passenger's own feedbacks, NOT for owners */}
+                                {passengerView && !ownerView && f.user_id === userId && (
                                     <div className="flex gap-2">
                                         <button
                                             onClick={() => {
@@ -769,8 +802,14 @@ const Feedback = ({
             ) : (
                 <div className="text-center py-12">
                     <FaCommentDots className="text-6xl text-yellow-400/30 mx-auto mb-4" />
-                    <h3 className="text-xl text-white mb-2">No Feedbacks Yet</h3>
-                    <p className="text-gray-400">Be the first to give feedback!</p>
+                    <h3 className="text-xl text-white mb-2">
+                        {ownerView ? "No Feedbacks Found" : "No Feedbacks Yet"}
+                    </h3>
+                    <p className="text-gray-400">
+                        {ownerView 
+                            ? "No feedbacks have been submitted for your buses" 
+                            : "Be the first to give feedback!"}
+                    </p>
                 </div>
             )}
         </div>

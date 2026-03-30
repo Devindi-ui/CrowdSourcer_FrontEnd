@@ -5,7 +5,8 @@ import {
   FaSearch,
   FaEdit,
   FaTrash,
-  FaArrowLeft
+  FaArrowLeft,
+  FaChevronLeft
 } from "react-icons/fa";
 
 import { busTypeAPI } from "../../services/api";
@@ -192,8 +193,7 @@ const BusType = () => {
         shadow-[0_0_20px_rgba(255,215,0,0.25)]
         hover:bg-yellow-500 hover:text-black transition duration-300"
       >
-        <FaArrowLeft className="text-yellow-400" />
-        <span className="font-semibold text-sm">Back</span>
+        <FaChevronLeft />
       </button>
 
       {!mode && (
